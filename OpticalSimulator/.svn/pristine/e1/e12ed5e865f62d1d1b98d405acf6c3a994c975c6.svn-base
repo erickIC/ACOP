@@ -1,0 +1,140 @@
+package br.upe.mascara;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class PowerMask {
+	private ArrayList<OperatingPoint> operatingPoints;
+	private float minTotalInputPower;
+	private float maxTotalInputPower;
+	private int minGain;
+	private int maxGain;
+	private HashMap<Integer, Float> minTotalPinPerGain;
+	private HashMap<Integer, Float> maxTotalPinPerGain;
+	private float maxFrequency;
+	private float minFrequency;
+	private float maxGainPerChannel;
+	private float minGainPerChannel;
+	private float maxNoiseFigure;
+	private float minNoiseFigure;
+
+	public ArrayList<OperatingPoint> getOperatingPoints() {
+		return operatingPoints;
+	}
+
+	public void setOperatingPoints(ArrayList<OperatingPoint> operatingPoints) {
+		this.operatingPoints = operatingPoints;
+	}
+
+	public void setMaxTotalPinPerGain(HashMap<Integer, Float> maxTotalPinPerGain) {
+		this.maxTotalPinPerGain = maxTotalPinPerGain;
+	}
+
+	public void setMinTotalPinPerGain(HashMap<Integer, Float> minTotalPinPerGain) {
+		this.minTotalPinPerGain = minTotalPinPerGain;
+	}
+
+	public float getMinTotalInputPower() {
+		return minTotalInputPower;
+	}
+
+	public void setMinTotalInputPower(float minTotalInputPower) {
+		this.minTotalInputPower = minTotalInputPower;
+	}
+
+	public float getMaxTotalOutputPower() {
+		return (this.maxGain + this.maxTotalInputPower);
+	}
+
+	public int getMinGain() {
+		return minGain;
+	}
+
+	public void setMinGain(int minGain) {
+		this.minGain = minGain;
+	}
+
+	public int getMaxGain() {
+		return maxGain;
+	}
+
+	public void setMaxGain(int maxGain) {
+		this.maxGain = maxGain;
+	}
+
+	public float getMaxTotalInputPower() {
+		return maxTotalInputPower;
+	}
+
+	public void setMaxTotalInputPower(float maxTotalInputPower) {
+		this.maxTotalInputPower = maxTotalInputPower;
+	}
+
+	public float getMinTotalOutputPower() {
+		return (this.minGain + this.minTotalInputPower);
+	}
+
+	public float getMaxTotalInputPower(int gain) {
+		return maxTotalPinPerGain.get(gain);
+	}
+	
+	public float getMinTotalInputPower(int gain) {
+		return minTotalPinPerGain.get(gain);
+	}
+
+	public float getMaxFrequency() {
+		return maxFrequency;
+	}
+
+	public void setMaxFrequency(float maxFrequency) {
+		this.maxFrequency = maxFrequency;
+	}
+
+	public float getMinFrequency() {
+		return minFrequency;
+	}
+
+	public void setMinFrequency(float minFrequency) {
+		this.minFrequency = minFrequency;
+	}
+
+	public float getMaxGainPerChannel() {
+		return maxGainPerChannel;
+	}
+
+	public void setMaxGainPerChannel(float maxGainPerChannel) {
+		this.maxGainPerChannel = maxGainPerChannel;
+	}
+
+	public float getMinGainPerChannel() {
+		return minGainPerChannel;
+	}
+
+	public void setMinGainPerChannel(float minGainPerChannel) {
+		this.minGainPerChannel = minGainPerChannel;
+	}
+
+	public float getMaxNoiseFigure() {
+		return maxNoiseFigure;
+	}
+
+	public void setMaxNoiseFigure(float maxNoiseFigure) {
+		this.maxNoiseFigure = maxNoiseFigure;
+	}
+
+	public float getMinNoiseFigure() {
+		return minNoiseFigure;
+	}
+
+	public void setMinNoiseFigure(float minNoiseFigure) {
+		this.minNoiseFigure = minNoiseFigure;
+	}
+
+	public HashMap<Integer, Float> getMinTotalPinPerGain() {
+		return minTotalPinPerGain;
+	}
+
+	public HashMap<Integer, Float> getMaxTotalPinPerGain() {
+		return maxTotalPinPerGain;
+	}
+}

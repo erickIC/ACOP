@@ -1,0 +1,279 @@
+package br.upe.heuristics.bruteForce;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
+import br.upe.base.Amplifier;
+import br.upe.base.AmplifierType;
+import br.upe.base.ObjectiveFunction;
+import br.upe.initializations.UniformInitialization;
+import br.upe.metrics.BeckerNoiseFigureMetric;
+import br.upe.metrics.SimpleFlatnessMetric;
+import br.upe.metrics.SumPowerConsumption;
+import br.upe.objfunctions.rn.NNFunction;
+import br.upe.simulations.simsetups.SimulationSetup;
+import br.upe.simulations.simsetups.UiaraImoc2013;
+import br.upe.util.Dominance;
+import br.upe.util.MaxMinUtility;
+
+public class BruteForceMethodRestricted_5Amp {
+
+	private float INPUT_POWER = -20.0f; // dBm
+	private static final int NUMBER_OBJ = 3;
+	private static float STEP = 0.5f; //dB
+
+	private UniformInitialization initialization;
+	private SimpleFlatnessMetric gfCalculation;
+	private BeckerNoiseFigureMetric nfCalculation;
+	private SumPowerConsumption sumPoutCalculation;
+	private ObjectiveFunction function;
+	private File arquivo;
+	private SimulationSetup simSet;
+
+	private ArrayList<SolutionBFMethod> externalArchive;
+
+	public BruteForceMethodRestricted_5Amp(){
+		function = new NNFunction();
+
+		simSet = new UiaraImoc2013();
+
+		initialization = new UniformInitialization(AmplifierType.L17_80CH);
+		gfCalculation = new SimpleFlatnessMetric();
+		nfCalculation = new BeckerNoiseFigureMetric(simSet.getLINK_LOSSES());
+		sumPoutCalculation = new SumPowerConsumption(80, 10);
+
+		INPUT_POWER = -20.0f; //DecibelConverter.calculateInputPower(simSet.getCHANNELS(), simSet.getCHANNEL_POWER());
+
+		try{
+			arquivo = new File("dB_" + 80 + "ch_");
+		}
+		catch(Exception e){
+
+		}
+
+	}
+
+	public void run(){
+
+		long ti = System.currentTimeMillis();
+		// System.out.println("Start");
+
+		double totalComb = (10.0/STEP)+1;
+		totalComb = totalComb * totalComb * totalComb * totalComb; 
+
+		double contador = 0;
+
+		float i = MaxMinUtility.MAX_GAIN;
+
+		while(i>=MaxMinUtility.MIN_GAIN){	//G1
+
+			float j = MaxMinUtility.MAX_GAIN;
+			while(j>=MaxMinUtility.MIN_GAIN){	//G2
+
+				float k = MaxMinUtility.MAX_GAIN;
+				while(k>=MaxMinUtility.MIN_GAIN){	//G3
+
+					float l = MaxMinUtility.MAX_GAIN;
+					while(l>=MaxMinUtility.MIN_GAIN){	//G4
+
+						float m = MaxMinUtility.MAX_GAIN;
+						while (m >= MaxMinUtility.MIN_GAIN) { // G5
+
+							float[] gains = { i, j, k, l, m };
+
+							initialization.setGains(gains);
+							Amplifier[] amplifiers = initialization.initialize(
+									simSet.getNumberOfAmplifiers(),
+									INPUT_POWER, 0, simSet.getLINK_LOSSES(),
+									function);
+
+							// Solucao fora das restricoes
+							if (amplifiers == null
+									|| Math.abs(amplifiers[0].getInputPower()) > (Math
+											.abs(INPUT_POWER) + 0.2)
+									|| Math.abs(amplifiers[0].getInputPower()) < (Math
+											.abs(INPUT_POWER) - 0.2)) {
+								m -= STEP;
+								contador++;
+								continue;
+							}
+
+							SolutionBFMethod solution = null;
+
+							// If the output power of the link is less than the
+							// input power, then the solution isn't desirable.
+							// And, if the output power is greater than the
+							// input power + voa max attenuation, then the
+							// solution is not desirable
+							if (amplifiers[amplifiers.length - 1]
+									.getOutputPower() >= INPUT_POWER
+									&& amplifiers[amplifiers.length - 1]
+											.getOutputPower() <= (INPUT_POWER + simSet
+											.getVOA_MAX_ATT() + simSet.getROADM_ATT())) {
+
+								solution = new SolutionBFMethod(NUMBER_OBJ);
+
+								solution.setAmplifiers(amplifiers);
+
+								// Adding the VOA attenuation to the noise
+								// figure
+								// calculation
+								if (nfCalculation instanceof BeckerNoiseFigureMetric) {
+									float voaAttenuation = (float) (amplifiers[amplifiers.length - 1]
+											.getOutputPower() - INPUT_POWER - simSet.getROADM_ATT());
+									((BeckerNoiseFigureMetric) nfCalculation)
+											.setVoaAttenuation(voaAttenuation);
+								}
+
+								solution.setFitness(0,
+										nfCalculation.evaluate(amplifiers)); // nf
+								solution.setFitness(1,
+										gfCalculation.evaluate(amplifiers)); // gf
+								solution.setFitness(2,
+										sumPoutCalculation.evaluate(amplifiers)); // sumPout
+
+
+								/*
+								 * The maximum output power in the link. It is
+								 * related with the nonlinear imparments double
+								 * maxPower = amplifiers[0].getOutputPower();
+								 * for(int p=1; p<amplifiers.length; p++){
+								 * if(amplifiers[p].getOutputPower() > maxPower)
+								 * maxPower = amplifiers[p].getOutputPower(); }
+								 * solution.setFitness(3, maxPower); //max(Pi)
+								 */
+							}
+
+							if (solution != null) {
+								this.addSolutionEA(solution);
+							}
+
+							m -= STEP;
+							contador++;
+
+						}
+
+						l -= STEP;
+					}
+
+					k -= STEP;
+				}
+
+				j -= STEP;
+			}
+
+			i-= STEP;
+			// System.out.print(((contador/totalComb)*100) + "% \t");
+
+			long te = System.currentTimeMillis();
+			// System.out.println("End = " + (te -ti) + " msec.\n\n");
+			try
+			{
+				//printExternalArchive();
+			}
+			catch(Exception e)
+			{
+
+			}
+		}
+	}
+
+	private void printExternalArchive() throws FileNotFoundException {
+		PrintWriter pareto = new PrintWriter(arquivo + "pareto_restr.txt");
+		PrintWriter amps = new PrintWriter(arquivo + "amplificadores_restr.txt");
+
+		for(SolutionBFMethod s : externalArchive){
+			pareto.print(s + "\n");
+			amps.print(s.printAmps() + "\n");
+		}
+
+		pareto.close();
+		amps.close();
+	}
+
+	private void addSolutionEA(SolutionBFMethod solution) {
+
+		if(externalArchive == null){
+			externalArchive = new ArrayList<SolutionBFMethod>();	
+		}
+		/*else
+		{
+			for(SolutionBFMethod s : externalArchive){
+				if(compareSolutionByDominace(s, solution) == Dominance.DOMINATES){
+					return;
+				}
+			}
+
+			ArrayList<SolutionBFMethod> temp = new ArrayList<SolutionBFMethod>();
+			for(SolutionBFMethod s : externalArchive){
+				if(compareSolutionByDominace(solution, s) != Dominance.DOMINATES){
+					temp.add(s);
+				}
+			}			
+
+			externalArchive = temp;
+		}*/
+
+		externalArchive.add(solution);
+
+	}
+
+	protected Dominance compareSolutionByDominace(SolutionBFMethod solution, SolutionBFMethod anotherSolution){
+		int numObj = NUMBER_OBJ;
+		boolean lostInAllDimensions = true;
+		boolean winInAllDimensions = true;
+		double[] fitness =  solution.getFitness();
+		double[] anotherFitness =  anotherSolution.getFitness();
+
+		for(int currentObj=0; currentObj < numObj ; currentObj++){
+
+			if(fitness[currentObj] > anotherFitness[currentObj]){
+				winInAllDimensions = false;
+			}
+
+			if(fitness[currentObj] < anotherFitness[currentObj]){
+				lostInAllDimensions = false;
+			}
+
+			if(!winInAllDimensions && !lostInAllDimensions){
+				return Dominance.INCOMPARABLE;
+			}
+		}
+
+		if(winInAllDimensions && lostInAllDimensions){
+			return Dominance.INCOMPARABLE;
+		}
+
+		if(winInAllDimensions){
+			return Dominance.DOMINATES;
+		}
+
+		if(lostInAllDimensions){
+			return Dominance.DOMINATED;
+		}
+
+		return Dominance.INCOMPARABLE;
+
+	}
+
+	public static void main(String[] args){
+		STEP = 0.5f;	//Float.parseFloat(args[0]);
+		// System.out.println("Step " + STEP);
+
+		int runs = 30;
+
+		for (int i = 0; i < runs; i++) {
+			long ti = System.currentTimeMillis();
+
+			BruteForceMethodRestricted_5Amp bf = new BruteForceMethodRestricted_5Amp();
+
+			bf.run();
+
+			System.out.println(System.currentTimeMillis() - ti);
+		}
+	}
+
+
+}

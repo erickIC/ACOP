@@ -1,0 +1,13 @@
+package br.upe.base;
+
+public enum AmplifierType {
+	L17_10CH, //Amplificador de linha com potência máxima de saída de 17 dBm, utilizando 10 canais
+	L17_20CH,
+	L17_40CH,
+	L17_80CH,
+	L21_40CH,
+	P14_L21,  //Desse amplificador em diante a máscara é apenas para 40ch
+	B24,
+	B21_L21,
+    B21_L24, EDFA_1_STG, EDFA_1_STG_PAR, EDFA_1_STG_IMPAR, EDFA_2_STG, EDFA_2_2_STG, EDFA_2_PadTec
+}

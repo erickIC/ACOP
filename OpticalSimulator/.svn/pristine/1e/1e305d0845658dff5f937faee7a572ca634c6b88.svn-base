@@ -1,0 +1,110 @@
+package br.upe.optimizationUtil;
+
+import br.upe.base.Amplifier;
+import br.upe.base.AmplifierType;
+import br.upe.base.AmplifierVOA;
+import br.upe.base.ObjectiveFunction;
+import br.upe.base.OpticalChannel;
+import br.upe.base.OpticalSignal;
+import br.upe.initializations.BruteForceInitialization;
+import br.upe.metrics.GNLIMetric;
+import br.upe.objfunctions.rn.NNFunction;
+import br.upe.objfunctions.rn.util.NormalizationUtility;
+import br.upe.objfunctions.rn.util.NormalizationUtilityFactory;
+import br.upe.signal.factory.PowerMaskSignal;
+import br.upe.simulations.simsetups.SimSetAMPVOA;
+import br.upe.simulations.simsetups.SimulationSetup;
+import br.upe.util.DecibelConverter;
+
+public class ACOP_MOOProblem {
+
+    private Amplifier[] amplifiers;
+
+    public double[] evaluate(float[] gains, float[] attenuations) {
+
+	AmplifierType type = AmplifierType.EDFA_1_STG;
+
+	NormalizationUtility nu = NormalizationUtilityFactory.getInstance().fabricate(type);
+	ObjectiveFunction function = new NNFunction(nu); // LinearInterpolationFunction();
+
+	int numberCh = 39;
+	float inputPowerCh = -21f;
+	SimulationSetup simSet = new SimSetAMPVOA(numberCh, inputPowerCh, 9.0f);
+	double linkLength = simSet.getLINK_LOSSES()[0] * 1000 / 0.2;
+
+	PowerMaskSignal signal = new PowerMaskSignal(numberCh, type, simSet.getCHANNEL_POWER(), 30);
+	OpticalSignal inputSignal = signal.createSignal();
+
+	float totalInputPower = inputSignal.getTotalPower();
+
+	BruteForceInitialization initialization = new BruteForceInitialization(type, true, simSet.getMaxOutputPower());
+	initialization.setGains(gains);
+	initialization.setAttenuations(attenuations);
+
+	Amplifier[] amplifiers = initialization.initialize(simSet.getNumberOfAmplifiers(), totalInputPower, 0,
+		simSet.getLINK_LOSSES(), function, inputSignal);
+
+	if (amplifiers == null)
+	    return null;
+
+	float ampVoaAtt = ((AmplifierVOA) amplifiers[amplifiers.length - 1]).getVoaOutAttenuation();
+	float voaAttenuation = (float) (amplifiers[amplifiers.length - 1].getOutputPower() - ampVoaAtt - totalInputPower
+		- simSet.getROADM_ATT());
+	((AmplifierVOA) amplifiers[amplifiers.length - 1]).increaseVoaOutAttenuation(voaAttenuation);
+	inputSignal = inputSignal.adjustByFactor(-voaAttenuation);
+
+	// If the output power of the link is less than the
+	// input power, then the solution isn't desirable.
+	// And, if the output power is greater than the
+	// input
+	// power + voa max attenuation + roadm attenuation,
+	// then
+	// the solution is not desirable
+	if (amplifiers[amplifiers.length - 1].getOutputPower() >= totalInputPower
+		&& ((AmplifierVOA) amplifiers[amplifiers.length - 1])
+			.getOutputPowerAfterVOA() <= (totalInputPower + simSet.getVOA_MAX_ATT() + simSet.getROADM_ATT())
+		&& voaAttenuation >= 0) {
+
+	    double[] result = new double[3];
+
+	    GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9, numberCh, inputPowerCh, linkLength);
+	    gnliMetric.evaluate(amplifiers);
+
+	    inputSignal = inputSignal.adjustByFactor(-simSet.getROADM_ATT());
+	    result[0] = calculateTilt(inputSignal); // minimizar
+
+	    result[1] = (1 / gnliMetric.worstOSNR_NLI()); // maximizar
+
+	    result[2] = gnliMetric.tiltOSNR_NLI(); // minimizar
+
+	    this.amplifiers = amplifiers;
+
+	    return result;
+	} else {
+	    return null;
+	}
+    }
+
+    private double calculateTilt(OpticalSignal signal) {
+	double maxPeak = Double.MIN_VALUE;
+	double minPeak = Double.MAX_VALUE;
+
+	for (OpticalChannel c : signal.getChannels()) {
+	    double signalLin = DecibelConverter.toLinearScale(c.getSignalPower());
+
+	    if (signalLin > maxPeak) {
+		maxPeak = signalLin;
+	    }
+	    if (signalLin < minPeak) {
+		minPeak = signalLin;
+	    }
+	}
+
+	return DecibelConverter.toDecibelScale(maxPeak / minPeak);
+    }
+
+    public Amplifier[] getAmplifiers() {
+	return amplifiers;
+    }
+
+}

@@ -1,0 +1,254 @@
+package br.upe.mascara;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
+
+import br.upe.base.AmplifierType;
+
+public class PowerMaskFactory {
+
+    private static final double C = 299792458; // m/s
+
+    private static String P14_PATH = "./masks/05_Com Tilt/P14/";
+    private static String B24_PATH = "./masks/05_Com Tilt/B24/";
+    private static String B21_L21_PATH = "./masks/05_Com Tilt/B21_L21/";
+    private static String B21_L24_PATH = "./masks/05_Com Tilt/B21_L24/";
+    private static String EDFA_1_STG_PATH = "./masks/05_Com Tilt/EDFA_1_STG/";
+    private static String EDFA_1_STG_PAR_PATH = "./masks/05_Com Tilt/EDFA_1_STG_FreqPar_Filt/";
+    private static String EDFA_1_STG_IMPAR_PATH = "./masks/05_Com Tilt/EDFA_1_STG_FreqImpar_Filt/";
+    private static String EDFA_2_STG_PATH = "./masks/05_Com Tilt/EDFA_2_STG/";
+    private static String EDFA_2_2_STG_PATH = "./masks/05_Com Tilt/EDFA_2_2_STG/";
+    private static String EDFA_2_PadTec_PATH = "./masks/05_Com Tilt/EDFA_2_PadTec/";
+
+    private static HashMap<AmplifierType, PowerMask> powerMasks;
+
+    private static PowerMaskFactory instance;
+
+    public static PowerMaskFactory getInstance() {
+	if (instance == null) {
+	    instance = new PowerMaskFactory();
+	}
+
+	return instance;
+    }
+
+    private PowerMaskFactory() {
+	powerMasks = new HashMap<AmplifierType, PowerMask>();
+    }
+
+    public PowerMask fabricatePowerMask(AmplifierType type) {
+	String dirPath = "";
+
+	PowerMask pm = powerMasks.get(type);
+
+	if (pm == null) {
+	    switch (type) {
+	    case P14_L21:
+		dirPath = P14_PATH;
+		break;
+	    case B24:
+		dirPath = B24_PATH;
+		break;
+	    case B21_L21:
+		dirPath = B21_L21_PATH;
+		break;
+	    case B21_L24:
+		dirPath = B21_L24_PATH;
+		break;
+	    case EDFA_1_STG:
+		dirPath = EDFA_1_STG_PATH;
+		break;
+	    case EDFA_1_STG_PAR:
+		dirPath = EDFA_1_STG_PAR_PATH;
+		break;
+	    case EDFA_1_STG_IMPAR:
+		dirPath = EDFA_1_STG_IMPAR_PATH;
+		break;
+	    case EDFA_2_STG:
+		dirPath = EDFA_2_STG_PATH;
+		break;
+	    case EDFA_2_2_STG:
+		dirPath = EDFA_2_2_STG_PATH;
+		break;
+	    case EDFA_2_PadTec:
+		dirPath = EDFA_2_PadTec_PATH;
+		break;
+	    default:
+		dirPath = P14_PATH;
+		break;
+	    }
+
+	    pm = readPowerMask(dirPath);
+
+	    powerMasks.put(type, pm);
+	}
+
+	return pm;
+    }
+
+    private PowerMask readPowerMask(String path) {
+	ArrayList<OperatingPoint> opsList = new ArrayList<OperatingPoint>();
+	int minGain = Integer.MAX_VALUE, maxGain = Integer.MIN_VALUE;
+	float minPin = Float.MAX_VALUE, maxPin = Float.NEGATIVE_INFINITY;
+	HashMap<Integer, Float> minTotalPinPerGain = new HashMap<Integer, Float>();
+	HashMap<Integer, Float> maxTotalPinPerGain = new HashMap<Integer, Float>();
+	float minFrequency = Float.MAX_VALUE, maxFrequency = Float.MIN_VALUE;
+	float minNF = Float.MAX_VALUE, maxNF = Float.MIN_VALUE;
+	float minGainChannel = Float.MAX_VALUE, maxGainChannel = Float.MIN_VALUE;
+
+	try {
+	    File file = new File(path + "TotalInfo.txt");
+	    Scanner reader = new Scanner(file);
+
+	    while (reader.hasNextLine()) {
+		String[] line = reader.nextLine().split("\t"); // G, A, Pin,
+							       // Pout, NF
+
+		OperatingPoint op = new OperatingPoint();
+		op.setTotalInputPower(Float.parseFloat(line[2])); // Pin
+		op.setGainSet(Integer.parseInt(line[0])); // Gset
+
+		// Updating min and max gain
+		if (op.getGainSet() < minGain)
+		    minGain = op.getGainSet();
+		if (op.getGainSet() > maxGain)
+		    maxGain = op.getGainSet();
+
+		// Updating min and max Pin
+		if (op.getTotalInputPower() < minPin)
+		    minPin = op.getTotalInputPower();
+		if (op.getTotalInputPower() > maxPin)
+		    maxPin = op.getTotalInputPower();
+
+		// Updating max pin per gain
+		if (maxTotalPinPerGain.containsKey(op.getGainSet())) {
+		    float maxPinG = maxTotalPinPerGain.get(op.getGainSet());
+		    if (op.getTotalInputPower() > maxPinG)
+			maxTotalPinPerGain.put(op.getGainSet(), op.getTotalInputPower());
+		} else {
+		    maxTotalPinPerGain.put(op.getGainSet(), op.getTotalInputPower());
+		}
+
+		// Updating min pin per gain
+		if (minTotalPinPerGain.containsKey(op.getGainSet())) {
+		    float minPinG = maxTotalPinPerGain.get(op.getGainSet());
+		    if (op.getTotalInputPower() < minPinG)
+			minTotalPinPerGain.put(op.getGainSet(), op.getTotalInputPower());
+		} else {
+		    minTotalPinPerGain.put(op.getGainSet(), op.getTotalInputPower());
+		}
+
+		int aParameter = Integer.parseInt(line[1]);
+
+		File filePinPeak = new File(path + "PinPeak_G" + op.getGainSet() + "_A" + aParameter + ".txt");
+		File filePoutPeak = new File(path + "PoutPeak_G" + op.getGainSet() + "_A" + aParameter + ".txt");
+		File fileNF = new File(path + "NF_G" + op.getGainSet() + "_A" + aParameter + ".txt");
+
+		float constantNF = 0;
+		Scanner readerNF = null;
+		if (!fileNF.exists()) {
+		    constantNF = Float.parseFloat(line[4]); // NF from TotalInfo
+		} else {
+		    readerNF = new Scanner(fileNF);
+		}
+
+		Scanner readerPin = new Scanner(filePinPeak);
+		Scanner readerPout = new Scanner(filePoutPeak);
+
+		HashMap<Double, Float> pinPerChannel = new HashMap<Double, Float>();
+		HashMap<Double, Float> gainPerChannel = new HashMap<Double, Float>();
+		HashMap<Double, Float> nfPerChannel = new HashMap<Double, Float>();
+
+		while (readerPin.hasNextLine()) {
+		    String[] linePin = readerPin.nextLine().split("\t");
+		    String[] linePout = readerPout.nextLine().split("\t");
+
+		    double wavelength = Float.parseFloat(linePin[0]); // Frequency
+		    double frequency = ((C / wavelength));
+		    frequency = (int) (frequency);
+		    frequency *= 1e9;
+		    float pinCh = Float.parseFloat(linePin[1]);
+		    float poutCh = Float.parseFloat(linePout[1]);
+
+		    float gain = poutCh - pinCh; // Calculate gain using Pin and
+						 // Pout
+
+		    pinPerChannel.put(frequency, pinCh);
+		    gainPerChannel.put(frequency, gain);
+
+		    float nf = constantNF;
+		    if (readerNF != null) {
+			String[] lineNF = readerNF.nextLine().split("\t");
+			nf = Float.parseFloat(lineNF[1]);
+
+			// If nf is less than 3 dB, it was an error in the
+			// characterization
+			if (nf < 3)
+			    nf += 3; // Sum 3 dB or duplicate
+		    }
+		    nfPerChannel.put(frequency, nf);
+
+		    // Updating min and max frequency
+		    if (frequency < minFrequency)
+			minFrequency = (float) frequency;
+		    if (frequency > maxFrequency)
+			maxFrequency = (float) frequency;
+
+		    // Updating min and max gain channel
+		    if (gain < minGainChannel)
+			minGainChannel = (float) gain;
+		    if (gain > maxGainChannel)
+			maxGainChannel = (float) gain;
+
+		    // Updating min and max NF channel
+		    if (nf < minNF)
+			minNF = (float) nf;
+		    if (nf > maxNF)
+			maxNF = (float) nf;
+		}
+
+		readerPin.close();
+		readerPout.close();
+
+		if (readerNF != null)
+		    readerNF.close();
+
+		op.setInputPowerPerChannel(pinPerChannel);
+		op.setGainPerChannel(gainPerChannel);
+		op.setNoiseFigurePerChannel(nfPerChannel);
+
+		opsList.add(op);
+	    }
+
+	    reader.close();
+	} catch (FileNotFoundException e) {
+	    e.printStackTrace();
+	    return null;
+	}
+
+	PowerMask pm = new PowerMask();
+	pm.setOperatingPoints(opsList);
+	pm.setMaxGain(maxGain);
+	pm.setMinGain(minGain);
+	pm.setMaxTotalInputPower(maxPin);
+	pm.setMinTotalInputPower(minPin);
+	pm.setMinTotalPinPerGain(minTotalPinPerGain);
+	pm.setMaxTotalPinPerGain(maxTotalPinPerGain);
+	pm.setMaxFrequency(maxFrequency);
+	pm.setMinFrequency(minFrequency);
+	pm.setMaxGainPerChannel(maxGainChannel);
+	pm.setMinGainPerChannel(minGainChannel);
+	pm.setMaxNoiseFigure(maxNF);
+	pm.setMinNoiseFigure(minNF);
+	return pm;
+    }
+
+    public static void main(String[] args) {
+	PowerMaskFactory pmf = new PowerMaskFactory();
+
+	pmf.fabricatePowerMask(AmplifierType.EDFA_1_STG);
+    }
+}

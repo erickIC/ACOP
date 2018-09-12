@@ -1,0 +1,91 @@
+import matplotlib.pyplot as plt
+
+f = open('LI_edfa22_nli_-27_par.txt', 'r+')
+f2 = open('LI_edfa22_nli_-21_par.txt', 'r+')
+f3 = open('LI_edfa22_nli_-15_par.txt', 'r+')
+
+ripple = []
+osnr = []
+ripple2 = []
+osnr2 = []
+ripple3 = []
+osnr3 = []
+
+for line in f:
+	str = line.split('\t')
+	ripple.append(str[0].replace(',', '.'))
+	osnr.append(str[1].replace(',', '.'))
+f.close()
+
+for line in f2:
+	str = line.split('\t')
+	ripple2.append(str[0].replace(',', '.'))
+	osnr2.append(str[1].replace(',', '.'))
+f2.close()
+
+for line in f3:
+	str = line.split('\t')
+	ripple3.append(str[0].replace(',', '.'))
+	osnr3.append(str[1].replace(',', '.'))
+f3.close()
+
+#plt.scatter(ripple3, osnr3, s=5, zorder=3, label='-15 dBm/ch')
+#plt.scatter(ripple2, osnr2, s=5, zorder=6, alpha=0.5, label='-21 dBm/ch')
+#plt.scatter(ripple, osnr, s=5, zorder=9, alpha=0.3, label='-27 dBm/ch')
+#plt.legend()
+#plt.grid(True, zorder=0)
+#axes = plt.gca()
+xlim = [0,0.5]#axes.get_xlim()
+ylim = [19,25]#axes.get_ylim()
+
+maxGain = [0.12965774536133348, 20.1049716917307]
+adgc = [0.16906929016113398, 21.924752332004704]
+ashb = [0.32139015197753806, 20.155055512704134]
+lossComp = [0.33809852600097323, 20.18006429085255]
+
+plt.subplot(311)
+plt.scatter(ripple, osnr, c='lime', s=5, zorder=3, label='-27 dBm/ch')
+plt.scatter(adgc[0], adgc[1],  c='k', s=50, zorder=3, marker='s', label='AdGC-NLI')
+plt.scatter(lossComp[0], lossComp[1], c='r', s=50, zorder=3, marker='D', label='LossComp')
+axes = plt.gca()
+axes.set_xlim(xlim)
+axes.set_ylim(ylim)
+axes.xaxis.set_ticklabels([])
+plt.title('Optimization space for different input powers')
+plt.legend()
+plt.grid(True, zorder=0)
+
+maxGain = [0.03914833068847874, 19.917613435308837]
+adgc = [0.0901317596435565, 23.26981419003669]
+ashb = [0.16734504699708244, 22.019579258755392]
+lossComp = [0.27108383178710665, 21.110271349898845]
+
+plt.subplot(312)
+plt.scatter(ripple2, osnr2, c='lime', s=5, zorder=3, label='-21 dBm/ch')
+plt.scatter(adgc[0], adgc[1],  c='k', s=50, facecolor='none', zorder=3, marker='s', label='AdGC-NLI')
+plt.scatter(lossComp[0], lossComp[1], c='r', s=50, zorder=3, marker='D', label='LossComp')
+axes = plt.gca()
+axes.set_xlim(xlim)
+axes.set_ylim(ylim)
+axes.xaxis.set_ticklabels([])
+plt.ylabel('min(OSNR ASE+NLI) (dB)')
+plt.legend()
+plt.grid(True, zorder=0)
+
+maxGain = [0.02165222167968505, 20.083053387229935]
+adgc = [0.06090545654296782, 23.299338671008485]
+ashb = [0.07077026367187335, 23.318883937345856]
+lossComp = [0.0660228729248044, 23.582880599687112]
+
+plt.subplot(313)
+plt.scatter(ripple3, osnr3, s=5, c='lime', zorder=3, label='-15 dBm/ch')
+plt.scatter(adgc[0], adgc[1],  c='k', s=50, zorder=3, marker='s', label='AdGC-NLI')
+plt.scatter(lossComp[0], lossComp[1], c='r', s=50, zorder=3, marker='D', label='LossComp')
+axes = plt.gca()
+axes.set_xlim(xlim)
+axes.set_ylim(ylim)
+plt.legend()
+plt.grid(True, zorder=0)
+plt.xlabel('Ripple (dB)')
+#plt.show()
+plt.savefig('optSpace.png', dpi = 300)

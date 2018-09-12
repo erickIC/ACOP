@@ -1,0 +1,119 @@
+package br.upe.simulations;
+
+import br.upe.base.AmplifierType;
+import br.upe.base.ACOPHeuristic;
+import br.upe.base.ObjectiveFunction;
+import br.upe.heuristics.maxGain.MaxGain;
+import br.upe.heuristics.uiara.UiaraHeuristic;
+import br.upe.initializations.UniformInitialization;
+import br.upe.metrics.BeckerNoiseFigureMetric;
+import br.upe.metrics.SimpleFlatnessMetric;
+import br.upe.metrics.SumPowerConsumption;
+import br.upe.objfunctions.rn.NNFunction;
+import br.upe.selection.QuadraticSelection;
+import br.upe.selection.UiaraWeightSelection;
+import br.upe.simulations.simsetups.CPqDTestBed;
+import br.upe.simulations.simsetups.SimulationSetup;
+
+public class SimCPqDTestBed {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		ACOPHeuristic heuristic;
+		ObjectiveFunction function = new NNFunction();
+		SimulationSetup simSet = new CPqDTestBed();
+		float[] linLosses = simSet.getLINK_LOSSES();
+		int numberAmplifiers = simSet.getNumberOfAmplifiers();
+		AmplifierType type = AmplifierType.L21_40CH;
+
+		float linkInputPower = 0.0f;//DecibelConverter.calculateInputPower(simSet.getCHANNELS(), simSet.getCHANNEL_POWER());
+
+		int rateCh = 10; //Gbps
+		int numberCh = 0;
+		switch(type){
+		case L17_10CH:
+			numberCh = 10;
+			break;
+		case L17_20CH:
+			numberCh = 20;
+			break;
+		case L21_40CH:
+		case L17_40CH:
+			numberCh = 40;
+			break;
+		case L17_80CH:
+			numberCh = 80;
+			break;
+		}
+
+		int runs = 1;
+
+		for(int i=0; i<runs; i++){
+
+			//MaxGain
+			long t1 = System.currentTimeMillis();
+			heuristic = new MaxGain(numberAmplifiers, linkInputPower, linLosses, function, 5);
+			heuristic.setInitialization(new UniformInitialization(type));
+			heuristic.setSelectionOp(new QuadraticSelection());
+			heuristic.setFlatnessMetric(new SimpleFlatnessMetric());
+			heuristic.setNoiseFigureMetric(new BeckerNoiseFigureMetric(linLosses));
+			heuristic.setPowerConsumptionMetric(new SumPowerConsumption(numberCh, rateCh));
+			heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
+			heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
+
+			heuristic.execute();
+
+			System.out.println((System.currentTimeMillis() - t1));
+
+			System.out.println(" ");
+			
+			//UIARA
+			t1 = System.currentTimeMillis();
+			heuristic = new UiaraHeuristic(numberAmplifiers, linkInputPower, linLosses, function, 50);
+			heuristic.setInitialization(new UniformInitialization(type));
+			heuristic.setSelectionOp(new UiaraWeightSelection());
+			heuristic.setFlatnessMetric(new SimpleFlatnessMetric());
+			heuristic.setNoiseFigureMetric(new BeckerNoiseFigureMetric(linLosses));
+			heuristic.setPowerConsumptionMetric(new SumPowerConsumption(numberCh, rateCh));
+			heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
+			heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
+
+
+			// When the selection uses weight
+			if (heuristic.getSelectionOp() instanceof UiaraWeightSelection) {
+				((UiaraWeightSelection) heuristic.getSelectionOp())
+				.setNFWeight(1);
+				((UiaraWeightSelection) heuristic.getSelectionOp())
+				.setGFWeight(1);
+			}
+
+
+			heuristic.execute();
+			System.out.println((System.currentTimeMillis() - t1));
+			
+			//VOAFLEX
+		/*	heuristic = new VOAFlexROADM(numberAmplifiers, linkInputPower, linLosses, function, 5);
+			//heuristic = new MaxGain(numberAmplifiers, linkInputPower, linLosses, function, 5);
+			heuristic.setInitialization(new UniformInitialization(type));
+			heuristic.setSelectionOp(new QuadraticSelection());
+			heuristic.setFlatnessMetric(new SimpleFlatnessMetric());
+			heuristic.setNoiseFigureMetric(new BeckerNoiseFigureMetric(linLosses));
+			heuristic.setPowerConsumptionMetric(new SumPowerConsumption(numberCh, rateCh));
+			heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
+			heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
+
+			heuristic.execute();
+
+			System.out.println((System.currentTimeMillis() - t1));
+
+			System.out.println(" ");*/
+
+		}
+
+
+		//System.out.println("\n\n");
+	}
+
+}

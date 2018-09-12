@@ -1,0 +1,331 @@
+package br.upe.heuristics.bruteForce.voaOut;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+
+import br.upe.base.Amplifier;
+import br.upe.base.AmplifierType;
+import br.upe.base.AmplifierVOA;
+import br.upe.base.ObjectiveFunction;
+import br.upe.base.OpticalSignal;
+import br.upe.heuristics.bruteForce.SolutionBFMethod;
+import br.upe.initializations.UniformInitializationAMPVOA;
+import br.upe.metrics.BeckerNoiseFigureMetric;
+import br.upe.metrics.OSNRMetric;
+import br.upe.metrics.SimpleFlatnessMetric;
+import br.upe.metrics.SumPowerConsumption;
+import br.upe.objfunctions.rn.NNFunction;
+import br.upe.signal.factory.ITUGridUniformSignal;
+import br.upe.simulations.simsetups.SimSetAMPVOA;
+import br.upe.simulations.simsetups.SimulationSetup;
+import br.upe.util.DecibelConverter;
+import br.upe.util.Dominance;
+import br.upe.util.MaxMinUtility;
+
+public class BF_VOA_Out_L21_6Amps {
+
+	private float INPUT_POWER = 0; // dBm
+	private static final int NUMBER_OBJ = 2;
+	private static float STEP = 1.0f; //dB
+	private float MAX_OUT_POWER = 0.0f; //dBm
+
+	private UniformInitializationAMPVOA initialization;
+	private SimpleFlatnessMetric gfCalculation;
+	private BeckerNoiseFigureMetric nfCalculation;
+	private OSNRMetric osnrCalculation;
+	private ObjectiveFunction function;
+	private File arquivo;
+	private SimulationSetup simSet;
+
+	private ArrayList<SolutionBFMethod> externalArchive;
+
+	private int actualIndex = 11;
+
+	PrintWriter pareto;
+	PrintWriter amps;
+
+	public BF_VOA_Out_L21_6Amps(){
+		function = new NNFunction(); //FixedFunction();
+
+		int numberCh = 40;
+		simSet = new SimSetAMPVOA(numberCh, -21.0f, -1f);
+
+		//Definindo ganho máximo
+		MAX_OUT_POWER = simSet.getMaxOutputPower();
+		System.out.println(MAX_OUT_POWER);
+
+		initialization = new UniformInitializationAMPVOA(AmplifierType.L21_40CH);
+		gfCalculation = new SimpleFlatnessMetric();
+		nfCalculation = new BeckerNoiseFigureMetric(simSet.getLINK_LOSSES());
+
+		INPUT_POWER = DecibelConverter.calculateInputPower(simSet.getCHANNELS(), simSet.getCHANNEL_POWER());
+
+		try{
+			arquivo = new File("m2.5dBm_VOA_L21_6A");
+			pareto = new PrintWriter(arquivo + "par.txt");
+			amps = new PrintWriter(arquivo + "amp.txt");
+		}
+		catch(Exception e){
+
+		}
+	}
+
+
+	public void run(){
+
+		SolutionBFMethod bestSol = null;
+		double bestDi = Double.MIN_VALUE;
+		MaxMinUtility maxMin = new MaxMinUtility(AmplifierType.L21_40CH);
+
+		double intAtual = 0;
+		double totalCombinacoes = 24137569.0;
+		float[] valores = new float[12]; 
+
+		//int voaIn1Max = (int) (-1*(maxMin.MIN_PIN - INPUT_POWER)); 
+		//int gain1Max = (int) (maxMin.getMaxOutput() - INPUT_POWER); 
+
+		//Pin no AMP1 é -2 dBm, a atenuação máxima do VOA é 25 dB
+		//Pin nos outros AMPs é no Máximo -1 dBm, a atenuação máxima do VOA é 26 dB
+
+		float i = 28f;
+
+		while(i>=12)
+		{	//G1
+			float j = 28f;
+			while(j>=12)
+			{	//G2
+				float k = 28f;
+				while(k>=12)
+				{	//G3
+					float m = 28f;
+					while(m>=12)
+					{	//G3
+						float n = 28f;
+						while(n>=12)
+						{	//G3
+							float l = 28f;
+							while(l>=12)
+							{	//G4
+								float[] gains = {i, j, k, m, n, l};
+
+								++intAtual;
+								float[] voas = {valores[0], valores[2], valores[3], valores[5], valores[6], valores[8], valores[9], valores[11]};
+
+								initialization.setGains(gains);
+								//initialization.setVoas(voas);
+								AmplifierVOA[] amplifiers = (AmplifierVOA[]) initialization.initialize(
+										simSet.getNumberOfAmplifiers(), INPUT_POWER, 0,
+										simSet.getLINK_LOSSES(), function);
+
+								if(amplifiers == null){
+									l-=STEP;
+									continue;
+								}
+
+								boolean ignore = true;
+								if(!this.isOutputPowerCorrect(amplifiers)){
+									for (int a = 0; a < amplifiers.length; a++) {
+										float voaAtt = amplifiers[a].getOutputPower() - MAX_OUT_POWER;
+
+										//This method concerns only the solutions that use the attenuation in the middle amplifiers
+										if(voaAtt <= simSet.getVOA_MAX_ATT()
+												&& voaAtt >= 1
+												&& a < amplifiers.length-1 ){
+											amplifiers[a].setVoaOutAttenuation(voaAtt);
+											ignore = false;
+										}
+									}
+								}
+								else{
+									ignore = false;
+								}
+
+								if(ignore){
+									l -=STEP;
+									continue;
+								}
+
+								SolutionBFMethod solution = null;
+
+								//Defining the output power of the last amplifier
+								float voaAttenuation = (float)(amplifiers[amplifiers.length -1].getOutputPowerAfterVOA() - INPUT_POWER - simSet.getROADM_ATT());
+
+								if(voaAttenuation > 0)
+									amplifiers[amplifiers.length -1].increaseVoaOutAttenuation(voaAttenuation);
+
+								//If the output power of the link is less than the input power, then the solution isn't desirable.
+								if(amplifiers[amplifiers.length -1 ].getOutputPowerAfterVOA() >= INPUT_POWER){
+									solution = new SolutionBFMethod(NUMBER_OBJ);
+
+									solution.setAmplifiers(amplifiers);
+
+									// Adding the VOA attenuation to the noise figure
+									// calculation
+									if (nfCalculation instanceof BeckerNoiseFigureMetric) {
+										((BeckerNoiseFigureMetric) nfCalculation).setVoaAttenuation(amplifiers[amplifiers.length -1].getVoaOutAttenuation());
+									}
+
+									ITUGridUniformSignal signal = new ITUGridUniformSignal(simSet.getCHANNELS(), 1.921e14, 50e9, simSet.getCHANNEL_POWER(), 30);
+									OpticalSignal inputSignal = signal.createSignal();
+									osnrCalculation = new OSNRMetric(inputSignal, simSet.getLINK_LOSSES());
+
+									solution.setFitness(0, osnrCalculation.evaluate(amplifiers)); //nf
+									//solution.setFitness(1, gfCalculation.evaluate(amplifiers)); //gf
+
+									//Choose best solution
+									double[] fitness = solution.getFitness();
+									double solutionDi = fitness[0];//Math.sqrt(fitness[0]*fitness[0]+fitness[1]*fitness[1]);
+
+									if(solutionDi > bestDi){
+										bestSol = solution;
+										bestDi = solutionDi;
+									}
+								}
+
+								//Só vai para o EA as soluções com NF < 15 dB
+								if(solution != null)// && solution.getFitness()[0] < 15.0f){
+									this.addSolutionEA(solution);
+
+								l-=STEP;
+							}
+							n-=STEP;
+						}
+						m-=STEP;
+					}
+					k-=STEP;
+				}
+
+				NumberFormat nf = NumberFormat.getInstance();
+				nf.setMinimumFractionDigits(1);
+				nf.setMaximumFractionDigits(1);
+
+				double porc = (intAtual)*100/totalCombinacoes;
+				System.out.println( nf.format(porc) + "%");
+
+				j-=STEP;
+			}
+			i-=STEP;
+
+			if(bestSol != null){
+				System.out.println("Best NF = " + bestDi);
+				System.out.println(bestSol);
+				System.out.println(bestSol.printAmps());
+			}
+		}
+
+		try
+		{
+			printExternalArchive((int)valores[0]);
+		}
+		catch(Exception e)
+		{
+
+		}
+	}
+
+	private void printExternalArchive(int index) throws FileNotFoundException {
+		for(SolutionBFMethod s : externalArchive){
+			pareto.print(s + "\n");
+			amps.print(s.printAmps() + "\n");
+			//System.out.println(s);
+		}
+
+		pareto.close();
+		amps.close();
+	}
+
+	private boolean isOutputPowerCorrect(Amplifier[] amplifiers){
+		for (int i = 0; i < amplifiers.length; i++) {
+			if(amplifiers[i].getOutputPower() > MAX_OUT_POWER){
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private void addSolutionEA(SolutionBFMethod solution) {
+
+		if(externalArchive == null){
+			externalArchive = new ArrayList<SolutionBFMethod>();	
+		}
+		/*else
+		{
+			for(SolutionBFMethod s : externalArchive){
+				if(compareSolutionByDominace(s, solution) == Dominance.DOMINATES){
+					return;
+				}
+			}
+
+			for(int i=0; i<externalArchive.size(); i++){
+				SolutionBFMethod s = externalArchive.get(i);
+				if(compareSolutionByDominace(solution, s) == Dominance.DOMINATES){
+					externalArchive.remove(i);
+				}
+			}
+		}*/
+
+		externalArchive.add(solution);
+
+	}
+
+	protected Dominance compareSolutionByDominace(SolutionBFMethod solution, SolutionBFMethod anotherSolution){
+		int numObj = NUMBER_OBJ;
+		boolean lostInAllDimensions = true;
+		boolean winInAllDimensions = true;
+		double[] fitness =  solution.getFitness();
+		double[] anotherFitness =  anotherSolution.getFitness();
+
+		for(int currentObj=0; currentObj < numObj ; currentObj++){
+
+			if(fitness[currentObj] > anotherFitness[currentObj]){
+				winInAllDimensions = false;
+			}
+
+			if(fitness[currentObj] < anotherFitness[currentObj]){
+				lostInAllDimensions = false;
+			}
+
+			if(!winInAllDimensions && !lostInAllDimensions){
+				return Dominance.INCOMPARABLE;
+			}
+		}
+
+		if(winInAllDimensions && lostInAllDimensions){
+			return Dominance.INCOMPARABLE;
+		}
+
+		if(winInAllDimensions){
+			return Dominance.DOMINATES;
+		}
+
+		if(lostInAllDimensions){
+			return Dominance.DOMINATED;
+		}
+
+		return Dominance.INCOMPARABLE;
+
+	}
+
+	public static void main(String[] args){
+		STEP = 1f;
+		// System.out.println("Step " + STEP);
+
+		int runs = 1;
+
+		for (int i = 0; i < runs; i++) {
+			long ti = System.currentTimeMillis();
+
+			BF_VOA_Out_L21_6Amps bf = new BF_VOA_Out_L21_6Amps();
+
+			bf.run();
+
+			System.out.println(System.currentTimeMillis() - ti);
+		}
+	}
+
+
+}

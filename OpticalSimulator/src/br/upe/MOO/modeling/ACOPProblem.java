@@ -23,7 +23,7 @@ public class ACOPProblem extends AbstractProblem {
      * include 2*number of amplifier decision variables and 2 objectives.
      */
     public ACOPProblem(int numberOfAmplifiers, AmplifierType type) {
-	super(numberOfAmplifiers, 2);
+	super(numberOfAmplifiers * 2, 2);
 	this.numberOfAmplifiers = numberOfAmplifiers;
 	this.ampType = type;
     }

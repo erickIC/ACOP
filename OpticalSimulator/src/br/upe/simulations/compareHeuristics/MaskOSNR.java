@@ -34,8 +34,8 @@ public class MaskOSNR {
 	System.out.println("-- LI --");
 
 	int numberCh = 40;
-	float pinSystem = -21.0f;
-	SimulationSetup simSet = new SimSetAMPVOA(numberCh, pinSystem, 9.0f);
+	float pinSystem = -18.0f;
+	SimulationSetup simSet = new SimSetAMPVOA(numberCh, pinSystem, 9.0f, 4, 18.0f);
 	float[] linLosses = simSet.getLINK_LOSSES();
 	int numberAmplifiers = simSet.getNumberOfAmplifiers();
 
@@ -46,7 +46,7 @@ public class MaskOSNR {
 	System.out.println("linkLength = " + linkLength);
 	GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9, numberCh, pinSystem, linkLength);
 
-	// Definindo ganho máximo
+	// Definindo ganho mï¿½ximo
 	float maxPout = simSet.getMaxOutputPower();
 	System.out.println(maxPout);
 
@@ -63,9 +63,8 @@ public class MaskOSNR {
 	Amplifier[] amplifiers = heuristic.execute();
 	OpticalSignal endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
 
-	System.out.println("****** MaxGain ******");
-	printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
-		heuristic.calculateOSNR(endSignal));
+	//System.out.println("****** MaxGain ******");
+	//printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),heuristic.calculateOSNR(endSignal));
 
 	double nfWeight = 1;
 	double gfWeight = 0.5;
@@ -86,7 +85,7 @@ public class MaskOSNR {
 	amplifiers = heuristic.execute();
 	endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
 
-	System.out.println("****** WAdGC ******");
+	System.out.println("****** WAdGC NLI******");
 	printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
 		heuristic.calculateOSNR(endSignal));
 
@@ -106,7 +105,7 @@ public class MaskOSNR {
 	amplifiers = heuristic.execute();
 	endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
 
-	System.out.println("****** AsHB Flex ******");
+	System.out.println("****** AsHB Flex NLI******");
 	printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
 		heuristic.calculateOSNR(endSignal));
 
@@ -120,18 +119,16 @@ public class MaskOSNR {
 
 	amplifiers[0].getGainPerChannel();
 
-	System.out.println("****** LossComp ******");
-	printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
-		heuristic.calculateOSNR(endSignal));
+	//System.out.println("****** LossComp ******");
+	//printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),heuristic.calculateOSNR(endSignal));
 
     }
 
     private static void printResults(Amplifier[] amplifiers, OpticalSignal endSignal, BeckerNoiseFigureMetric nfMetric,
 	    GNLIMetric gnliMetric, double tilt, double OSNR) {
 	gnliMetric.evaluate(amplifiers);
-	System.out.println("NF\tGF\tO_NLI\tO_ASE");
-	System.out.printf("%2.3f\t%2.3f\t%2.3f\t%2.3f", nfMetric.evaluate(amplifiers), tilt, gnliMetric.worstOSNR_NLI(),
-		gnliMetric.worstOSNR_ASE());
+	System.out.println("rp_O_NLI,O_NLI");
+	System.out.printf("%2.3f, %2.3f", gnliMetric.getTiltOSNR_NLI(), gnliMetric.worstOSNR_NLI());
 
 	/*
 	 * System.out.println("OSNR_edfa:"); double[] tempOSNR =

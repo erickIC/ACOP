@@ -72,7 +72,7 @@ public class OSNRWeightSelection implements SelectionOperator {
 	    double tmpAngle;
 	    for (int i = 0; i < bestFitness.length; i++) {
 		tmpAngle = Math
-			.atan(NFWeight * candidates[i].getNoiseFigure() / GFWeight * candidates[i].getFlatness());
+			.atan(NFWeight * candidates[i].getMaskOSNR() / GFWeight * candidates[i].getFlatness());
 
 		if (tmpAngle < minAngle) {
 		    minAngle = tmpAngle;

@@ -23,133 +23,131 @@ import br.upe.simulations.simsetups.SimulationSetup;
 
 public class Default {
 
-    public static void main(String[] args) {
-	ACOPHeuristic heuristic;
-	AmplifierType type = AmplifierType.EDFA_1_STG;
+	public static void main(String[] args) {
+		ACOPHeuristic heuristic;
+		AmplifierType type = AmplifierType.EDFA_1_PadTec;
 
-	NormalizationUtility nu = NormalizationUtilityFactory.getInstance().fabricate(type);
-	ObjectiveFunction function = new LinearInterpolationFunction();
-									// //
+		NormalizationUtility nu = NormalizationUtilityFactory.getInstance().fabricate(type);
+		ObjectiveFunction function = new LinearInterpolationFunction();
+		// //
 
-	System.out.println("-- LI --");
+		System.out.println("-- LI --");
 
-	int numberCh = 39;
-	float pinSystem = -21.0f;
-	SimulationSetup simSet = new SimSetAMPVOA(numberCh, pinSystem, 0.0f);
-	float[] linLosses = simSet.getLINK_LOSSES();
-	int numberAmplifiers = simSet.getNumberOfAmplifiers();
+		int numberCh = 40;
+		float pinSystem = -18.0f;
+		SimulationSetup simSet = new SimSetAMPVOA(numberCh, pinSystem, 9.0f, 4, 18.0f);
+		float[] linLosses = simSet.getLINK_LOSSES();
+		int numberAmplifiers = simSet.getNumberOfAmplifiers();
 
-	BeckerNoiseFigureMetric nfMetric = new BeckerNoiseFigureMetric(linLosses);
+		BeckerNoiseFigureMetric nfMetric = new BeckerNoiseFigureMetric(linLosses);
 
-	double linkLength = linLosses[0] * 1000 / 0.2;
-	System.out.println("linkLength = " + linkLength);
-	GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9, numberCh, pinSystem, linkLength);
+		double linkLength = linLosses[0] * 1000 / 0.2;
+		System.out.println("linkLength = " + linkLength);
+		GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9, numberCh, pinSystem, linkLength);
 
-	// Definindo ganho máximo
-	float maxPout = simSet.getMaxOutputPower();
-	System.out.println(maxPout);
+		// Definindo ganho mï¿½ximo
+		float maxPout = simSet.getMaxOutputPower();
+		System.out.println(maxPout);
 
-	PowerMaskSignal signal = new PowerMaskSignal(numberCh, type, simSet.getCHANNEL_POWER(), 30);
-	OpticalSignal inputSignal = signal.createSignal();
-	Amplifier[] amplifiers;
-	OpticalSignal endSignal;
+		PowerMaskSignal signal = new PowerMaskSignal(numberCh, type, simSet.getCHANNEL_POWER(), 30);
+		OpticalSignal inputSignal = signal.createSignal();
+		Amplifier[] amplifiers;
+		OpticalSignal endSignal;
 
-	heuristic = new MaxGain(numberAmplifiers, linLosses, inputSignal, function);
-	heuristic.setInitialization(new UniformInitialization(type));
-	heuristic.setSelectionOp(new MaxGainSelection());
-	heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
-	heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
-	heuristic.setMaxOutputPower(maxPout);
-	amplifiers = heuristic.execute();
-	endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
+		heuristic = new MaxGain(numberAmplifiers, linLosses, inputSignal, function);
+		heuristic.setInitialization(new UniformInitialization(type));
+		heuristic.setSelectionOp(new MaxGainSelection());
+		heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
+		heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
+		heuristic.setMaxOutputPower(maxPout);
+		amplifiers = heuristic.execute();
+		endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
 
-	System.out.println("****** MaxGain ******");
-	printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
-		heuristic.calculateOSNR(endSignal));
+		System.out.println("****** MaxGain ******");
+		printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
+				heuristic.calculateOSNR(endSignal));
 
-	heuristic = new AdGC(numberAmplifiers, linLosses, inputSignal, function);
-	heuristic.setInitialization(new UniformInitialization(type));
-	heuristic.setSelectionOp(new UiaraWeightSelection());
-	heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
-	heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
-	heuristic.setMaxOutputPower(maxPout);
+		heuristic = new AdGC(numberAmplifiers, linLosses, inputSignal, function);
+		heuristic.setInitialization(new UniformInitialization(type));
+		heuristic.setSelectionOp(new UiaraWeightSelection());
+		heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
+		heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
+		heuristic.setMaxOutputPower(maxPout);
 
-	// When the selection uses weight
-	if (heuristic.getSelectionOp() instanceof UiaraWeightSelection) {
-	    ((UiaraWeightSelection) heuristic.getSelectionOp()).setNFWeight(1);
-	    ((UiaraWeightSelection) heuristic.getSelectionOp()).setGFWeight(1);
+		// When the selection uses weight
+		if (heuristic.getSelectionOp() instanceof UiaraWeightSelection) {
+			((UiaraWeightSelection) heuristic.getSelectionOp()).setNFWeight(1);
+			((UiaraWeightSelection) heuristic.getSelectionOp()).setGFWeight(1);
+		}
+
+		amplifiers = heuristic.execute();
+		endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
+
+		System.out.println("****** WAdGC ******");
+		printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
+				heuristic.calculateOSNR(endSignal));
+
+		heuristic = new AsHBFlex(numberAmplifiers, linLosses, inputSignal, function);
+		heuristic.setSelectionOp(new UiaraWeightSelection());
+		heuristic.setInitialization(new UniformInitialization(type));
+		heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
+		heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
+		heuristic.setMaxOutputPower(maxPout);
+		((AsHBFlex) heuristic).setMaxIteration(50);
+		// When the selection uses weight
+		if (heuristic.getSelectionOp() instanceof UiaraWeightSelection) {
+			((UiaraWeightSelection) heuristic.getSelectionOp()).setNFWeight(1);
+			((UiaraWeightSelection) heuristic.getSelectionOp()).setGFWeight(0.5);
+		}
+
+		amplifiers = heuristic.execute();
+		endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
+
+		System.out.println("****** AsHB Flex ******");
+		printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
+				heuristic.calculateOSNR(endSignal));
+
+		heuristic = new LossComp(numberAmplifiers, linLosses, inputSignal, function);
+		heuristic.setInitialization(new UniformInitialization(type));
+		heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
+		heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
+		heuristic.setMaxOutputPower(maxPout);
+		amplifiers = heuristic.execute();
+		endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
+
+		amplifiers[0].getGainPerChannel();
+
+		System.out.println("****** LossComp ******");
+		printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
+				heuristic.calculateOSNR(endSignal));
+
 	}
 
-	amplifiers = heuristic.execute();
-	endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
+	private static void printResults(Amplifier[] amplifiers, OpticalSignal endSignal, BeckerNoiseFigureMetric nfMetric,
+			GNLIMetric gnliMetric, double tilt, double OSNR) {
+		gnliMetric.evaluate(amplifiers);
+		System.out.println("rp_O_NLI,O_NLI");
+		System.out.printf("%2.3f, %2.3f", gnliMetric.getTiltOSNR_NLI(), gnliMetric.worstOSNR_NLI());
 
-	System.out.println("****** WAdGC ******");
-	printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
-		heuristic.calculateOSNR(endSignal));
+		//System.out.println(tilt + ", " + gnliMetric.worstOSNR_ASE() + ", " + gnliMetric.worstOSNR_NLI());
 
-	heuristic = new AsHBFlex(numberAmplifiers, linLosses, inputSignal, function);
-	heuristic.setSelectionOp(new UiaraWeightSelection());
-	heuristic.setInitialization(new UniformInitialization(type));
-	heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
-	heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
-	heuristic.setMaxOutputPower(maxPout);
-	((AsHBFlex) heuristic).setMaxIteration(10);
-	// When the selection uses weight
-	if (heuristic.getSelectionOp() instanceof UiaraWeightSelection) {
-	    ((UiaraWeightSelection) heuristic.getSelectionOp()).setNFWeight(1);
-	    ((UiaraWeightSelection) heuristic.getSelectionOp()).setGFWeight(0.5);
+		/*
+		 * System.out.println("OSNR_edfa:"); double[] tempOSNR =
+		 * gnliMetric.getOSNR_EDFA(); for (int i = 0; i < tempOSNR.length; i++)
+		 * { System.out.print(tempOSNR[i] + "  "); }
+		 */
+
+		/*
+		 * System.out.println(); System.out.println("OSNR_nli:"); tempOSNR =
+		 * gnliMetric.getOSNR_NLI(); for (int i = 0; i < tempOSNR.length; i++) {
+		 * System.out.print(tempOSNR[i] + "  "); }
+		 */
+
+		System.out.println();
+		for (int i = 0; i < amplifiers.length; i++) {
+			System.out.println(amplifiers[i]);
+		}
+		System.out.println();
 	}
-
-	amplifiers = heuristic.execute();
-	endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
-
-	System.out.println("****** AsHB Flex ******");
-	printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
-		heuristic.calculateOSNR(endSignal));
-
-	heuristic = new LossComp(numberAmplifiers, linLosses, inputSignal, function);
-	heuristic.setInitialization(new UniformInitialization(type));
-	heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
-	heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
-	heuristic.setMaxOutputPower(maxPout);
-	amplifiers = heuristic.execute();
-	endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
-
-	amplifiers[0].getGainPerChannel();
-
-	System.out.println("****** LossComp ******");
-	printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
-		heuristic.calculateOSNR(endSignal));
-
-    }
-
-    private static void printResults(Amplifier[] amplifiers, OpticalSignal endSignal, BeckerNoiseFigureMetric nfMetric,
-	    GNLIMetric gnliMetric, double tilt, double OSNR) {
-	gnliMetric.evaluate(amplifiers);
-	//System.out.println("NF\tGF\tO_NLI\tO_ASE");
-	// System.out.printf("%2.3f\t%2.3f\t%2.3f\t%2.3f",
-	// nfMetric.evaluate(amplifiers), tilt, gnliMetric.worstOSNR_NLI(),
-	// gnliMetric.worstOSNR_ASE());
-	
-	System.out.println(tilt + ", " + gnliMetric.worstOSNR_ASE() + ", " + gnliMetric.worstOSNR_NLI());
-
-	/*
-	 * System.out.println("OSNR_edfa:"); double[] tempOSNR =
-	 * gnliMetric.getOSNR_EDFA(); for (int i = 0; i < tempOSNR.length; i++)
-	 * { System.out.print(tempOSNR[i] + "  "); }
-	 */
-
-	/*
-	 * System.out.println(); System.out.println("OSNR_nli:"); tempOSNR =
-	 * gnliMetric.getOSNR_NLI(); for (int i = 0; i < tempOSNR.length; i++) {
-	 * System.out.print(tempOSNR[i] + "  "); }
-	 */
-
-	/*System.out.println();
-	for (int i = 0; i < amplifiers.length; i++) {
-	    System.out.println(amplifiers[i]);
-	}*/
-	System.out.println();
-    }
 
 }

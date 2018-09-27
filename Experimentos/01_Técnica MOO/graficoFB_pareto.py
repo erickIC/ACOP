@@ -1,34 +1,6 @@
 import os
 import matplotlib.pyplot as plt
 
-def readData(pasta):
-	osnrRipplePareto = []
-	osnrPareto = []
-	caminhos = [os.path.join(pasta, nome) for nome in os.listdir(pasta)]
-	arquivos = [arq for arq in caminhos if os.path.isfile(arq)]
-	par = [arq for arq in arquivos if arq.lower().endswith("_par.txt")]
-	for file in par:
-		f = open(file, 'r+')
-		for line in f:
-			str = line.split('\t')
-			if file.lower().endswith("pareto_par.txt"):
-				osnrRipplePareto.append(str[0].replace(',', '.'))
-				osnrPareto.append(str[1].replace(',', '.'))
-		f.close()
-	return osnrRipplePareto, osnrPareto;
-	
-def readMOOData(arquivo):
-	osnrRipple = []
-	osnr = []
-	f = open(arquivo, 'r+')
-	for line in f:
-		str = line.split('\t')
-		osnrRipple.append(str[0].replace(',', '.'))
-		osnr.append(str[1].replace(',', '.'))
-	f.close()
-	return osnrRipple, osnr
-		
-
 title = 'EDFA 2'
 pasta1 = 'fb_e2_2a'
 label1 = '2 Amps'

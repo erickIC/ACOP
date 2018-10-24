@@ -1,98 +1,101 @@
-def calculo_normalizacao(x, min, max, rangea, rangeb):
+def normalization(x, min, max, range_a, range_b):
 	
-	z = ( (float(rangeb) - float(rangea)) * ( (x - float(min))/(float(max) - float(min)) ) ) + float(rangea)
+	z = ( (float(range_b) - float(range_a)) * ( (x - float(min))/(float(max) - float(min)) ) ) + float(range_a)
 	return z
 
-mascara = open('mascara1.txt', 'r')
-escrito = open('testew.txt', 'w')
+mask = open('mascara2.txt', 'r')
+written = open('testew.txt', 'w')
 
-potencias = mascara.readlines()
+powers = mask.readlines()
 
-canal = []
-canal_float = []
+channel = []
+channel_float = []
 
-maior_pintotal = -float('inf')
-maior_gset = -float('inf')
-maior_wave = -float('inf')
-maior_gch = -float('inf')
-maior_nf = -float('inf')
+biggest_pintotal = -float('inf')
+biggest_gset = -float('inf')
+biggest_wave = -float('inf')
+biggest_gch = -float('inf')
+biggest_nf = -float('inf')
 
-menor_pintotal = float('inf')
-menor_gset = float('inf')
-menor_wave = float('inf')
-menor_gch = float('inf')
-menor_nf = float('inf')
+smallest_pintotal = float('inf')
+smallest_gset = float('inf')
+smallest_wave = float('inf')
+smallest_gch = float('inf')
+smallest_nf = float('inf')
 
-rangea = float(0.15)
-rangeb = float(0.85)
+range_a = 0.15
+range_b = 0.85
 
-total_canais = int(potencias[0])
+total_channels = int(powers[0])
 
+ # For to take the max's and min's of every variable and to separate the channels.  
 
-for i in range(1, len(potencias)):
+for i in range(1, len(powers)):
 
-	canais = potencias[i].split()
+	channels = powers[i].split()
 
-	for j in range(0, total_canais):
+	for j in range(0, total_channels):
 						 #Pintotal               Gset					wave									Gch         Pout                     Pin                          						NF
 
-		canal_float.append([float(canais[0]), float(canais[2]), float(canais[3 + (3*total_canais) + j]), float(float(canais[3 + total_canais + j]) - float(canais[3 + j])), float(canais[3 + (2*total_canais) + j])])
+		channel_float.append([float(channels[0]), float(channels[2]), float(channels[3 + (3*total_channels) + j]), float(float(channels[3 + total_channels + j]) - float(channels[3 + j])), float(channels[3 + (2*total_channels) + j])])
 
-		if float(canais[0]) > maior_pintotal:
-			maior_pintotal = float(canais[0])
+		if float(channels[0]) > biggest_pintotal:
+			biggest_pintotal = float(channels[0])
 
-		if float(canais[0]) < menor_pintotal:
-			menor_pintotal = float(canais[0])
+		if float(channels[0]) < smallest_pintotal:
+			smallest_pintotal = float(channels[0])
 
-		if 	float(canais[2]) > maior_gset:
-			maior_gset = float(canais[2])
+		if 	float(channels[2]) > biggest_gset:
+			biggest_gset = float(channels[2])
 
-		if float(canais[2]) < menor_gset:
-			menor_gset = float(canais[2])
+		if float(channels[2]) < smallest_gset:
+			smallest_gset = float(channels[2])
 
-		if float(canais[3 + (3*total_canais) + j]) > maior_wave:
-			maior_wave = float(canais[3 + (3*total_canais) + j])
+		if float(channels[3 + (3*total_channels) + j]) > biggest_wave:
+			biggest_wave = float(channels[3 + (3*total_channels) + j])
 
-		if float(canais[3 + (3*total_canais) + j]) < menor_wave:
-			menor_wave = float(canais[3 + (3*total_canais) + j])
+		if float(channels[3 + (3*total_channels) + j]) < smallest_wave:
+			smallest_wave = float(channels[3 + (3*total_channels) + j])
 
-		if float(float(canais[3 + total_canais + j]) - float(canais[3 + j])) > maior_gch:
-			maior_gch = float(float(canais[3 + total_canais + j]) - float(canais[3 + j]))
+		if float(float(channels[3 + total_channels + j]) - float(channels[3 + j])) > biggest_gch:
+			biggest_gch = float(float(channels[3 + total_channels + j]) - float(channels[3 + j]))
 
-		if float(float(canais[3 + total_canais + j]) - float(canais[3 + j])) < menor_gch:
-			menor_gch = float(float(canais[3 + total_canais + j]) - float(canais[3 + j]))
+		if float(float(channels[3 + total_channels + j]) - float(channels[3 + j])) < smallest_gch:
+			smallest_gch = float(float(channels[3 + total_channels + j]) - float(channels[3 + j]))
 
-		if 	float(canais[3 + (2*total_canais) + j]) > maior_nf:
-			maior_nf = float(canais[3 + (2*total_canais) + j])
+		if 	float(channels[3 + (2*total_channels) + j]) > biggest_nf:
+			biggest_nf = float(channels[3 + (2*total_channels) + j])
 
-		if float(canais[3 + (2*total_canais) + j]) < menor_nf:
-			menor_nf = float(canais[3 + (2*total_canais) + j])						
+		if float(channels[3 + (2*total_channels) + j]) < smallest_nf:
+			smallest_nf = float(channels[3 + (2*total_channels) + j])						
 
 
-#print(maior_pintotal, menor_pintotal, maior_gset, menor_gset, maior_wave, menor_wave, maior_gch, menor_gch, maior_nf, menor_nf)
-#print(canal_float[1][1])
 
-maximos = [maior_pintotal, maior_gset, maior_wave, maior_gch, maior_nf]
-minimos = [menor_pintotal, menor_gset, menor_wave, menor_gch, menor_nf]
-#print(maximos)
-#print(minimos)
-#print(canal_float[1])
-for i in range(0, len(canal_float)):
-	atual = canal_float[i]
+maximum = [biggest_pintotal, biggest_gset, biggest_wave, biggest_gch, biggest_nf]
+minimum = [smallest_pintotal, smallest_gset, smallest_wave, smallest_gch, smallest_nf]
 
-	for j in range(0, len(atual)):
-		atual[j] = calculo_normalizacao(atual[j], minimos[j], maximos[j], rangea, rangeb)
+print(maximum)
+print(minimum)
+print(channel_float[0])
 
-	canal_float[i] = atual	
+ #normalizing the data.
+
+for i in range(0, len(channel_float)): #normalizing the data.
+	current = channel_float[i]
+
+	for j in range(0, len(current)):
+		current[j] = normalization(current[j], minimum[j], maximum[j], range_a, range_b)
+
+	channel_float[i] = current	
 		
 
-#print(canal_float[1])
+#Put the data in a new file.
 
-for i in range(0, len(canal_float)):
+for i in range(0, len(channel_float)): 
 
-	canal.append(str(canal_float[i][0]) + ' ' + str(canal_float[i][1])  + ' ' + str(canal_float[i][2]) + ' ' + str(canal_float[i][3]) + ' ' + str(canal_float[i][4]) + '\n')
+	channel.append(str(channel_float[i][0]) + ' ' + str(channel_float[i][1])  + ' ' + str(channel_float[i][2]) + ' ' + str(channel_float[i][3]) + ' ' + str(channel_float[i][4]) + '\n')
 
-escrito.writelines(canal)
+written.writelines(channel)
 
-mascara.close()
-escrito.close()
+mask.close()
+written.close()

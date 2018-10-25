@@ -8,9 +8,9 @@ import br.upe.base.OpticalSignal;
 import br.upe.mascara.PowerMask;
 import br.upe.mascara.PowerMaskFactory;
 
-public class BFMethod_2amps extends BFMethod {
+public class BF_2a_VOA extends BFMethod {
 
-    public BFMethod_2amps(int numberOfAmplifiers) {
+    public BF_2a_VOA(int numberOfAmplifiers) {
 	super(numberOfAmplifiers);
     }
 
@@ -159,7 +159,7 @@ public class BFMethod_2amps extends BFMethod {
     public static void main(String[] args) {
 	int runs = 1;
 	for (int i = 0; i < runs; i++) {
-	    BFMethod_2amps bf = new BFMethod_2amps(2);
+	    BF_2a_VOA bf = new BF_2a_VOA(2);
 
 	    bf.run();
 	}

@@ -80,4 +80,21 @@ public class ACOPProblem extends AbstractProblem {
 	solution.setObjectives(f);
     }
 
+    public static void main(String[] args) {
+	ACOPProblem problem = new ACOPProblem(4, AmplifierType.EDFA_2_PadTec);
+
+	int[] values = { 23, 27, 27, 27, 15, 7, 9, 0 };
+
+	Solution solution = new Solution(8, 2);
+	for (int i = 0; i < values.length; i++) {
+	    if (i < 4) {
+		solution.setVariable(i, new BinaryIntegerVariable(values[i], 17, 27));
+	    } else {
+		solution.setVariable(i, new BinaryIntegerVariable(values[i], 0, (int) MAX_VOA_ATT));
+	    }
+	}
+	
+	problem.evaluate(solution);
+    }
+
 }

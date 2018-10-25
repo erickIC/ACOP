@@ -291,29 +291,32 @@ public abstract class ACOPHeuristic {
 	int maxGain = pm.getMaxGain();
 	int minGain = pm.getMinGain();
 
-	if(gain == 30)
-	    System.out.println();
+	int intGain = (int) gain;
 	
-	if (gain < minGain)
-	    gain = minGain;	
-	else if (gain > maxGain)
-	    gain = maxGain;
+	if (intGain < minGain)
+	    intGain = minGain;
+	else if (intGain > maxGain)
+	    intGain = maxGain;
 	
-	float maxInputPower = pm.getMaxTotalInputPower((int) gain);
+	float maxInputPower = pm.getMaxTotalInputPower(intGain);
 
 	while (amplifier.getInputPower() > maxInputPower + 0.5) {
-	    gain -= 1f;
-	    maxInputPower = pm.getMaxTotalInputPower((int) gain);
+	    if (intGain <= minGain)
+		break;
+	    intGain -= 1f;
+	    maxInputPower = pm.getMaxTotalInputPower(intGain);
 	}
 
 	
-	float minInputPower = pm.getMinTotalInputPower((int) gain);
+	float minInputPower = pm.getMinTotalInputPower(intGain);
 	while (amplifier.getInputPower() < minInputPower - 0.5) {
-	    gain += 1f;
-	    minInputPower = pm.getMinTotalInputPower((int) gain);
+	    if (intGain >= minGain)
+		break;
+	    intGain += 1f;
+	    minInputPower = pm.getMinTotalInputPower(intGain);
 	}
 
-	amplifier.setGain(gain);
+	amplifier.setGain(intGain);
 	
     }
 

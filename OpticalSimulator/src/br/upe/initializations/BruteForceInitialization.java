@@ -29,6 +29,9 @@ public class BruteForceInitialization implements InitializationStrategy {
     public Amplifier[] initialize(int numberOfAmplifiers, float linkInputPower, float linkOutputPower,
 	    float[] linkLosses, ObjectiveFunction function, OpticalSignal inputSignal) {
 	Amplifier[] amplifiers = new Amplifier[numberOfAmplifiers];
+	if (attenuations == null) {
+	    attenuations = new float[numberOfAmplifiers];
+	}
 
 	this.signal = inputSignal;
 
@@ -158,6 +161,14 @@ public class BruteForceInitialization implements InitializationStrategy {
 
     public void setSignal(OpticalSignal signal) {
 	this.signal = signal;
+    }
+
+    public boolean isHasVOA() {
+	return hasVOA;
+    }
+
+    public void setHasVOA(boolean hasVOA) {
+	this.hasVOA = hasVOA;
     }
 
 }

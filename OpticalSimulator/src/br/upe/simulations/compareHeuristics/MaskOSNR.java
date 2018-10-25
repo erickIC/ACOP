@@ -6,8 +6,6 @@ import br.upe.base.AmplifierType;
 import br.upe.base.ObjectiveFunction;
 import br.upe.base.OpticalSignal;
 import br.upe.heuristics.AsHB.AsHBFlex;
-import br.upe.heuristics.lossComp.LossComp;
-import br.upe.heuristics.maxGain.MaxGain;
 import br.upe.heuristics.uiara.AdGC;
 import br.upe.initializations.UniformInitialization;
 import br.upe.metrics.BeckerNoiseFigureMetric;
@@ -16,7 +14,6 @@ import br.upe.objfunctions.linerInterpolation.LinearInterpolationFunction;
 import br.upe.objfunctions.maskOSNR.MaskOSNRFunction;
 import br.upe.objfunctions.rn.util.NormalizationUtility;
 import br.upe.objfunctions.rn.util.NormalizationUtilityFactory;
-import br.upe.selection.MaxGainSelection;
 import br.upe.selection.OSNRWeightSelection;
 import br.upe.signal.factory.PowerMaskSignal;
 import br.upe.simulations.simsetups.SimSetAMPVOA;
@@ -31,11 +28,11 @@ public class MaskOSNR {
 	NormalizationUtility nu = NormalizationUtilityFactory.getInstance().fabricate(type);
 	ObjectiveFunction functionAux = new LinearInterpolationFunction(); // NNFunction(nu);
 
-	System.out.println("-- LI --");
+	System.out.println("e1_3a");
 
 	int numberCh = 40;
 	float pinSystem = -18.0f;
-	SimulationSetup simSet = new SimSetAMPVOA(numberCh, pinSystem, 9.0f, 4, 18.0f);
+	SimulationSetup simSet = new SimSetAMPVOA(numberCh, pinSystem, 9.0f, 3, 18.0f);
 	float[] linLosses = simSet.getLINK_LOSSES();
 	int numberAmplifiers = simSet.getNumberOfAmplifiers();
 
@@ -43,28 +40,13 @@ public class MaskOSNR {
 	BeckerNoiseFigureMetric nfMetric = new BeckerNoiseFigureMetric(linLosses);
 
 	double linkLength = linLosses[0] * 1000 / 0.2;
-	System.out.println("linkLength = " + linkLength);
 	GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9, numberCh, pinSystem, linkLength);
 
 	// Definindo ganho m�ximo
 	float maxPout = simSet.getMaxOutputPower();
-	System.out.println(maxPout);
 
 	PowerMaskSignal signal = new PowerMaskSignal(numberCh, type, simSet.getCHANNEL_POWER(), 30);
 	OpticalSignal inputSignal = signal.createSignal();
-
-
-	heuristic = new MaxGain(numberAmplifiers, linLosses, inputSignal, function);
-	heuristic.setInitialization(new UniformInitialization(type));
-	heuristic.setSelectionOp(new MaxGainSelection());
-	heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
-	heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
-	heuristic.setMaxOutputPower(maxPout);
-	Amplifier[] amplifiers = heuristic.execute();
-	OpticalSignal endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
-
-	//System.out.println("****** MaxGain ******");
-	//printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),heuristic.calculateOSNR(endSignal));
 
 	double nfWeight = 1;
 	double gfWeight = 0.5;
@@ -82,10 +64,10 @@ public class MaskOSNR {
 	    ((OSNRWeightSelection) heuristic.getSelectionOp()).setGFWeight(gfWeight);
 	}
 
-	amplifiers = heuristic.execute();
-	endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
+	Amplifier[] amplifiers = heuristic.execute();
+	OpticalSignal endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
 
-	System.out.println("****** WAdGC NLI******");
+	System.out.print("adgc_nli");
 	printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
 		heuristic.calculateOSNR(endSignal));
 
@@ -105,31 +87,20 @@ public class MaskOSNR {
 	amplifiers = heuristic.execute();
 	endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
 
-	System.out.println("****** AsHB Flex NLI******");
+	System.out.print("ashbflex_nli");
 	printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),
 		heuristic.calculateOSNR(endSignal));
-
-	heuristic = new LossComp(numberAmplifiers, linLosses, inputSignal, function);
-	heuristic.setInitialization(new UniformInitialization(type));
-	heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
-	heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
-	heuristic.setMaxOutputPower(maxPout);
-	amplifiers = heuristic.execute();
-	endSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
-
-	amplifiers[0].getGainPerChannel();
-
-	//System.out.println("****** LossComp ******");
-	//printResults(amplifiers, endSignal, nfMetric, gnliMetric, heuristic.calculateTilt(endSignal),heuristic.calculateOSNR(endSignal));
-
     }
 
     private static void printResults(Amplifier[] amplifiers, OpticalSignal endSignal, BeckerNoiseFigureMetric nfMetric,
 	    GNLIMetric gnliMetric, double tilt, double OSNR) {
 	gnliMetric.evaluate(amplifiers);
-	System.out.println("rp_O_NLI,O_NLI");
-	System.out.printf("%2.3f, %2.3f", gnliMetric.getTiltOSNR_NLI(), gnliMetric.worstOSNR_NLI());
 
+	System.out.println(" = [" + gnliMetric.getTiltOSNR_NLI() + ", " + gnliMetric.worstOSNR_NLI() + "]");
+
+	// System.out.println("rp_O_NLI,O_NLI");
+	// System.out.printf("%2.3f, %2.3f", gnliMetric.getTiltOSNR_NLI(),
+	// gnliMetric.worstOSNR_NLI());
 	/*
 	 * System.out.println("OSNR_edfa:"); double[] tempOSNR =
 	 * gnliMetric.getOSNR_EDFA(); for (int i = 0; i < tempOSNR.length; i++)
@@ -142,11 +113,11 @@ public class MaskOSNR {
 	 * System.out.print(tempOSNR[i] + "  "); }
 	 */
 
-	System.out.println();
-	for (int i = 0; i < amplifiers.length; i++) {
-	    System.out.println(amplifiers[i]);
-	}
-	System.out.println();
+	// System.out.println();
+	// for (int i = 0; i < amplifiers.length; i++) {
+	// System.out.println(amplifiers[i]);
+	// }
+	// System.out.println();
     }
 
 }

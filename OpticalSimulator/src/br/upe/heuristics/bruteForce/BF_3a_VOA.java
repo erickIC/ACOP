@@ -12,9 +12,9 @@ import br.upe.base.OpticalSignal;
 import br.upe.mascara.PowerMask;
 import br.upe.mascara.PowerMaskFactory;
 
-public class BFMethod_3amps extends BFMethod {
+public class BF_3a_VOA extends BFMethod {
 
-    public BFMethod_3amps() {
+    public BF_3a_VOA() {
 	super(3);
     }
 
@@ -158,7 +158,7 @@ public class BFMethod_3amps extends BFMethod {
 		}
 
 		try {
-		    printExternalArchive(i);
+		    printExternalArchive(i + "");
 		    Timestamp timeEnd = new Timestamp();
 		    PrintWriter time = new PrintWriter(arquivoT);
 		    time.println("Start = " + timeIni.getDate());
@@ -188,7 +188,7 @@ public class BFMethod_3amps extends BFMethod {
     public static void main(String[] args) {
 	int runs = 1;
 	for (int i = 0; i < runs; i++) {
-	    BFMethod_3amps bf = new BFMethod_3amps();
+	    BF_3a_VOA bf = new BF_3a_VOA();
 
 	    bf.run();
 	}

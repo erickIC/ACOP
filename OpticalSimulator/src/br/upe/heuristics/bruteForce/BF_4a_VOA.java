@@ -2,10 +2,7 @@ package br.upe.heuristics.bruteForce;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.Scanner;
-
-import com.sun.jmx.snmp.Timestamp;
 
 import br.upe.base.Amplifier;
 import br.upe.base.AmplifierVOA;
@@ -13,12 +10,12 @@ import br.upe.base.OpticalSignal;
 import br.upe.mascara.PowerMask;
 import br.upe.mascara.PowerMaskFactory;
 
-public class BFMethod_4amps extends BFMethod {
+public class BF_4a_VOA extends BFMethod {
 
     private int maxG1, minG1;
     private int maxG2, minG2;
 
-    public BFMethod_4amps(int maxG1, int minG1, int maxG2, int minG2) {
+    public BF_4a_VOA(int maxG1, int minG1, int maxG2, int minG2) {
 	super(4);
 	this.maxG1 = maxG1;
 	this.minG1 = minG1;
@@ -44,7 +41,7 @@ public class BFMethod_4amps extends BFMethod {
 	float shift = 0.0f;
 
 	File arquivoT = new File("4_time.txt");
-	Timestamp timeIni = new Timestamp();
+	// Timestamp timeIni = new Timestamp();
 
 	float G1MaxLimit = maxG1;
 	float G1MinLimit = minG1;
@@ -85,9 +82,17 @@ public class BFMethod_4amps extends BFMethod {
 					float p = simSet.getVOA_MAX_ATT() - shift;
 					while (p >= 0) { // VOA4
 
+					    if (i == 23f && j == 15f)
+						System.out.println();
+
 					    float[] gains = { i, k, m, o };
 					    float[] attenuations = { j, l, n, p };
 
+					    // float[] gains = { 23, 27, 27,
+					    // 27};
+					    // float[] attenuations = { 15, 7,
+					    // 9, 0 };
+					    
 					    initialization.setGains(gains);
 					    initialization.setAttenuations(attenuations);
 					    OpticalSignal signalTemp = inputSignal.clone();
@@ -182,12 +187,12 @@ public class BFMethod_4amps extends BFMethod {
 			    l -= STEP;
 			}
 			try {
-			    printExternalArchive(i + "-" + k);
-			    Timestamp timeEnd = new Timestamp();
-			    PrintWriter time = new PrintWriter(arquivoT);
-			    time.println("Start = " + timeIni.getDate());
-			    time.println("End = " + timeEnd.getDate());
-			    time.close();
+			    printExternalArchive(i + "-" + j + "-" + k);
+			    // Timestamp timeEnd = new Timestamp();
+			    // PrintWriter time = new PrintWriter(arquivoT);
+			    // time.println("Start = " + timeIni.getDate());
+			    // time.println("End = " + timeEnd.getDate());
+			    // time.close();
 			} catch (Exception e) {
 
 			}
@@ -211,9 +216,9 @@ public class BFMethod_4amps extends BFMethod {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
-	Timestamp timeEnd = new Timestamp();
-	System.out.println("Start = " + timeIni.getDate());
-	System.out.println("End = " + timeEnd.getDate());
+	// Timestamp timeEnd = new Timestamp();
+	// System.out.println("Start = " + timeIni.getDate());
+	// System.out.println("End = " + timeEnd.getDate());
     }
 
     public static void main(String[] args) {
@@ -244,7 +249,7 @@ public class BFMethod_4amps extends BFMethod {
 	}
 
 	if (selection.equals("S") || selection.equals("s")) {
-	    BFMethod_4amps bf = new BFMethod_4amps(g1mx, g1min, g2mx, g2min);
+	    BF_4a_VOA bf = new BF_4a_VOA(g1mx, g1min, g2mx, g2min);
 
 	    bf.run();
 	}

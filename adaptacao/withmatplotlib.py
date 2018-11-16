@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import keras
 from keras.models import Sequential
 from keras.layers import Dense
@@ -67,11 +68,22 @@ print(model.summary())
 
 model.compile(optimizer = 'adam', loss = 'mse', metrics = ['acc'])
 
-model.fit(training_x, training_y, epochs = 100)
+history = model.fit(training_x, training_y, epochs = 150)
 
 loss, acc = model.evaluate(test_x, test_y)
 
 t = "Trained model accuracy: " + str((acc*100)) + "%" + " and the loss: " + str(loss)
 print(t)
+
+
+
+########################################### Ploting ########################################################################################## 
+
+plt.rcParams['figure.figsize'] = (11,7)
+plt.plot(history.epoch, history.history['loss'], 'r')
+plt.title('MLP  5-10-2')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.show()
 
 file.close()

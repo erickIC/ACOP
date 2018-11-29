@@ -5,6 +5,7 @@ def normalization(x, min, max, range_a, range_b):
 
 mask = open('mascara2.txt', 'r')
 written = open('testew.txt', 'w')
+max_and_min = open('max_min.txt', 'w')
 
 powers = mask.readlines()
 
@@ -73,7 +74,8 @@ for i in range(1, len(powers)):
 
 maximum = [biggest_pintotal, biggest_gset, biggest_wave, biggest_gch, biggest_nf]
 minimum = [smallest_pintotal, smallest_gset, smallest_wave, smallest_gch, smallest_nf]
-
+maximumstr = [str(biggest_pintotal) + ' ' + str(biggest_gset) + ' ' + str(biggest_wave) + ' ' + str(biggest_gch) + ' ' + str(biggest_nf) + '\n']
+minimumstr = [str(smallest_pintotal) + ' ' + str(smallest_gset) + ' ' + str(smallest_wave) + ' ' + str(smallest_gch) + ' ' + str(smallest_nf) + '\n']
 print(maximum)
 print(minimum)
 print(channel_float[0])
@@ -96,6 +98,9 @@ for i in range(0, len(channel_float)):
 	channel.append(str(channel_float[i][0]) + ' ' + str(channel_float[i][1])  + ' ' + str(channel_float[i][2]) + ' ' + str(channel_float[i][3]) + ' ' + str(channel_float[i][4]) + '\n')
 
 written.writelines(channel)
-
+max_and_min.writelines(maximumstr)
+max_and_min.writelines(minimumstr)
+max_and_min.writelines([str(range_a) + ' ' + str(range_b) + '\n'])
 mask.close()
 written.close()
+max_and_min.close()

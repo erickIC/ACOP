@@ -1,0 +1,46 @@
+Population Size = 100
+Generations = 300
+
+Binary Tournament Selection
+	Deterministic tournament selection operator. The tournament size specifies the number of candidate solutions selected randomly from a population. The winner of a tournament is the best solution in the pool. Unlike probabilistic tournament selection, the best solution is always returned in deterministic tournament selection. If two or more solutions are the best in the pool, one solution is randomly selected with equal probability as the tournament winner.
+Half-uniform crossover (HUX) operator. 
+	Half of the non-matching bits are swapped between the two parents.
+Bit flip mutation operator.
+	Each bit is flipped (switched from a {@code 0} to a {@code 1}, or vice versa) using the specified probability.
+
+e1_2a
+NSGAII:
+    InvertedGenerationalDistance: 
+        Mean: 0.15833304865586004
+        StandardDeviation: 0.0
+        Count: 50
+e1_3a
+NSGAII:
+    InvertedGenerationalDistance: 
+        Mean: 0.08753543731157779
+        StandardDeviation: 0.010364247042474734
+        Count: 50
+e1_4a
+NSGAII:
+    InvertedGenerationalDistance: 
+        Mean: 0.00837800213275797
+        StandardDeviation: 0.007627182896658712
+        Count: 50
+e2_2a
+NSGAII:
+    InvertedGenerationalDistance: 
+        Mean: 0.07571348931989347
+        StandardDeviation: 0.07386310383129055
+        Count: 50
+e2_3a
+NSGAII:
+    InvertedGenerationalDistance: 
+        Mean: 0.032240456669666476
+        StandardDeviation: 0.038749553569173305
+        Count: 50
+e2_4a
+NSGAII:
+    InvertedGenerationalDistance: 
+        Mean: 0.011536237104410589
+        StandardDeviation: 0.0067580601431209515
+        Count: 50

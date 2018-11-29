@@ -1,3 +1,4 @@
+
 package br.upe.optimizationUtil;
 
 import br.upe.base.ACOPHeuristic;

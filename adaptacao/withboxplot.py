@@ -5,7 +5,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from random import randint 
 
-def unnormalization(x, min, max, range_a, range_b):
+def unnormalization(x, max, min, range_a, range_b):
     z = []
     for i in range(0, len(x)):
         j = ((float(x[i]) - float(range_a))*(float(max)-float(min)))/ (float(range_b) - float(range_a)) + float(min)
@@ -64,8 +64,8 @@ test_y = np.array(array_yt)
 
 model = Sequential()
 
-model.add(Dense(7, input_dim=3, activation='sigmoid'))
-model.add(Dense(15, activation='sigmoid'))
+model.add(Dense(5, input_dim=3, activation='sigmoid'))
+model.add(Dense(10, activation='sigmoid'))
 model.add(Dense(2, activation ='sigmoid'))
 
 print(model.summary())
@@ -119,7 +119,7 @@ for i in range(0, len(gch_test)):
 
 plt.subplot(211)
 plt.boxplot(diff_gch)
-plt.title('Diff gch 7 - 15 - 2')
+plt.title('Diff gch 5 - 10 - 2')
 plt.subplot(212)
 plt.boxplot(diff_nf)
 plt.title('Diff NF')

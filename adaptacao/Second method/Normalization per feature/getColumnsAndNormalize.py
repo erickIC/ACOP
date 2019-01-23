@@ -91,11 +91,11 @@ with open(output_file, 'w') as f_out:
 	# Writes normalized data into output file
 	for i in range(0, data.shape[0]):
 		new_line = ""
-		new_line += str(round(((data[i][0] - min_gset) / (max_gset - min_gset)), 10)) + '\t'
+		new_line += str(((data[i][0] - min_gset) / (max_gset - min_gset))) + '\t'
 		for j in range(1, 41):
-			new_line += str(round(((data[i][j] - min_pin) / (max_pin - min_pin)), 10)) + '\t'
+			new_line += str(((data[i][j] - min_pin) / (max_pin - min_pin))) + '\t'
 		for j in range(41, 81):
-			new_line += str(round(((data[i][j] - min_pout) / (max_pout - min_pout)), 10)) + '\t'
+			new_line += str(((data[i][j] - min_pout) / (max_pout - min_pout))) + '\t'
 		for j in range(81, data.shape[1]):
-			new_line += str(round(((data[i][j] - min_nf) / (max_nf - min_nf)), 10)) + '\t'
+			new_line += str(((data[i][j] - min_nf) / (max_nf - min_nf))) + '\t'
 		f_out.write(new_line + '\n')

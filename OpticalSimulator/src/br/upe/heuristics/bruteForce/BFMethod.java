@@ -41,7 +41,7 @@ public abstract class BFMethod {
 
     public BFMethod(int numberOfAmplifiers) {
 	ampType = AmplifierType.EDFA_1_PadTec;
-	String fileStr = "FB_results/e1_";
+	String fileStr = "FB_results/VOA_e1_";
 
 	function = new LinearInterpolationFunction();
 

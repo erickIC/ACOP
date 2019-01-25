@@ -10,15 +10,21 @@ import br.upe.mascara.PowerMaskFactory;
 
 public class UniformInitializationVOA implements InitializationStrategy {
     private AmplifierType type;
+    private float[] voaLosses;
 
     public UniformInitializationVOA(AmplifierType type) {
 	this.type = type;
     }
 
+    public UniformInitializationVOA(AmplifierType type, float[] voaLosses) {
+	this.type = type;
+	this.voaLosses = voaLosses;
+    }
+
     @Override
     public Amplifier[] initialize(int numberOfAmplifiers, float linkInputPower, float linkOutputPower,
 	    float[] linkLosses, ObjectiveFunction function, OpticalSignal signal) {
-	Amplifier[] amplifiers = new Amplifier[numberOfAmplifiers];
+	AmplifierVOA[] amplifiers = new AmplifierVOA[numberOfAmplifiers];
 
 	PowerMask pm = PowerMaskFactory.getInstance().fabricatePowerMask(type);
 	for (int i = 0; i < numberOfAmplifiers; i++) {
@@ -38,6 +44,9 @@ public class UniformInitializationVOA implements InitializationStrategy {
 		float inputPower = amplifiers[i - 1].getOutputPower() - linkLosses[i - 1];
 		amplifiers[i] = new AmplifierVOA(inputPower, type);
 	    }
+	    
+	    if(voaLosses != null)
+		amplifiers[i].setVoaOutAttenuation(voaLosses[i]);
 	}
 
 	return amplifiers;

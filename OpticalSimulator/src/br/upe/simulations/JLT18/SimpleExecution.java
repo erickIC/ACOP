@@ -1,4 +1,4 @@
-package br.upe.MOO;
+package br.upe.simulations.JLT18;
 
 import org.moeaframework.Executor;
 import org.moeaframework.core.NondominatedPopulation;

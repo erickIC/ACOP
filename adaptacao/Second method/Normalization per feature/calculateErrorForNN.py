@@ -6,6 +6,7 @@
 
     Description:
     Code to create one neural network with only one hidden layer to Pout and one to NF too, using Dropout and callback to previne the overfitting.
+    And plotting the Error for non-normalized data. 
 
     licensed under the GNU General Public License v3.0.
 '''
@@ -17,6 +18,16 @@ from keras.layers import Dense
 from random import randint 
 from keras import callbacks
 from keras.layers import Dropout
+
+def unnormalization(data, min, max, range_a, range_b):
+	unnormalized_data = []
+	for i in range(0, data.shape[0]):
+		values = []
+		for j in range(0, data.shape[1]):
+			values.append(((float(data[i][j]) - float(range_a)) * (float(max)-float(min))) / (float(range_b) - float(range_a)) + float(min))
+		unnormalized_data.append(values)
+	return np.array(unnormalized_data)
+
 
 #Read the file. 
 imput_file = 'mask-edfa1-padtec-modified-normalized.txt'
@@ -112,41 +123,54 @@ cb = callbacks.EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 10,
 history_pout = model_pout.fit(training_x, training_y_pout, validation_data=(test_x, test_y_pout), epochs = num_epochs,callbacks=[cb])
 history_nf = model_nf.fit(training_x, training_y_nf, validation_data=(test_x, test_y_nf), epochs = num_epochs, callbacks=[cb])
 
+#Unnormalizing the data
+input_file = "min-max.txt"
+
+with open(input_file, 'r') as f_in:
+	lines = f_in.readlines()
+
+	auxiliary = lines[0].split()
+	max_pout = auxiliary[2]
+	max_nf = auxiliary[3]
+
+	auxiliary = lines[1].split()
+	min_pout = auxiliary[2]
+	min_nf = auxiliary[3]
+
+	range_a = 0.15
+	range_b = 0.85
+
+out_y_pout = model_pout.predict(test_x)
+out_y_nf = model_nf.predict(test_x)
+
+pout_pred = unnormalization(out_y_pout, min_pout, max_pout, range_a, range_b)
+pout_test = unnormalization(test_y_pout, min_pout, max_pout, range_a, range_b)
+nf_pred = unnormalization(out_y_nf, min_nf, max_nf, range_a, range_b)
+nf_test = unnormalization(test_y_nf, min_nf, max_nf, range_a, range_b)
+
+#Calculating the absolute error
+
+diff_pout = []
+diff_nf = []
+
+for i in range(0, pout_pred.shape[0]):
+    pout_current = float(0)
+    nf_current = float(0)
+    for j in range(0, pout_pred.shape[1]):
+	    pout_current += abs(pout_pred[i][j] - pout_test[i][j])
+	    nf_current += abs(nf_pred[i][j] - nf_test[i][j])
+    diff_pout.append(pout_current/pout_pred.shape[1])
+    diff_nf.append(nf_current/pout_pred.shape[1])            
+
 
 #Plotting
 
 plt.figure(figsize=(16,10))
+plt.subplot(211)
+plt.boxplot(diff_pout)
+plt.title('Diff Pout')
 
-plt.subplot(221)
-plt.plot(history_pout.epoch, history_pout.history['val_loss'], label='loss val')
-plt.plot(history_pout.epoch, history_pout.history['loss'],'--', label='loss train')
-plt.xlabel('epochs')
-plt.ylabel('MSE')
-plt.title('Pout loss')
-plt.legend()
-
-plt.subplot(222)
-plt.plot(history_pout.epoch, history_pout.history['val_acc'], label='acc val')
-plt.plot(history_pout.epoch, history_pout.history['acc'],'--', label='acc train')
-plt.xlabel('epochs')
-plt.ylabel('Accuracy')
-plt.title('Pout accuracy')
-plt.legend()
-
-plt.subplot(223)
-plt.plot(history_nf.epoch, history_nf.history['val_loss'], label='loss val')
-plt.plot(history_nf.epoch, history_nf.history['loss'],'--', label='loss train')
-plt.xlabel('epochs')
-plt.ylabel('MSE')
-plt.title('NF loss')
-plt.legend()
-
-plt.subplot(224)
-plt.plot(history_nf.epoch, history_nf.history['val_acc'], label='acc val')
-plt.plot(history_nf.epoch, history_nf.history['acc'],'--', label='acc train')
-plt.xlabel('epochs')
-plt.ylabel('Accuracy')
-plt.title('NF accuracy')
-plt.legend()
-
+plt.subplot(212)
+plt.boxplot(diff_nf)
+plt.title('Diff NF')
 plt.show()

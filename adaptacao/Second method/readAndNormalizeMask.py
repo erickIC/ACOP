@@ -85,7 +85,7 @@ for line in f:
 	lines_nf.append(new_line_nf)
 
 
-##################### Writting the max and min files ############################
+##################### Writing the max and min files ############################
 string_max = ''
 string_min = ''
 

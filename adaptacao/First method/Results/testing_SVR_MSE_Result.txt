@@ -1,0 +1,3 @@
+Mean Squared Error Regression Loss:
+Gch: 0.002158425547684358
+NF: 0.0018620845800477845

@@ -1,3 +1,4 @@
+'''
 import numpy as np
 from random import randint
 from sklearn.svm import SVR
@@ -217,3 +218,53 @@ plt.title('Noise Figure (melhor caso)')
 plt.legend()
 
 plt.show()
+'''
+
+### CASCADE
+import pandas as pd
+import re
+
+## Dataset 1 (G_set = 14 dB)
+input_set_1 = "EDFA1STG_G=14dB@16dBm_Tilt=3.9_Maior_Precisão.xlsx"
+dataframe_1 = pd.read_excel(input_set_1, usecols=range(0, 12), skiprows=range(0, 1), skipfooter=3)
+#print(dataframe_1)
+
+columns_1 = list(dataframe_1)
+#print(columns_1)
+
+gain_1 = 14
+loss_1 = gain_1
+
+## Dataset 2 (G_set = 20dB)
+input_set_2 = "EDFA1STG_G=20dB@16dBm_Tilt=-1.09_Maior_Precisão.xlsx"
+dataframe_2 = pd.read_excel(input_set_2, usecols=range(0, 22), skiprows=range(0, 1))
+#print(dataframe_2)
+
+columns_2 = list(dataframe_2)
+#print(columns_2)
+
+gain_2 = 20
+loss_2 = gain_2
+
+## Dataset 3 (variable G_set)
+input_set_3 = "EDFA1STG_diferentes_Ganhos_G=14,24,...,14,24....xlsx"
+dataframe_3 = pd.read_excel(input_set_3, usecols=range(0, 22), skiprows=range(0, 1))
+#print(dataframe_3)
+
+columns_3 = list(dataframe_3)
+#print(columns_3)
+
+# Getting gains and losses for each amplifier in the cascade
+i = 0
+gains_3 = [i] * (len(columns_3)-2)
+losses_3 = [i] * (len(columns_3)-2)
+
+gain_3 = re.findall('\d+', columns_3[2])
+gains_3[i] = int(gain_3[0])
+for amplifier in columns_3[3:]:
+	i += 1
+	loss_3, gain_3 = re.findall('\d+', amplifier[:-1])
+	losses_3[i], gains_3[i] = int(loss_3), int(gain_3)
+
+#print(gains_3)
+#print(losses_3)

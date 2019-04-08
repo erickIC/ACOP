@@ -5,7 +5,7 @@
     Programmers: Allan Bezerra and Jose Carlos Pinheiro Filho.
 
     Description:
-        Create a cascate using the model already trained in different scenarios.
+        Create a cascade using the model already trained in different scenarios.
 
     licensed under the GNU General Public License v3.0.
 '''
@@ -41,6 +41,19 @@ wavelength = [1560.713, 1559.794, 1559.04, 1558.187, 1557.433, 1556.613,
                1536.638, 1535.883, 1535.096, 1534.342, 1533.587, 1532.8, 
                1532.013, 1531.226, 1530.438, 1529.651]
 
+
+#Set the font sizes to the plots
+smaller_size = 8
+medium_size = 10
+bigger_size = 16
+plt.rc('font', size=medium_size)             # controls default text sizes
+plt.rc('axes', titlesize=medium_size)        # fontsize of the axes title
+plt.rc('axes', labelsize=medium_size)        # fontsize of the x and y labels
+plt.rc('xtick', labelsize=smaller_size)      # fontsize of the tick labels
+plt.rc('ytick', labelsize=smaller_size)      # fontsize of the tick labels
+plt.rc('legend', fontsize=smaller_size)       # legend fontsize
+plt.rc('figure', titlesize=medium_size)      # fontsize of the figure title
+
 ## Taking information to normalization.
 
 input_file = "min-max.txt"
@@ -71,10 +84,10 @@ model = load_model("model_pout.h5")
 ## Dataset 1 (G_set = 14 dB)
 input_set_1 = "EDFA1STG_G=14dB@16dBm_Tilt=3.9_Maior_Precisão.xlsx"
 dataframe_1 = pd.read_excel(input_set_1, usecols=range(0, 12), skiprows=range(0, 1), skipfooter=3)
-#print(dataframe_1)
+
 
 columns_1 = list(dataframe_1)
-#print(len(dataframe_1[columns_1[1]]))
+
 
 
 
@@ -93,8 +106,6 @@ signal_current = np.array([signal_current])
 diff_scenario1 = []
 for i in range(2, len(columns_1)):
 	
-	#print(gset_current, signal_current)
-
 	x_current = np.concatenate((gset_current,signal_current),axis=1)
 	y_out = model.predict(x_current)
 
@@ -113,17 +124,22 @@ for i in range(2, len(columns_1)):
 	gset_current.append(normalization(gain_1, min_gset, max_gset, range_a, range_b))
 	gset_current = np.array([gset_current])
 	signal_current = np.array(signal_current)
-#print(diff_scenario1)
-plt.subplot(221)
+
+plt.figure(figsize=(16,10))
+plt.subplot(231)
 plt.boxplot(diff_scenario1)
 plt.title('Absolute difference First scenario')
 plt.ylabel('(dB)')
-
-plt.subplot(223)
+plt.xlabel('Amplifier')
+plt.subplot(234)
 
 plt.plot(wavelength, y_out[0], label='predicted pout')
 plt.plot(wavelength, dataframe_1[columns_1[len(columns_1) - 1]], label='expected pout')
+
+plt.plot(wavelength, y_out[0],'bo', label='predicted points')
+plt.plot(wavelength, dataframe_1[columns_1[len(columns_1) - 1]], 'ro',label='expected points')
 plt.ylabel('Pout (db)')
+plt.xlabel('Wavelenght')
 plt.legend()
 
 
@@ -135,10 +151,10 @@ plt.legend()
 ## Dataset 2 (G_set = 20dB)
 input_set_2 = "EDFA1STG_G=20dB@16dBm_Tilt=-1.09_Maior_Precisão.xlsx"
 dataframe_2 = pd.read_excel(input_set_2, usecols=range(0, 22), skiprows=range(0, 1))
-#print(dataframe_2)
+
 
 columns_2 = list(dataframe_2)
-#print(columns_2)
+
 
 gain_2 = 20
 loss_2 = gain_2
@@ -155,14 +171,12 @@ signal_current = np.array([signal_current])
 diff_scenario2 = []
 for i in range(2, len(columns_2)):
 	
-	#print(gset_current, signal_current)
-
 	x_current = np.concatenate((gset_current,signal_current),axis=1)
 	y_out = model.predict(x_current)
 
 	y_out = unnormalization(y_out[0], min_pout, max_pout, range_a, range_b)
 
-	#print(y_out)
+
 	for j in range(0, y_out.shape[0]):
 		diff_current = []
 		for k in range(0, y_out.shape[1]):
@@ -175,36 +189,40 @@ for i in range(2, len(columns_2)):
 	gset_current.append(normalization(gain_2, min_gset, max_gset, range_a, range_b))
 	gset_current = np.array([gset_current])
 	signal_current = np.array(signal_current)
-#print(diff_scenario1)
-plt.subplot(222)
+
+plt.subplot(232)
 plt.boxplot(diff_scenario2)
 plt.title('Absolute difference Second scenario')
 plt.ylabel('(dB)')
-
-plt.subplot(224)
+plt.xlabel('Amplifier')
+plt.subplot(235)
 
 plt.plot(wavelength, y_out[0], label='predicted pout')
 plt.plot(wavelength, dataframe_2[columns_2[len(columns_2) - 1]], label='expected pout')
+
+plt.plot(wavelength, y_out[0],'bo', label='predicted points')
+plt.plot(wavelength, dataframe_2[columns_2[len(columns_2) - 1]], 'ro',label='expected points')
 plt.ylabel('Pout (db)')
+plt.xlabel('Wavelenght')
 plt.legend()
 
 
-plt.show()
+
 ### Third scenario
 
 
 ## Dataset 3 (variable G_set)
 input_set_3 = "EDFA1STG_diferentes_Ganhos_G=14,24,...,14,24....xlsx"
 dataframe_3 = pd.read_excel(input_set_3, usecols=range(0, 22), skiprows=range(0, 1))
-#print(dataframe_3)
+
 
 columns_3 = list(dataframe_3)
-#print(columns_3)
+
 
 # Getting gains and losses for each amplifier in the cascade
 i = 0
-gains_3 = [i] * (len(columns_3)-2)
-losses_3 = [i] * (len(columns_3)-2)
+gains_3 = [i] * (len(columns_3)-1)
+losses_3 = [i] * (len(columns_3)-1)
 
 gain_3 = re.findall('\d+', columns_3[2])
 gains_3[i] = int(gain_3[0])
@@ -213,5 +231,60 @@ for amplifier in columns_3[3:]:
 	loss_3, gain_3 = re.findall('\d+', amplifier[:-1])
 	losses_3[i], gains_3[i] = int(loss_3), int(gain_3)
 
-#print(gains_3)
-#print(losses_3)
+
+
+gset_current = []
+gset_current.append(normalization(gains_3[0], min_gset, max_gset, range_a, range_b))
+
+signal_current = []
+for i in range(0, len(dataframe_3[columns_3[1]])):
+    signal_current.append(normalization(dataframe_3[columns_3[1]][i], min_pin, max_pin, range_a, range_b))
+
+gset_current = np.array([gset_current])
+signal_current = np.array([signal_current])
+
+diff_scenario3 = []
+
+# Cascade
+for i in range(2, len(columns_3)):
+	# Building input
+	x_current = np.concatenate((gset_current, signal_current), axis=1)
+
+	# Predicting P_out
+	y_out = model.predict(x_current)
+
+	# De-normalizing data
+	y_out = unnormalization(y_out[0], min_pout, max_pout, range_a, range_b)
+
+	# Calculating error at current amplifier
+	diff_current = []
+	for j in range(0, y_out.shape[1]):
+		diff_current.append(abs(float(y_out[0][j]) - dataframe_3[columns_3[i]][j]))
+	diff_scenario3.append(diff_current)
+	# Normalizing next input in cascade
+	gset_current = []
+	gset_current.append(normalization(gains_3[i-1], min_gset, max_gset, range_a, range_b))
+	gset_current = np.array([gset_current])
+
+	signal_current = []
+	for j in range(0, len(y_out)):
+		signal_current.append(normalization((y_out[j] - losses_3[i-1]), min_pin, max_pin, range_a, range_b))
+	signal_current = np.array(signal_current)
+
+plt.subplot(233)
+plt.boxplot(diff_scenario3)
+plt.title('Absolute difference Third scenario')
+plt.ylabel('(dB)')
+plt.xlabel('Amplifier')
+
+plt.subplot(236) 
+plt.plot(wavelength, y_out[0], label='predicted')
+plt.plot(wavelength, dataframe_3[columns_3[len(columns_3) - 1]], label='expected')
+
+plt.plot(wavelength, y_out[0],'bo', label='predicted points')
+plt.plot(wavelength, dataframe_3[columns_3[len(columns_3) - 1]], 'ro',label='expected points')
+plt.ylabel('Pout (db)')
+plt.xlabel('Wavelenght')
+plt.legend()
+
+plt.savefig('ScenariosNN.png', dpi = 300)

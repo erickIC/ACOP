@@ -51,6 +51,19 @@ wavelength = [1560.713, 1559.794, 1559.04, 1558.187, 1557.433, 1556.613,
                1536.638, 1535.883, 1535.096, 1534.342, 1533.587, 1532.8, 
                1532.013, 1531.226, 1530.438, 1529.651]
 
+
+#Set the font sizes to the plots
+smaller_size = 8
+medium_size = 10
+bigger_size = 16
+plt.rc('font', size=medium_size)             # controls default text sizes
+plt.rc('axes', titlesize=medium_size)        # fontsize of the axes title
+plt.rc('axes', labelsize=medium_size)        # fontsize of the x and y labels
+plt.rc('xtick', labelsize=smaller_size)      # fontsize of the tick labels
+plt.rc('ytick', labelsize=smaller_size)      # fontsize of the tick labels
+plt.rc('legend', fontsize=smaller_size)       # legend fontsize
+plt.rc('figure', titlesize=medium_size)      # fontsize of the figure title
+
 ### Dataset 1 (G_set = 14 dB)
 input_set_1 = "EDFA1STG_G=14dB@16dBm_Tilt=3.9_Maior_Precisão.xlsx"
 dataframe_1 = pd.read_excel(input_set_1, usecols=range(0, 12), skiprows=range(0, 1), skipfooter=3)
@@ -98,6 +111,7 @@ for i in range(2, len(columns_1)):
 	p_in = np.array([p_in])
 
 # Plotting results (boxplot cascade)
+plt.figure(figsize=(16,10))
 plt.subplot(231)
 plt.boxplot(diff_dataframe1)
 plt.title('Absolute difference (scenario 1)')
@@ -244,4 +258,5 @@ plt.ylabel('P_Out (dB)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
+plt.savefig('ScenariosSVR.png', dpi = 300)
 plt.show()

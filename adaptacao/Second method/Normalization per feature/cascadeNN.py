@@ -97,6 +97,11 @@ loss_1 = gain_1
 signal_current = []
 gset_current = []
 
+
+middle_signal = []
+middle_predict = []
+
+
 for i in range(0, len(dataframe_1[columns_1[1]])):
     signal_current.append(normalization(dataframe_1[columns_1[1]][i], min_pin, max_pin, range_a, range_b))
 gset_current.append(normalization(gain_1, min_gset, max_gset, range_a, range_b))
@@ -104,6 +109,7 @@ gset_current.append(normalization(gain_1, min_gset, max_gset, range_a, range_b))
 gset_current = np.array([gset_current])
 signal_current = np.array([signal_current])
 diff_scenario1 = []
+
 for i in range(2, len(columns_1)):
 	
 	x_current = np.concatenate((gset_current,signal_current),axis=1)
@@ -111,7 +117,7 @@ for i in range(2, len(columns_1)):
 
 	y_out = unnormalization(y_out[0], min_pout, max_pout, range_a, range_b)
 
-	#print(y_out)
+	
 	for j in range(0, y_out.shape[0]):
 		diff_current = []
 		for k in range(0, y_out.shape[1]):
@@ -119,11 +125,18 @@ for i in range(2, len(columns_1)):
 		diff_scenario1.append(diff_current)
 	signal_current = []
 	gset_current = []
+	if i == len(columns_1)/2:
+		middle_predict = y_out[0]
+		middle_signal =  dataframe_1[columns_1[i]]
+		middle_id = int(len(columns_1)/2 - 1)
 	for j in range(0, len(y_out)):
 		signal_current.append(normalization((y_out[j] - loss_1), min_pin, max_pin, range_a, range_b))
 	gset_current.append(normalization(gain_1, min_gset, max_gset, range_a, range_b))
 	gset_current = np.array([gset_current])
 	signal_current = np.array(signal_current)
+	
+
+
 
 plt.figure(figsize=(16,10))
 plt.subplot(231)
@@ -133,12 +146,12 @@ plt.ylabel('(dB)')
 plt.xlabel('Amplifier')
 plt.subplot(234)
 
-plt.plot(wavelength, y_out[0], label='predicted pout')
-plt.plot(wavelength, dataframe_1[columns_1[len(columns_1) - 1]], label='expected pout')
+plt.plot(wavelength, middle_predict, 'go-',label='predicted pout' + str(middle_id))
+plt.plot(wavelength, middle_signal, 'yo-',label='expected pout' + str(middle_id))
 
-plt.plot(wavelength, y_out[0],'bo', label='predicted points')
-plt.plot(wavelength, dataframe_1[columns_1[len(columns_1) - 1]], 'ro',label='expected points')
-plt.ylabel('Pout (db)')
+plt.plot(wavelength, y_out[0],'bo-', label='predicted last')
+plt.plot(wavelength, dataframe_1[columns_1[len(columns_1) - 1]], 'ro-',label='expected last')
+plt.ylabel('Pout (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
@@ -182,6 +195,10 @@ for i in range(2, len(columns_2)):
 		for k in range(0, y_out.shape[1]):
 			diff_current.append(abs(float(y_out[j][k]) - dataframe_2[columns_2[i]][k]))
 		diff_scenario2.append(diff_current)
+	if i == len(columns_1)/2:
+		middle_predict = y_out[0]
+		middle_signal =  dataframe_2[columns_2[i]]
+		middle_id = int(len(columns_2)/2 - 1)
 	signal_current = []
 	gset_current = []
 	for j in range(0, len(y_out)):
@@ -197,12 +214,12 @@ plt.ylabel('(dB)')
 plt.xlabel('Amplifier')
 plt.subplot(235)
 
-plt.plot(wavelength, y_out[0], label='predicted pout')
-plt.plot(wavelength, dataframe_2[columns_2[len(columns_2) - 1]], label='expected pout')
+plt.plot(wavelength, middle_predict,'go-' ,label='predicted pout' + str(middle_id))
+plt.plot(wavelength, middle_signal,'yo-', label='expected pout' + str(middle_id))
 
-plt.plot(wavelength, y_out[0],'bo', label='predicted points')
-plt.plot(wavelength, dataframe_2[columns_2[len(columns_2) - 1]], 'ro',label='expected points')
-plt.ylabel('Pout (db)')
+plt.plot(wavelength, y_out[0],'bo-', label='predicted last')
+plt.plot(wavelength, dataframe_2[columns_2[len(columns_2) - 1]], 'ro-',label='expected last')
+plt.ylabel('Pout (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
@@ -267,6 +284,11 @@ for i in range(2, len(columns_3)):
 	gset_current = np.array([gset_current])
 
 	signal_current = []
+	if i == len(columns_1)/2:
+		middle_predict = y_out[0]
+		middle_signal =  dataframe_3[columns_3[i]]
+		middle_id = int(len(columns_3)/2 - 1)
+
 	for j in range(0, len(y_out)):
 		signal_current.append(normalization((y_out[j] - losses_3[i-1]), min_pin, max_pin, range_a, range_b))
 	signal_current = np.array(signal_current)
@@ -278,13 +300,13 @@ plt.ylabel('(dB)')
 plt.xlabel('Amplifier')
 
 plt.subplot(236) 
-plt.plot(wavelength, y_out[0], label='predicted')
-plt.plot(wavelength, dataframe_3[columns_3[len(columns_3) - 1]], label='expected')
+plt.plot(wavelength, middle_predict,'go-' ,label='predicted pout' + str(middle_id))
+plt.plot(wavelength, middle_signal,'yo-' ,label='expected pout' + str(middle_id))
 
-plt.plot(wavelength, y_out[0],'bo', label='predicted points')
-plt.plot(wavelength, dataframe_3[columns_3[len(columns_3) - 1]], 'ro',label='expected points')
-plt.ylabel('Pout (db)')
+plt.plot(wavelength, y_out[0],'bo-', label='predicted last')
+plt.plot(wavelength, dataframe_3[columns_3[len(columns_3) - 1]], 'ro-',label='expected last')
+plt.ylabel('Pout (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
-plt.savefig('ScenariosNN.png', dpi = 300)
+plt.savefig('ScenariosNNWithMiddle.png', dpi = 200)

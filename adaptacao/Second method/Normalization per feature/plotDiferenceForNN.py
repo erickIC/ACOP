@@ -125,8 +125,8 @@ history_pout = model_pout.fit(training_x, training_y_pout, validation_data=(test
 history_nf = model_nf.fit(training_x, training_y_nf, validation_data=(test_x, test_y_nf), epochs = num_epochs, callbacks=[cb])
 
 #saving the model
-model_pout.save('model_pout.h5')
-model_nf.save('model_nf.h5')
+#model_pout.save('model_pout.h5')
+#model_nf.save('model_nf.h5')
 
 #Unnormalizing the data
 input_file = "min-max.txt"

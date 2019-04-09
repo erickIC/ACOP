@@ -103,6 +103,10 @@ for i in range(2, len(columns_1)):
 	for j in range(0, y_out.shape[1]):
 		diff_current.append(abs(float(y_out[0][j]) - dataframe_1[columns_1[i]][j]))
 	diff_dataframe1.append(diff_current)
+	if i == len(columns_1)/2:
+		middle_predict = y_out[0]
+		middle_signal =  dataframe_1[columns_1[i]]
+		middle_id = int(len(columns_1)/2 - 1)
 
 	# Normalizing next input in cascade
 	p_in = []
@@ -119,9 +123,13 @@ plt.ylabel('P_Out (dB)')
 plt.xlabel('Amplifier')
 
 plt.subplot(234)
-plt.plot(wavelength, y_out[0], label='predicted')
-plt.plot(wavelength, dataframe_1[columns_1[len(columns_1) - 1]], label='expected')
-plt.ylabel('P_Out (dB)')
+
+plt.plot(wavelength, middle_predict, 'go-',label='predicted pout' + str(middle_id))
+plt.plot(wavelength, middle_signal, 'yo-',label='expected pout' + str(middle_id))
+
+plt.plot(wavelength, y_out[0], 'bo-',label='predicted last')
+plt.plot(wavelength, dataframe_1[columns_1[len(columns_1) - 1]], 'ro-',label='expected last')
+plt.ylabel('P_Out (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
@@ -165,6 +173,11 @@ for i in range(2, len(columns_2)):
 		diff_current.append(abs(float(y_out[0][j]) - dataframe_2[columns_2[i]][j]))
 	diff_dataframe2.append(diff_current)
 
+	if i == len(columns_1)/2:
+		middle_predict = y_out[0]
+		middle_signal =  dataframe_2[columns_2[i]]
+		middle_id = int(len(columns_2)/2 - 1)
+
 	# Normalizing next input in cascade
 	p_in = []
 	for j in range(0, y_out.shape[1]):
@@ -179,9 +192,13 @@ plt.ylabel('P_Out (dB)')
 plt.xlabel('Amplifier')
 
 plt.subplot(235)
-plt.plot(wavelength, y_out[0], label='predicted')
-plt.plot(wavelength, dataframe_2[columns_2[len(columns_2) - 1]], label='expected')
-plt.ylabel('P_Out (dB)')
+
+plt.plot(wavelength, middle_predict,'go-' ,label='predicted pout' + str(middle_id))
+plt.plot(wavelength, middle_signal,'yo-', label='expected pout' + str(middle_id))
+
+plt.plot(wavelength, y_out[0], 'bo-', label='predicted last')
+plt.plot(wavelength, dataframe_2[columns_2[len(columns_2) - 1]], 'ro-', label='expected last')
+plt.ylabel('P_Out (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
@@ -234,6 +251,11 @@ for i in range(2, len(columns_3)):
 		diff_current.append(abs(float(y_out[0][j]) - dataframe_3[columns_3[i]][j]))
 	diff_dataframe3.append(diff_current)
 
+	if i == len(columns_1)/2:
+		middle_predict = y_out[0]
+		middle_signal =  dataframe_3[columns_3[i]]
+		middle_id = int(len(columns_3)/2 - 1)
+
 	# Normalizing next input in cascade
 	g_set = []
 	g_set.append(normalization(gains_3[i-1], min_gset, max_gset, range_a, range_b))
@@ -252,11 +274,14 @@ plt.ylabel('P_Out (dB)')
 plt.xlabel('Amplifier')
 
 plt.subplot(236)
-plt.plot(wavelength, y_out[0], label='predicted')
-plt.plot(wavelength, dataframe_3[columns_3[len(columns_3) - 1]], label='expected')
-plt.ylabel('P_Out (dB)')
+plt.plot(wavelength, middle_predict,'go-' ,label='predicted pout' + str(middle_id))
+plt.plot(wavelength, middle_signal,'yo-' ,label='expected pout' + str(middle_id))
+
+plt.plot(wavelength, y_out[0], 'bo-',label='predicted last')
+plt.plot(wavelength, dataframe_3[columns_3[len(columns_3) - 1]], 'ro-',label='expected last')
+plt.ylabel('P_Out (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
-plt.savefig('ScenariosSVR.png', dpi = 300)
+plt.savefig('ScenariosSVRWithMiddle.png', dpi = 200)
 plt.show()

@@ -20,7 +20,7 @@ public class ACOPProblem_JustVOA extends AbstractProblem {
 
     /**
      * Constructs a new instance of the ACOPProblem function, defining it to
-     * include 2*number of amplifier decision variables and 2 objectives.
+     * include #number of amplifier decision variables and 2 objectives.
      */
     public ACOPProblem_JustVOA(int numberOfAmplifiers, AmplifierType type, ACOP_LOCAL_PROBLEM localProblem) {
 	super(numberOfAmplifiers, 2);

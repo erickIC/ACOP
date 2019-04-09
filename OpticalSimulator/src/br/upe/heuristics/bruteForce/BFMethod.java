@@ -41,13 +41,13 @@ public abstract class BFMethod {
 
     public BFMethod(int numberOfAmplifiers) {
 	ampType = AmplifierType.EDFA_1_PadTec;
-	String fileStr = "FB_results/VOA_e1_";
+	String fileStr = "FB_results/VOA_110km_e1_";
 
 	function = new LinearInterpolationFunction();
 
 	int numberCh = 40;
 	float inputPowerCh = -18f;
-	float linkLosses = 18.0f;
+	float linkLosses = 22.0f;
 	simSet = new SimSetAMPVOA(numberCh, inputPowerCh, 9.0f, numberOfAmplifiers);
 	double linkLength = linkLosses * 1000 / 0.2;
 

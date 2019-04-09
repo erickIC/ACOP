@@ -3,12 +3,17 @@ package br.upe.initializations;
 import br.upe.base.Amplifier;
 import br.upe.base.AmplifierType;
 import br.upe.base.AmplifierVOA;
+import br.upe.base.Fiber;
+import br.upe.base.FiberType;
 import br.upe.base.ObjectiveFunction;
 import br.upe.base.OpticalChannel;
 import br.upe.base.OpticalSignal;
 import br.upe.mascara.PowerMask;
 import br.upe.mascara.PowerMaskFactory;
+import br.upe.objfunctions.linerInterpolation.LinearInterpolationFunction;
+import br.upe.signal.factory.PowerMaskSignal;
 import br.upe.util.DecibelConverter;
+import br.upe.util.SignalFeatureCalculation;
 
 public class BruteForceInitialization implements InitializationStrategy {
 
@@ -36,6 +41,11 @@ public class BruteForceInitialization implements InitializationStrategy {
 	this.signal = inputSignal;
 
 	for (int i = 0; i < numberOfAmplifiers; i++) {
+	    // calculate the signal tilt
+	    double tilt = SignalFeatureCalculation.calculateTiltNonLinearReg(signal);
+	    // select the best mask considering the signal tilt
+	    type = getAmplifierType(tilt);
+
 	    // The first amplifier
 	    if (i == 0) {
 		if (!hasVOA)
@@ -76,7 +86,8 @@ public class BruteForceInitialization implements InitializationStrategy {
 
 		if (i + 1 < numberOfAmplifiers) {
 		    // updating the input power of the next amplifier
-		    linkTrasferFunction(linkLosses[i], signal);
+		    signal = new Fiber(FiberType.SMF_28, linkLosses[i]).linkTrasferFunction(signal);
+		    // linkTrasferFunction(linkLosses[i], signal);
 		}
 	    } else {
 		return null;
@@ -142,7 +153,7 @@ public class BruteForceInitialization implements InitializationStrategy {
 	} // Restricao para manter pontos dentro da mascara.
 	else {
 	    int gain = (int) amplifier.getGain();
-	    float relax = 0.5f;
+	    float relax = 0.0f;
 
 	    // Se o Pin é maior do que o maximo ou menor que o mínimo.
 	    if (amplifier.getInputPower() > (pm.getMaxTotalInputPower(gain) + relax)
@@ -171,4 +182,48 @@ public class BruteForceInitialization implements InitializationStrategy {
 	this.hasVOA = hasVOA;
     }
 
+    private static AmplifierType getAmplifierType(double tilt) {
+	if (tilt < 0) {
+	    tilt *= -1;
+	    if (tilt < 2)
+		return AmplifierType.EDFA_1_PadTec;
+	    else if (tilt >= 2 && tilt < 6)
+		return AmplifierType.EDFA_1_Tm4_PadTec;
+	    else if (tilt >= 6 && tilt < 8)
+		return AmplifierType.EDFA_1_Tm8_PadTec;
+	    else
+		return AmplifierType.EDFA_1_Tm12_PadTec;
+	} else {
+	    if (tilt < 2)
+		return AmplifierType.EDFA_1_PadTec;
+	    else if (tilt >= 2 && tilt < 6)
+		return AmplifierType.EDFA_1_T4_PadTec;
+	    else if (tilt >= 6 && tilt < 8)
+		return AmplifierType.EDFA_1_T8_PadTec;
+	    else
+		return AmplifierType.EDFA_1_T12_PadTec;
+	}
+    }
+
+    public static void main(String[] args0) {
+	BruteForceInitialization bfIni = new BruteForceInitialization(AmplifierType.EDFA_1_PadTec, false,
+		Float.MAX_VALUE);
+	float[] gains = { 23, 21, 18, 23, 18, 22, 19, 21, 20, 18, 22, 19, 19, 22, 21, 17, 23, 20, 19, 19 };
+	bfIni.setGains(gains);
+	
+	ObjectiveFunction function = new LinearInterpolationFunction();
+	PowerMaskSignal signal = new PowerMaskSignal(40, AmplifierType.EDFA_1_PadTec, -20, 40);
+	OpticalSignal inputSignal = signal.createSignal();
+
+	float totalInputPower = inputSignal.getTotalPower();
+	float[] losses = new float[20];
+	for (int i = 0; i < losses.length; i++) {
+	    losses[i] = 20f;
+	}
+	
+	Amplifier[] amplifiers = bfIni.initialize(20, totalInputPower, 0, losses, function, inputSignal);
+	for (int i = 0; i < amplifiers.length; i++) {
+	    System.out.println(amplifiers[i].getOutputPower());
+	}
+    }
 }

@@ -16,7 +16,7 @@ import br.upe.optimizationUtil.ACOP_MOOProblem;
 public class ACOPProblem extends AbstractProblem {
     private int numberOfAmplifiers;
     private AmplifierType ampType;
-    private static double MAX_VOA_ATT = 20.0f;
+    private static double MAX_VOA_ATT = 0.0f;
 
     /**
      * Constructs a new instance of the ACOPProblem function, defining it to

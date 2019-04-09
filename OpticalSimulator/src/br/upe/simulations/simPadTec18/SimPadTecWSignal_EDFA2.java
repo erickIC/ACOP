@@ -1,4 +1,4 @@
-package br.upe.simulations.simPadTec;
+package br.upe.simulations.simPadTec18;
 
 import br.upe.base.Amplifier;
 import br.upe.base.AmplifierType;

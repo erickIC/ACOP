@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
-import com.sun.jmx.snmp.Timestamp;
+//import com.sun.jmx.snmp.Timestamp;
 
 import br.upe.base.Amplifier;
 import br.upe.base.AmplifierVOA;
@@ -38,7 +38,7 @@ public class BF_3a_VOA extends BFMethod {
 	float shift = 0.0f;
 
 	File arquivoT = new File("time.txt");
-	Timestamp timeIni = new Timestamp();
+	// Timestamp timeIni = new Timestamp();
 
 	while (shift < STEP) {
 	    float i = pm.getMaxGain() - shift;
@@ -159,11 +159,11 @@ public class BF_3a_VOA extends BFMethod {
 
 		try {
 		    printExternalArchive(i + "");
-		    Timestamp timeEnd = new Timestamp();
+		    // Timestamp timeEnd = new Timestamp();
 		    PrintWriter time = new PrintWriter(arquivoT);
-		    time.println("Start = " + timeIni.getDate());
-		    time.println("End = " + timeEnd.getDate());
-		    time.close();
+		    // time.println("Start = " + timeIni.getDate());
+		    // time.println("End = " + timeEnd.getDate());
+		    // time.close();
 		} catch (Exception e) {
 
 		}
@@ -179,9 +179,9 @@ public class BF_3a_VOA extends BFMethod {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
-	Timestamp timeEnd = new Timestamp();
-	System.out.println("Start = " + timeIni.getDate());
-	System.out.println("End = " + timeEnd.getDate());
+	// Timestamp timeEnd = new Timestamp();
+	// System.out.println("Start = " + timeIni.getDate());
+	// System.out.println("End = " + timeEnd.getDate());
 
     }
 

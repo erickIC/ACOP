@@ -27,7 +27,7 @@ public class LauchPowerPerSpan {
 	int populationSize = 200;
 	int numberOfGenerations = 1500;
 	AmplifierType ampType = AmplifierType.EDFA_1_PadTec;
-	int[] vNumberOfAmplifiers = { 8, 10 };
+	int[] vNumberOfAmplifiers = { 2, 3 };
 	int numberSolutions = 5;
 
 	for (int a = 0; a < vNumberOfAmplifiers.length; a++) {
@@ -52,6 +52,10 @@ public class LauchPowerPerSpan {
 		}
 
 		solutionsMaxOSNR.add(solMaxOSNR);
+		for (int i = 0; i < solMaxOSNR.getNumberOfVariables(); i++) {
+		    System.out.print(solMaxOSNR.getVariable(i) + ", ");
+		}
+		System.out.println();
 	    }
 
 	    double[][] launchPower = new double[numberOfAmplifiers][numberSolutions];

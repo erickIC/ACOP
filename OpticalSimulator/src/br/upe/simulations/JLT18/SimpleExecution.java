@@ -13,18 +13,16 @@ import br.upe.base.AmplifierType;
 public class SimpleExecution {
     public static void main(String[] args) {
 
-	int populationSize = 200;
-	int numberOfGenerations = 1500;
+	int populationSize = 60;
+	int numberOfGenerations = 500;
 
 	while (true) {
 	    System.out.println(new Timestamp());
 	    NondominatedPopulation result = new Executor()
-		    .withProblemClass(ACOPProblem.class, 8,
+		    .withProblemClass(ACOPProblem.class, 4,
 			    AmplifierType.EDFA_1_PadTec)
 		    .withAlgorithm("NSGAII")
 		    .withMaxEvaluations(populationSize * numberOfGenerations).run();
-
-	    System.out.println(new Timestamp());
 
 	    if (result.size() <= 1)
 		continue;

@@ -9,11 +9,10 @@ public class TransformCompletePMFile {
 
     public static void main(String[] args) {
 	try {
-	    String tiltVal = "-4";
-	    // String path = "./masks/05_Com Tilt/EDFA_1_Tilt" + tiltVal +
-	    // "_PadTec/";
-	    String path = "./masks/05_Com Tilt/EDFA_2_PadTec/";
-	    File file = new File("mask-edfa2-padtec.txt");
+	    String tiltVal = "12";
+	    String path = "./masks/05_Com Tilt/EDFA_1_PadTec_Tilt" + tiltVal + "/";
+	    // String path = "./masks/05_Com Tilt/EDFA_1_PadTec/";
+	    File file = new File("./masks/tilt" + tiltVal + ".txt");
 	    File fileTotal = new File(path + "TotalInfo.txt");
 
 	    Scanner reader = new Scanner(file);

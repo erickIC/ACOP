@@ -1,6 +1,8 @@
 
 package br.upe.optimizationUtil;
 
+import java.util.ArrayList;
+
 import br.upe.base.ACOPHeuristic;
 import br.upe.base.Amplifier;
 import br.upe.base.AmplifierType;
@@ -8,6 +10,7 @@ import br.upe.base.AmplifierVOA;
 import br.upe.base.ObjectiveFunction;
 import br.upe.base.OpticalChannel;
 import br.upe.base.OpticalSignal;
+import br.upe.base.SimulationParameters;
 import br.upe.heuristics.maxGain.MaxGain;
 import br.upe.heuristics.uiara.AdGC;
 import br.upe.initializations.BruteForceInitialization;
@@ -17,9 +20,8 @@ import br.upe.objfunctions.linerInterpolation.LinearInterpolationFunction;
 import br.upe.selection.MaxGainSelection;
 import br.upe.selection.UiaraWeightSelection;
 import br.upe.signal.factory.PowerMaskSignal;
-import br.upe.simulations.simsetups.SimSetAMPVOA;
-import br.upe.simulations.simsetups.SimulationSetup;
 import br.upe.util.DecibelConverter;
+import br.upe.util.LinearRegression;
 
 public class ACOP_MOOProblem {
 
@@ -27,21 +29,29 @@ public class ACOP_MOOProblem {
     private AmplifierType type;
     private int numAmps;
     private ACOP_LOCAL_PROBLEM localProblem;
+    private SimulationParameters simParams;
 
-    public ACOP_MOOProblem(AmplifierType type, int numberOfAmplifiers) {
+    public ACOP_MOOProblem(AmplifierType type, int numberOfAmplifiers, SimulationParameters parameters) {
 	this.type = type;
 	this.numAmps = numberOfAmplifiers;
 	this.localProblem = ACOP_LOCAL_PROBLEM.AdGC;
+	this.simParams = parameters;
     }
 
-    public ACOP_MOOProblem(AmplifierType type, int numberOfAmplifiers, ACOP_LOCAL_PROBLEM localProblem) {
+    public ACOP_MOOProblem(AmplifierType type, int numberOfAmplifiers, SimulationParameters parameters,
+	    ACOP_LOCAL_PROBLEM localProblem) {
 	this.type = type;
 	this.numAmps = numberOfAmplifiers;
 	this.localProblem = localProblem;
+	this.simParams = parameters;
     }
 
-    public double[] evaluate(float[] attenuations) {
+    public double[] evaluateJustAttenuations(float[] attenuations) {
 	return evaluate(null, attenuations);
+    }
+
+    public double[] evaluateJustGains(float[] gains) {
+	return evaluate(gains, null);
     }
 
     public double[] evaluate(float[] gains, float[] attenuations) {
@@ -50,13 +60,10 @@ public class ACOP_MOOProblem {
 	// NormalizationUtilityFactory.getInstance().fabricate(type);
 	ObjectiveFunction function = new LinearInterpolationFunction();
 
-	int numberCh = 40;
-	float inputPowerCh = -18f;
-	float linkLosses = 18.0f;
-	SimulationSetup simSet = new SimSetAMPVOA(numberCh, inputPowerCh, 9.0f, numAmps);
-	double linkLength = linkLosses * 1000 / 0.2;
+	double linkLength = simParams.getLinkLosses() * 1000 / 0.2;
 
-	PowerMaskSignal signal = new PowerMaskSignal(numberCh, type, simSet.getCHANNEL_POWER(), 40);
+	PowerMaskSignal signal = new PowerMaskSignal(simParams.getNumberCh(), type,
+		simParams.getSimSet().getCHANNEL_POWER(), 40);
 	OpticalSignal inputSignal = signal.createSignal();
 
 	float totalInputPower = inputSignal.getTotalPower();
@@ -68,21 +75,21 @@ public class ACOP_MOOProblem {
 
 	    switch (localProblem) {
 	    case MaxGain:
-		heuristic = new MaxGain(numAmps, simSet.getLINK_LOSSES(), inputSignal, function);
+		heuristic = new MaxGain(numAmps, simParams.getSimSet().getLINK_LOSSES(), inputSignal, function);
 		heuristic.setSelectionOp(new MaxGainSelection());
 		break;
 	    case AdGC:
-		heuristic = new AdGC(numAmps, simSet.getLINK_LOSSES(), inputSignal, function);
+		heuristic = new AdGC(numAmps, simParams.getSimSet().getLINK_LOSSES(), inputSignal, function);
 		heuristic.setSelectionOp(new UiaraWeightSelection());
 		break;
 	    default:
-		heuristic = new AdGC(numAmps, simSet.getLINK_LOSSES(), inputSignal, function);
+		heuristic = new AdGC(numAmps, simParams.getSimSet().getLINK_LOSSES(), inputSignal, function);
 	    }
 
 	    heuristic.setInitialization(new UniformInitializationVOA(type, attenuations));
-	    heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
-	    heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
-	    heuristic.setMaxOutputPower(simSet.getMaxOutputPower());
+	    heuristic.setVoaMaxAttenuation(simParams.getSimSet().getVOA_MAX_ATT());
+	    heuristic.setRoadmAttenuation(simParams.getSimSet().getROADM_ATT());
+	    heuristic.setMaxOutputPower(simParams.getSimSet().getMaxOutputPower());
 	    amplifiers = heuristic.execute();
 
 	    if (amplifiers == null)
@@ -91,20 +98,24 @@ public class ACOP_MOOProblem {
 	    voaAttenuation = ((AmplifierVOA) amplifiers[amplifiers.length - 1]).getVoaOutAttenuation();
 	} else {
 
-	    BruteForceInitialization initialization = new BruteForceInitialization(type, true,
-		    simSet.getMaxOutputPower());
+	    boolean hasVOA = true;
+	    if (attenuations == null)
+		hasVOA = false;
+
+	    BruteForceInitialization initialization = new BruteForceInitialization(type, hasVOA,
+		    simParams.getSimSet().getMaxOutputPower());
 	    initialization.setGains(gains);
 	    initialization.setAttenuations(attenuations);
 
-	    amplifiers = initialization.initialize(simSet.getNumberOfAmplifiers(), totalInputPower, 0,
-		    simSet.getLINK_LOSSES(), function, inputSignal);
+	    amplifiers = initialization.initialize(simParams.getSimSet().getNumberOfAmplifiers(), totalInputPower, 0,
+		    simParams.getSimSet().getLINK_LOSSES(), function, inputSignal);
 
 	    if (amplifiers == null)
 		return null;
 
 	    float ampVoaAtt = ((AmplifierVOA) amplifiers[amplifiers.length - 1]).getVoaOutAttenuation();
 	    voaAttenuation = (float) (amplifiers[amplifiers.length - 1].getOutputPower() - ampVoaAtt
-		    - totalInputPower - simSet.getROADM_ATT());
+		    - totalInputPower - simParams.getSimSet().getROADM_ATT());
 	    ((AmplifierVOA) amplifiers[amplifiers.length - 1]).increaseVoaOutAttenuation(voaAttenuation);
 
 	}
@@ -118,19 +129,29 @@ public class ACOP_MOOProblem {
 	// the solution is not desirable
 	if (amplifiers[amplifiers.length - 1].getOutputPower() >= totalInputPower
 		&& ((AmplifierVOA) amplifiers[amplifiers.length - 1])
-			.getOutputPowerAfterVOA() <= (totalInputPower + simSet.getVOA_MAX_ATT() + simSet.getROADM_ATT())
+			.getOutputPowerAfterVOA() <= (totalInputPower + simParams.getSimSet().getVOA_MAX_ATT()
+				+ simParams.getSimSet().getROADM_ATT())
 		&& voaAttenuation >= 0) {
 
 	    double[] result = new double[3];
 
-	    GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9, numberCh, inputPowerCh, linkLength);
+	    GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9, simParams.getNumberCh(), simParams.getInputPowerCh(),
+		    linkLength);
 	    gnliMetric.evaluate(amplifiers);
 
 	    // result[0] = calculateTilt(inputSignal); // minimizar
 
-	    result[1] = (1 / gnliMetric.worstOSNR_NLI()); // maximizar
+	    // result[1] = (1 / gnliMetric.worstOSNR_NLI()); // maximizar
 
-	    result[0] = gnliMetric.getTiltOSNR_NLI(); // minimizar
+	    if (gnliMetric.worstOSNR_ASE() < 0)
+		// TODO: verificar casos com OSNR menor do que zero
+		System.out.println();
+
+	    result[1] = (1 / gnliMetric.worstOSNR_ASE()); // maximizar
+
+	    // result[0] = gnliMetric.getTiltOSNR_NLI(); // minimizar
+
+	    result[0] = Math.abs(calculateTiltLinearReg(inputSignal)); // minimizar
 
 	    this.amplifiers = amplifiers;
 
@@ -138,6 +159,35 @@ public class ACOP_MOOProblem {
 	} else {
 	    return null;
 	}
+    }
+
+    private static double calculateTiltLinearReg(OpticalSignal signal) {
+	ArrayList<OpticalChannel> channels = signal.getChannels();
+	double[] frequencies = new double[channels.size()];
+	double[] power = new double[channels.size()];
+
+	int indexMaxFreq = 0, indexMinFreq = 0;
+
+	for (int i = 0; i < power.length; i++) {
+	    frequencies[i] = channels.get(i).getFrequency();
+	    power[i] = channels.get(i).getSignalPower();
+
+	    if (frequencies[i] < frequencies[indexMinFreq])
+		indexMinFreq = i;
+	    else if (frequencies[i] > frequencies[indexMaxFreq])
+		indexMaxFreq = i;
+	}
+
+	// normalizing frequencies
+	double maxFreq = frequencies[indexMaxFreq];
+	double minFreq = frequencies[indexMinFreq];
+	for (int i = 0; i < frequencies.length; i++) {
+	    frequencies[i] = (frequencies[i] - minFreq) / (maxFreq - minFreq);
+	}
+
+	LinearRegression lr = new LinearRegression(frequencies, power);
+
+	return lr.Tilt();
     }
 
     private double calculateTilt(OpticalSignal signal) {

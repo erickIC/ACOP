@@ -77,7 +77,7 @@ with open(input_file, 'r') as f_in:
 	range_b = 0.85
 
 ## Load the model
-model = load_model("model_pout.h5")
+model = load_model("model_pout2.h5")
 
 ### First scenario
 
@@ -309,4 +309,4 @@ plt.ylabel('Pout (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
-plt.savefig('ScenariosNNWithMiddle.png', dpi = 200)
+plt.savefig('ScenariosNNWithMiddle2.png', dpi = 200)

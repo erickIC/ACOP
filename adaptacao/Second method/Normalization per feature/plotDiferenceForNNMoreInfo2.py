@@ -5,7 +5,7 @@
     Programmer: Jose Carlos Pinheiro Filho.
 
     Description:
-    Code to create one neural network with only one hidden layer to Pout and one to NF too, using Dropout and callback to previne the overfitting.
+    Code to create one neural network with only one hidden layer to Pout and one to NF too, using callback to previne the overfitting taking all the data.
     And plotting the difference between the signal predicted and the expected for non-normalized data with more information, boxplot of absolute error and the training curve. 
 
     licensed under the GNU General Public License v3.0.
@@ -72,7 +72,7 @@ with open(imput_file, 'r') as file:
         not_caught.append(True)
 
 #Separate the training set and the test set.
-eighty_percent = int(0.8 * len(data))
+eighty_percent = int(1 * len(data))
 number_channels = 40
 
 array_x = []
@@ -88,7 +88,7 @@ while len(array_x) != eighty_percent: #While to set the training set.
     current = randint(0, len(not_caught) - 1)
     if  not_caught[current]:
         auxiliary = data[current]
-        not_caught[current] = False
+        not_caught[current] = True
         x = [auxiliary[0]]
         ypout = []
         ynf= []
@@ -107,13 +107,15 @@ for i in range(len(not_caught)):
         x = [auxiliary[0]]
         ypout = []
         ynf= []
-        for j in range(0, number_channels):
-            x.append(auxiliary[1+j])
-            ypout.append(auxiliary[41+j])
-            ynf.append(auxiliary[81 + j])
+        for i in range(0, number_channels):
+            x.append(auxiliary[1+i])
+            ypout.append(auxiliary[41+i])
+            ynf.append(auxiliary[81 + i])
         array_xt.append(x)  
         array_yt_pout.append(ypout)
-        array_yt_nf.append(ynf)     
+        array_yt_nf.append(ynf)
+        if len(array_xt) ==  int(0.2 * len(data)):
+            break 
          
 training_x = np.array(array_x)
 training_y_pout = np.array(array_y_pout)
@@ -129,11 +131,11 @@ model_pout = Sequential()
 model_nf = Sequential()
 
 model_pout.add(Dense(83, input_dim = 41, activation='sigmoid'))
-model_pout.add(Dropout(0.1))
+model_pout.add(Dense(83, activation='sigmoid'))
 model_pout.add(Dense(40, activation='sigmoid'))
 
 model_nf.add(Dense(83, input_dim = 41, activation='sigmoid'))
-model_nf.add(Dropout(0.1))
+model_nf.add(Dense(83, activation='sigmoid'))
 model_nf.add(Dense(40, activation='sigmoid'))
 
 
@@ -150,8 +152,8 @@ history_pout = model_pout.fit(training_x, training_y_pout, validation_data=(test
 history_nf = model_nf.fit(training_x, training_y_nf, validation_data=(test_x, test_y_nf), epochs = num_epochs, callbacks=[cb])
 
 #saving the model
-model_pout.save('model_pout.h5')
-model_nf.save('model_nf.h5')
+model_pout.save('model_pout2.h5')
+model_nf.save('model_nf2.h5')
 
 #Unnormalizing the data
 input_file = "min-max.txt"

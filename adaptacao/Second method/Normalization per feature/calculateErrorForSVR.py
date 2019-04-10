@@ -30,6 +30,7 @@ with open(input_file, 'r') as f_in:
 		caught.append(0)
 data = np.array(data)
 
+### FIRST METHOD
 ### Separating the data into training (80%) and testing set (20%)
 eighty_percent = int(0.8 * data.shape[0])
 
@@ -55,6 +56,31 @@ for i in range(0, len(caught)):
 		array_xt.append(auxiliary[:41])
 		array_yt.append(auxiliary[41:])
 		caught[i] = 1
+
+### SECOND METHOD
+# ### Using all data for training set and 20% for the test set
+# twenty_percent = int(0.2 * data.shape[0])
+
+# # Training set
+# array_x = []
+# array_y = []
+
+# for i in range(0, data.shape[0]):
+# 	auxiliary = data[i]
+# 	array_x.append(auxiliary[:41])
+# 	array_y.append(auxiliary[41:])
+
+# # Test set
+# array_xt = []
+# array_yt = []
+
+# while len(array_xt) != twenty_percent:
+# 	current = randint(0, len(caught)-1)
+# 	if caught[current] == 0:
+# 		auxiliary = data[current]
+# 		array_xt.append(auxiliary[:41])
+# 		array_yt.append(auxiliary[41:])
+# 		caught[current] = 1
 
 training_x = np.array(array_x)
 training_y = np.array(array_y)

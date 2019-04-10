@@ -44,7 +44,7 @@ public class BruteForceInitialization implements InitializationStrategy {
 	    // calculate the signal tilt
 	    double tilt = SignalFeatureCalculation.calculateTiltNonLinearReg(signal);
 	    // select the best mask considering the signal tilt
-	    type = getAmplifierType(tilt);
+	    // TODO: type = getAmplifierType(tilt);
 
 	    // The first amplifier
 	    if (i == 0) {

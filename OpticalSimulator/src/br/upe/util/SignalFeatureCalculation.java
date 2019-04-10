@@ -158,6 +158,7 @@ public class SignalFeatureCalculation {
 
 	Function exponential = new ExponentialFunction();
 	NonLinearSolver non_linear = new NonLinearSolver(exponential);
+	non_linear.setStepSize(0.5);
 	double[][] x = new double[frequencies.length][1];
 	for (int i = 0; i < frequencies.length; i++) {
 	    x[i][0] = frequencies[i];

@@ -2,6 +2,7 @@
 package br.upe.optimizationUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import br.upe.base.ACOPHeuristic;
 import br.upe.base.Amplifier;
@@ -20,6 +21,8 @@ import br.upe.objfunctions.linerInterpolation.LinearInterpolationFunction;
 import br.upe.selection.MaxGainSelection;
 import br.upe.selection.UiaraWeightSelection;
 import br.upe.signal.factory.PowerMaskSignal;
+import br.upe.simulations.simPadTec19.SimSetPadTec;
+import br.upe.simulations.simsetups.SimulationSetup;
 import br.upe.util.DecibelConverter;
 import br.upe.util.LinearRegression;
 
@@ -30,12 +33,21 @@ public class ACOP_MOOProblem {
     private int numAmps;
     private ACOP_LOCAL_PROBLEM localProblem;
     private SimulationParameters simParams;
+    private int preTilt;
 
     public ACOP_MOOProblem(AmplifierType type, int numberOfAmplifiers, SimulationParameters parameters) {
 	this.type = type;
 	this.numAmps = numberOfAmplifiers;
 	this.localProblem = ACOP_LOCAL_PROBLEM.AdGC;
 	this.simParams = parameters;
+    }
+
+    public ACOP_MOOProblem(AmplifierType type, int numberOfAmplifiers, SimulationParameters parameters, int preTilt) {
+	this.type = type;
+	this.numAmps = numberOfAmplifiers;
+	this.localProblem = ACOP_LOCAL_PROBLEM.AdGC;
+	this.simParams = parameters;
+	this.preTilt = preTilt;
     }
 
     public ACOP_MOOProblem(AmplifierType type, int numberOfAmplifiers, SimulationParameters parameters,
@@ -65,6 +77,8 @@ public class ACOP_MOOProblem {
 	PowerMaskSignal signal = new PowerMaskSignal(simParams.getNumberCh(), type,
 		simParams.getSimSet().getCHANNEL_POWER(), 40);
 	OpticalSignal inputSignal = signal.createSignal();
+
+	applyPreTilt(inputSignal);
 
 	float totalInputPower = inputSignal.getTotalPower();
 
@@ -133,7 +147,7 @@ public class ACOP_MOOProblem {
 				+ simParams.getSimSet().getROADM_ATT())
 		&& voaAttenuation >= 0) {
 
-	    double[] result = new double[3];
+	    double[] result = new double[2];
 
 	    GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9, simParams.getNumberCh(), simParams.getInputPowerCh(),
 		    linkLength);
@@ -141,23 +155,42 @@ public class ACOP_MOOProblem {
 
 	    // result[0] = calculateTilt(inputSignal); // minimizar
 
-	    // result[1] = (1 / gnliMetric.worstOSNR_NLI()); // maximizar
+	    result[1] = (1 / gnliMetric.worstOSNR_NLI()); // maximizar
 
 	    if (gnliMetric.worstOSNR_ASE() < 0)
 		// TODO: verificar casos com OSNR menor do que zero
 		System.out.println();
 
-	    result[1] = (1 / gnliMetric.worstOSNR_ASE()); // maximizar
+	    // result[1] = (1 / gnliMetric.worstOSNR_ASE()); // maximizar
 
-	    // result[0] = gnliMetric.getTiltOSNR_NLI(); // minimizar
+	    result[0] = gnliMetric.getTiltOSNR_NLI(); // minimizar
 
-	    result[0] = Math.abs(calculateTiltLinearReg(inputSignal)); // minimizar
+	    // result[0] = Math.abs(calculateTiltLinearReg(inputSignal)); //
+	    // minimizar
 
 	    this.amplifiers = amplifiers;
 
 	    return result;
 	} else {
 	    return null;
+	}
+    }
+
+    private void applyPreTilt(OpticalSignal inputSignal) {
+	if (preTilt == 0)
+	    return;
+
+	double factor = Math.abs(preTilt) / (simParams.getNumberCh() - 1.0);
+
+	Collections.sort(inputSignal.getChannels());
+	if (preTilt < 0)
+	    Collections.reverse(inputSignal.getChannels());
+
+	double adjust = 0;
+	for (OpticalChannel ch : inputSignal.getChannels()) {
+	    ch.setSignalPower(ch.getSignalPower() + adjust);
+	    ch.setNoisePower(ch.getNoisePower() + adjust);
+	    adjust -= factor;
 	}
     }
 
@@ -212,4 +245,27 @@ public class ACOP_MOOProblem {
 	return amplifiers;
     }
 
+    public void setPreTilt(int i) {
+	this.preTilt = i;
+
+    }
+
+    public static void main(String[] args) {
+
+	float chPower = -18.0f; // -20 dBm/ch = -4 dBm ;; -19 dBm/ch = -3 dBm
+	int numberCh = 40;
+	int numberAmps = 4;
+	float loss = 18.0f;
+
+	SimulationSetup simSet = new SimSetPadTec(numberCh, chPower, numberAmps, loss);
+
+	SimulationParameters simParams = new SimulationParameters(numberCh, chPower, loss, simSet);
+
+	ACOP_MOOProblem problem = new ACOP_MOOProblem(AmplifierType.EDFA_1_PadTec, simSet.getNumberOfAmplifiers(),
+		simParams);
+
+	float[] gains = { 15, 18, 20, 23 };
+	float[] attenuations = { 1, 0, 1, 1 };
+	problem.evaluate(gains, attenuations);
+    }
 }

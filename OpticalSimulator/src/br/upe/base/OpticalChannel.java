@@ -2,7 +2,7 @@ package br.upe.base;
 
 import java.text.NumberFormat;
 
-public class OpticalChannel {
+public class OpticalChannel implements Comparable<OpticalChannel> {
 	private double frequency;
 	private double SignalPower;
 	private double NoisePower;
@@ -86,4 +86,9 @@ public class OpticalChannel {
 	protected OpticalChannel clone() {
 		return new OpticalChannel(frequency, SignalPower, NoisePower);
 	}
+
+    @Override
+    public int compareTo(OpticalChannel o) {
+	return this.frequency < o.frequency ? -1 : (this.frequency > o.frequency ? 1 : 0);
+    }
 }

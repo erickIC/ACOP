@@ -7,7 +7,7 @@ import org.moeaframework.core.variable.EncodingUtils;
 
 import com.sun.jmx.snmp.Timestamp;
 
-import br.upe.MOO.modeling.ACOPProblem_JustGains;
+import br.upe.MOO.modeling.ACOPProblem_GainsTilt;
 import br.upe.base.Amplifier;
 import br.upe.base.AmplifierType;
 import br.upe.base.ObjectiveFunction;
@@ -24,12 +24,12 @@ public class MOOToMinTilt {
 	int populationSize = 100; // 60
 	int numberOfGenerations = 1000; // 500
 
-	float chPower = -20.0f; // -20 dBm/ch = -4 dBm ;; -19 dBm/ch = -3 dBm
+	float chPower = -19.0f; // -20 dBm/ch = -4 dBm ;; -19 dBm/ch = -3 dBm
 	int numberCh = 40;
 	int numberAmps = 20;
-	float loss = 20.0f;
+	float loss = 19.0f;
 
-	System.out.println("-4dBm_loss20");
+	System.out.println("-3dBm_loss19");
 
 	SimulationSetup simSet = new SimSetPadTec(numberCh, chPower, numberAmps, loss);
 
@@ -38,7 +38,7 @@ public class MOOToMinTilt {
 	while (true) {
 	    System.out.println(new Timestamp());
 	    NondominatedPopulation result = new Executor()
-		    .withProblemClass(ACOPProblem_JustGains.class, numberAmps,
+		    .withProblemClass(ACOPProblem_GainsTilt.class, numberAmps,
 			    AmplifierType.EDFA_1_PadTec, simParams)
 		    .withAlgorithm("NSGAII")
 		    .withMaxEvaluations(populationSize * numberOfGenerations).run();
@@ -49,8 +49,11 @@ public class MOOToMinTilt {
 	    for (Solution solution : result) {
 		System.out.format("%.4f\t%.4f\t|\t", solution.getObjective(0), (1.0 / solution.getObjective(1)));
 		int[] x = EncodingUtils.getInt(solution);
+
+		System.out.print(x[0] + "\t"); // InputTilt
+
 		float[] gains = new float[x.length];
-		for (int i = 0; i < solution.getNumberOfVariables(); i++) {
+		for (int i = 1; i < solution.getNumberOfVariables(); i++) {
 		    System.out.print(x[i] + "\t");
 		    gains[i] = (float) x[i];
 		}

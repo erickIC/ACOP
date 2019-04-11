@@ -132,10 +132,11 @@ model_nf = Sequential()
 
 model_pout.add(Dense(83, input_dim = 41, activation='sigmoid'))
 model_pout.add(Dense(83, activation='sigmoid'))
+model_pout.add(Dense(83, activation='sigmoid'))
 model_pout.add(Dense(40, activation='sigmoid'))
 
-model_nf.add(Dense(83, input_dim = 41, activation='sigmoid'))
-model_nf.add(Dense(83, activation='sigmoid'))
+model_nf.add(Dense(54, input_dim = 41, activation='sigmoid'))
+model_nf.add(Dense(54, activation='sigmoid'))
 model_nf.add(Dense(40, activation='sigmoid'))
 
 
@@ -144,16 +145,16 @@ print(model_nf.summary())
 
 model_pout.compile(optimizer = 'adam', loss = 'mse', metrics = ['acc'])
 model_nf.compile(optimizer = 'adam', loss = 'mse', metrics = ['acc'])
-num_epochs = 2000
+num_epochs = 5000
 
-cb = callbacks.EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 10, verbose = 0, mode='auto')
+cb = callbacks.EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 120, verbose = 0, mode='auto')
 
 history_pout = model_pout.fit(training_x, training_y_pout, validation_data=(test_x, test_y_pout), epochs = num_epochs,callbacks=[cb])
 history_nf = model_nf.fit(training_x, training_y_nf, validation_data=(test_x, test_y_nf), epochs = num_epochs, callbacks=[cb])
 
 #saving the model
-model_pout.save('model_pout2.h5')
-model_nf.save('model_nf2.h5')
+model_pout.save('model_pout4.h5')
+model_nf.save('model_nf4.h5')
 
 #Unnormalizing the data
 input_file = "min-max.txt"

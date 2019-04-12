@@ -110,7 +110,7 @@ gset_current = np.array([gset_current])
 signal_current = np.array([signal_current])
 diff_scenario1 = []
 
-for i in range(2, len(columns_1)):
+for i in range(2, int(len(columns_1)/2)+1):
 	
 	x_current = np.concatenate((gset_current,signal_current),axis=1)
 	y_out = model.predict(x_current)
@@ -125,10 +125,10 @@ for i in range(2, len(columns_1)):
 		diff_scenario1.append(diff_current)
 	signal_current = []
 	gset_current = []
-	if i == len(columns_1)/2:
+	if i == len(columns_1)/4 + 1:
 		middle_predict = y_out[0]
 		middle_signal =  dataframe_1[columns_1[i]]
-		middle_id = int(len(columns_1)/2 - 1)
+		middle_id = int(len(columns_1)/4)
 	for j in range(0, len(y_out)):
 		signal_current.append(normalization((y_out[j] - loss_1), min_pin, max_pin, range_a, range_b))
 	gset_current.append(normalization(gain_1, min_gset, max_gset, range_a, range_b))
@@ -153,6 +153,7 @@ plt.plot(wavelength, y_out[0],'bo-', label='predicted last')
 plt.plot(wavelength, dataframe_1[columns_1[len(columns_1) - 1]], 'ro-',label='expected last')
 plt.ylabel('Pout (dBm)')
 plt.xlabel('Wavelenght')
+plt.grid(True)
 plt.legend()
 
 
@@ -221,6 +222,7 @@ plt.plot(wavelength, y_out[0],'bo-', label='predicted last')
 plt.plot(wavelength, dataframe_2[columns_2[len(columns_2) - 1]], 'ro-',label='expected last')
 plt.ylabel('Pout (dBm)')
 plt.xlabel('Wavelenght')
+plt.grid(True)
 plt.legend()
 
 
@@ -307,6 +309,7 @@ plt.plot(wavelength, y_out[0],'bo-', label='predicted last')
 plt.plot(wavelength, dataframe_3[columns_3[len(columns_3) - 1]], 'ro-',label='expected last')
 plt.ylabel('Pout (dBm)')
 plt.xlabel('Wavelenght')
+plt.grid(True)
 plt.legend()
 
-plt.savefig('ScenariosNNWithMiddle3.png', dpi = 200)
+plt.savefig('ScenariosNNWithMiddle4.png', dpi = 200)

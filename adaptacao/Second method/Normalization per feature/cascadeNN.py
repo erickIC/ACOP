@@ -79,6 +79,7 @@ with open(input_file, 'r') as f_in:
 ## Load the model
 model = load_model("model_pout3.h5")
 
+print(model.summary())
 ### First scenario
 
 ## Dataset 1 (G_set = 14 dB)

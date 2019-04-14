@@ -42,7 +42,7 @@ with open(input_file, 'r') as f_in:
 	range_a = 0.15
 	range_b = 0.85
 
-# Wavelength for use in plot
+### Wavelength for use in plot
 wavelength = [1560.713, 1559.794, 1559.04, 1558.187, 1557.433, 1556.613, 
                1555.858, 1555.038, 1554.153, 1553.398, 1552.578, 1551.758,
                1550.971, 1550.02, 1549.397, 1548.61, 1547.822, 1547.002, 
@@ -52,7 +52,7 @@ wavelength = [1560.713, 1559.794, 1559.04, 1558.187, 1557.433, 1556.613,
                1532.013, 1531.226, 1530.438, 1529.651]
 
 
-#Set the font sizes to the plots
+### Set the font sizes to the plots
 smaller_size = 8
 medium_size = 10
 bigger_size = 16
@@ -87,7 +87,7 @@ p_in = np.array([p_in])
 diff_dataframe1 = []
 
 # Cascade
-for i in range(2, len(columns_1)):
+for i in range(2, len(columns_1)-5):
 	# Building input
 	x_in = np.concatenate((g_set, p_in), axis=1)
 
@@ -103,10 +103,10 @@ for i in range(2, len(columns_1)):
 	for j in range(0, y_out.shape[1]):
 		diff_current.append(abs(float(y_out[0][j]) - dataframe_1[columns_1[i]][j]))
 	diff_dataframe1.append(diff_current)
-	if i == len(columns_1)/2:
+	if i == int((len(columns_1)-5)/2):
 		middle_predict = y_out[0]
 		middle_signal =  dataframe_1[columns_1[i]]
-		middle_id = int(len(columns_1)/2 - 1)
+		middle_id = int((len(columns_1)-5)/2 - 1)
 
 	# Normalizing next input in cascade
 	p_in = []
@@ -128,7 +128,7 @@ plt.plot(wavelength, middle_predict, 'go-',label='predicted pout' + str(middle_i
 plt.plot(wavelength, middle_signal, 'yo-',label='expected pout' + str(middle_id))
 
 plt.plot(wavelength, y_out[0], 'bo-',label='predicted last')
-plt.plot(wavelength, dataframe_1[columns_1[len(columns_1) - 1]], 'ro-',label='expected last')
+plt.plot(wavelength, dataframe_1[columns_1[len(columns_1) - 6]], 'ro-',label='expected last')
 plt.ylabel('P_Out (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
@@ -283,5 +283,5 @@ plt.ylabel('P_Out (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
-plt.savefig('ScenariosSVRWithMiddle.png', dpi = 200)
+plt.savefig('ScenariosSVRWithMiddle(5amps).png', dpi = 200)
 plt.show()

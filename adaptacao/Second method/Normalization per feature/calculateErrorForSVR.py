@@ -31,72 +31,176 @@ with open(input_file, 'r') as f_in:
 data = np.array(data)
 
 ### FIRST METHOD
-### Separating the data into training (80%) and testing set (20%)
-eighty_percent = int(0.8 * data.shape[0])
-
-# Training set
-array_x = []
-array_y = []
-
-while len(array_x) != eighty_percent:
-	current = randint(0, len(caught)-1)
-	if caught[current] == 0:
-		auxiliary = data[current]
-		array_x.append(auxiliary[:41])
-		array_y.append(auxiliary[41:])
-		caught[current] = 1
-
-# Test set
-array_xt = []
-array_yt = []
-
-for i in range(0, len(caught)):
-	if caught[i] == 0:
-		auxiliary = data[i]
-		array_xt.append(auxiliary[:41])
-		array_yt.append(auxiliary[41:])
-		caught[i] = 1
-
-### SECOND METHOD
-# ### Using all data for training set and 20% for the test set
-# twenty_percent = int(0.2 * data.shape[0])
+# ### Separating the data into training (80%) and testing set (20%)
+# eighty_percent = int(0.8 * data.shape[0])
 
 # # Training set
 # array_x = []
 # array_y = []
 
-# for i in range(0, data.shape[0]):
-# 	auxiliary = data[i]
-# 	array_x.append(auxiliary[:41])
-# 	array_y.append(auxiliary[41:])
+# while len(array_x) != eighty_percent:
+# 	current = randint(0, len(caught)-1)
+# 	if caught[current] == 0:
+# 		auxiliary = data[current]
+# 		array_x.append(auxiliary[:41])
+# 		array_y.append(auxiliary[41:])
+# 		caught[current] = 1
 
 # # Test set
 # array_xt = []
 # array_yt = []
 
-# while len(array_xt) != twenty_percent:
-# 	current = randint(0, len(caught)-1)
-# 	if caught[current] == 0:
-# 		auxiliary = data[current]
+# for i in range(0, len(caught)):
+# 	if caught[i] == 0:
+# 		auxiliary = data[i]
 # 		array_xt.append(auxiliary[:41])
 # 		array_yt.append(auxiliary[41:])
-# 		caught[current] = 1
+# 		caught[i] = 1
 
-training_x = np.array(array_x)
-training_y = np.array(array_y)
+### SECOND METHOD
+### Using all data for training set and 20% for the test set
+twenty_percent = int(0.2 * data.shape[0])
+
+# Training set 1
+array_x = []
+array_y = []
+
+for i in range(0, data.shape[0]):
+	auxiliary = data[i]
+	array_x.append(auxiliary[:41])
+	array_y.append(auxiliary[41:])
+
+training_x1 = np.array(array_x)
+training_y1 = np.array(array_y)
+
+# Training set 2
+array_x = []
+array_y = []
+
+for i in range(2):
+	for j in range(i, data.shape[0], 2):
+		auxiliary = data[j]
+		array_x.append(auxiliary[:41])
+		array_y.append(auxiliary[41:])
+
+training_x2 = np.array(array_x)
+training_y2 = np.array(array_y)
+
+# Training set 3
+array_x = []
+array_y = []
+
+for i in range(3):
+	for j in range(i, data.shape[0], 3):
+		auxiliary = data[j]
+		array_x.append(auxiliary[:41])
+		array_y.append(auxiliary[41:])
+
+training_x3 = np.array(array_x)
+training_y3 = np.array(array_y)
+
+# Training set 4
+array_x = []
+array_y = []
+
+for i in range(4):
+	for j in range(i, data.shape[0], 4):
+		auxiliary = data[j]
+		array_x.append(auxiliary[:41])
+		array_y.append(auxiliary[41:])
+
+training_x4 = np.array(array_x)
+training_y4 = np.array(array_y)
+
+# Training set 5
+array_x = []
+array_y = []
+
+for i in range(5):
+	for j in range(i, data.shape[0], 5):
+		auxiliary = data[j]
+		array_x.append(auxiliary[:41])
+		array_y.append(auxiliary[41:])
+
+training_x5 = np.array(array_x)
+training_y5 = np.array(array_y)
+
+# Training set 6
+array_x = []
+array_y = []
+
+for i in range(6):
+	for j in range(i, data.shape[0], 6):
+		auxiliary = data[j]
+		array_x.append(auxiliary[:41])
+		array_y.append(auxiliary[41:])
+
+training_x6 = np.array(array_x)
+training_y6 = np.array(array_y)
+
+# Training set 7
+array_x = []
+array_y = []
+
+for i in range(7):
+	for j in range(i, data.shape[0], 7):
+		auxiliary = data[j]
+		array_x.append(auxiliary[:41])
+		array_y.append(auxiliary[41:])
+
+training_x7 = np.array(array_x)
+training_y7 = np.array(array_y)
+
+# Test set
+array_xt = []
+array_yt = []
+
+while len(array_xt) != twenty_percent:
+	current = randint(0, len(caught)-1)
+	if caught[current] == 0:
+		auxiliary = data[current]
+		array_xt.append(auxiliary[:41])
+		array_yt.append(auxiliary[41:])
+		caught[current] = 1
+
 test_x = np.array(array_xt)
 test_y = np.array(array_yt)
 
 ### Building SVR and running regression
 svr = SVR(kernel='poly', degree=3, gamma='auto', coef0=1, epsilon=0.01)
 svr_t = MultiOutputRegressor(svr)
-svr_t = svr_t.fit(training_x, training_y)
 
-# Saving model for later use
-with open('svr_model.pkl', 'wb') as f:
-	pickle.dump(svr_t, f)
+svr_t1 = svr_t.fit(training_x1, training_y1)
+svr_t2 = svr_t.fit(training_x2, training_y2)
+svr_t3 = svr_t.fit(training_x3, training_y3)
+svr_t4 = svr_t.fit(training_x4, training_y4)
+svr_t5 = svr_t.fit(training_x5, training_y5)
+svr_t6 = svr_t.fit(training_x6, training_y6)
+svr_t7 = svr_t.fit(training_x7, training_y7)
 
-y_out = svr_t.predict(test_x)
+# Saving models for later use
+with open('svr_model_1.pkl', 'wb') as f:
+	pickle.dump(svr_t1, f)
+
+with open('svr_model_2.pkl', 'wb') as f:
+	pickle.dump(svr_t2, f)
+
+with open('svr_model_3.pkl', 'wb') as f:
+	pickle.dump(svr_t3, f)
+
+with open('svr_model_4.pkl', 'wb') as f:
+	pickle.dump(svr_t4, f)
+
+with open('svr_model_5.pkl', 'wb') as f:
+	pickle.dump(svr_t5, f)
+
+with open('svr_model_6.pkl', 'wb') as f:
+	pickle.dump(svr_t6, f)
+
+with open('svr_model_7.pkl', 'wb') as f:
+	pickle.dump(svr_t7, f)
+
+y_out = svr_t1.predict(test_x)
 
 ### Calculating training error (MSE - Mean Squared Error)
 print('Mean Squared Error Regression Loss:')

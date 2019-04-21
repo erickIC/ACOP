@@ -17,9 +17,27 @@ def unnormalization(data, min, max, range_a, range_b):
 	unnormalized_data.append(values)
 	return np.array(unnormalized_data)
 
-### Load SVR model
-with open('svr_model.pkl', 'rb') as f:
-	svr_t = pickle.load(f)
+### Load SVR models
+with open('svr_model_1.pkl', 'rb') as f:
+	svr_t1 = pickle.load(f)
+
+with open('svr_model_2.pkl', 'rb') as f:
+	svr_t2 = pickle.load(f)
+
+with open('svr_model_3.pkl', 'rb') as f:
+	svr_t3 = pickle.load(f)
+
+with open('svr_model_4.pkl', 'rb') as f:
+	svr_t4 = pickle.load(f)
+
+with open('svr_model_5.pkl', 'rb') as f:
+	svr_t5 = pickle.load(f)
+
+with open('svr_model_6.pkl', 'rb') as f:
+	svr_t6 = pickle.load(f)
+
+with open('svr_model_7.pkl', 'rb') as f:
+	svr_t7 = pickle.load(f)
 
 ### Load info for normalization
 input_file = "min-max.txt"
@@ -92,7 +110,17 @@ for i in range(2, len(columns_1)-5):
 	x_in = np.concatenate((g_set, p_in), axis=1)
 
 	# Predicting P_out
-	y_out = svr_t.predict(x_in)
+	aux = []
+
+	aux = svr_t1.predict(x_in)
+	aux += svr_t2.predict(x_in)
+	aux += svr_t3.predict(x_in)
+	aux += svr_t4.predict(x_in)
+	aux += svr_t5.predict(x_in)
+	aux += svr_t6.predict(x_in)
+	aux += svr_t7.predict(x_in)
+
+	y_out = aux / 7
 	y_out = y_out[:, :40]
 	
 	# De-normalizing data
@@ -161,7 +189,17 @@ for i in range(2, len(columns_2)):
 	x_in = np.concatenate((g_set, p_in), axis=1)
 
 	# Predicting P_out
-	y_out = svr_t.predict(x_in)
+	aux = []
+
+	aux = svr_t1.predict(x_in)
+	aux += svr_t2.predict(x_in)
+	aux += svr_t3.predict(x_in)
+	aux += svr_t4.predict(x_in)
+	aux += svr_t5.predict(x_in)
+	aux += svr_t6.predict(x_in)
+	aux += svr_t7.predict(x_in)
+
+	y_out = aux / 7
 	y_out = y_out[:, :40]
 	
 	# De-normalizing data
@@ -239,7 +277,17 @@ for i in range(2, len(columns_3)):
 	x_in = np.concatenate((g_set, p_in), axis=1)
 
 	# Predicting P_out
-	y_out = svr_t.predict(x_in)
+	aux = []
+
+	aux = svr_t1.predict(x_in)
+	aux += svr_t2.predict(x_in)
+	aux += svr_t3.predict(x_in)
+	aux += svr_t4.predict(x_in)
+	aux += svr_t5.predict(x_in)
+	aux += svr_t6.predict(x_in)
+	aux += svr_t7.predict(x_in)
+
+	y_out = aux / 7
 	y_out = y_out[:, :40]
 	
 	# De-normalizing data
@@ -283,5 +331,5 @@ plt.ylabel('P_Out (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
-plt.savefig('ScenariosSVRWithMiddle(5amps).png', dpi = 200)
+plt.savefig('ScenariosSVRWithMiddle(5amps-7models).png', dpi = 200)
 plt.show()

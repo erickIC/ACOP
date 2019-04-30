@@ -31,7 +31,17 @@ def unnormalization(data, min, max, range_a, range_b):
 			values.append(((float(data[i][j]) - float(range_a)) * (float(max)-float(min))) / (float(range_b) - float(range_a)) + float(min))
 		unnormalized_data.append(values)
 	return np.array(unnormalized_data)
-
+def unnormalization_in(data, min_gset, max_gset, min_pin, max_pin, range_a, range_b):
+	unnormalized_data = []
+	for i in range(0, data.shape[0]):
+		values = []
+		for j in range(0, data.shape[1]):
+		    if j == 0:
+		        values.append(((float(data[i][j]) - float(range_a)) * (float(max_gset)-float(min_gset))) / (float(range_b) - float(range_a)) + float(min_gset))
+		    else:
+			    values.append(((float(data[i][j]) - float(range_a)) * (float(max_pin)-float(min_pin))) / (float(range_b) - float(range_a)) + float(min_pin))
+		unnormalized_data.append(values)
+	return np.array(unnormalized_data)
 
 #Set the font sizes to the plots
 smaller_size = 12
@@ -160,18 +170,113 @@ for i in range(0, len(out_y_pout)):
 
 y_out = np.array(y_out)
 y_test = np.array(y_test)
+x_test = unnormalization_in(test_x, min_gset, max_gset, min_pin, max_pin, range_a, range_b)
+
+
 #Calculating the absolute error
 
 diff_pout = []
 biggest_pout = 0
 smallest_pout = float('inf')
-#print(y_out.shape[0], y_out.shape[1], y_out.shape[2])
+
+
 for i in range(0, y_out.shape[1]):
     current = float(0)
     for j in range(0, y_out.shape[0]):
         current += abs(y_out[j][i][0] - y_test[j][i][0])
-        print(current, y_out[j][i][0], y_test[j][i][0])
+        #print(current, y_out[j][i][0], y_test[j][i][0])
     diff_pout.append(current/y_out.shape[0])
+    if current/y_out.shape[0] < smallest_pout:
+        smallest_pout = current/y_out.shape[0]
+    if current/y_out.shape[0] > biggest_pout:
+        biggest_pout = current/y_out.shape[0]
+
+biggest_pout_id = 0
+smallest_pout_id = 0
+median_pout_id = 0
+
+for i in range(0, len(diff_pout)):
+    if median(diff_pout) == diff_pout[i]:
+        median_pout_id = i
+    if biggest_pout == diff_pout[i]:
+        biggest_pout_id = i
+    if smallest_pout == diff_pout[i]:
+        smallest_pout_id = i
+
+
+
+wavelength = [1560.713, 1559.794, 1559.04, 1558.187, 1557.433, 1556.613, 
+               1555.858, 1555.038, 1554.153, 1553.398, 1552.578, 1551.758,
+               1550.971, 1550.02, 1549.397, 1548.61, 1547.822, 1547.002, 
+               1546.182, 1545.395, 1544.608, 1543.788, 1543.001, 1542.214,
+               1541.426, 1540.639, 1539.852, 1538.966, 1538.278, 1537.425, 
+               1536.638, 1535.883, 1535.096, 1534.342, 1533.587, 1532.8, 
+               1532.013, 1531.226, 1530.438, 1529.651]
+
+
+#Plotting
+
+
+
+
+
+
+biggest_diff_out = []
+biggest_diff_test = []
+smallest_diff_out = []
+smallest_diff_test = []
+median_diff_out = []
+median_diff_test = []
+
+for i in range(0, y_out.shape[0]):
+    biggest_diff_out.append(y_out[i][biggest_pout_id][0])
+    biggest_diff_test.append(y_test[i][biggest_pout_id][0])
+
+    smallest_diff_out.append(y_out[i][smallest_pout_id][0])
+    smallest_diff_test.append(y_test[i][smallest_pout_id][0])
+
+    median_diff_out.append(y_out[i][median_pout_id][0])
+    median_diff_test.append(y_test[i][median_pout_id][0])
+
+biggest_diff_out = np.array(biggest_diff_out)
+biggest_diff_test = np.array(biggest_diff_test)
+smallest_diff_out = np.array(smallest_diff_out)
+smallest_diff_test = np.array(smallest_diff_test)
+median_diff_out = np.array(median_diff_out)
+median_diff_test = np.array(median_diff_test)
+
+
+
+#Original vs predicted
+text = ''
+
+plt.figure(figsize=(16,16))
+plt.subplot(311)
+text = 'Gset =' + str(int(x_test[biggest_pout_id][0])) + '(dB) ' + 'Tilt = '  + str(int(round((x_test[biggest_pout_id][1] - x_test[biggest_pout_id][len(x_test[biggest_pout_id]) - 1]), 0))) + '(dBm)'
+plt.plot(wavelength, biggest_diff_out, 'o-', label='predicted pout')
+plt.plot(wavelength, biggest_diff_test, 'o-',label='expected pout')
+plt.ylabel('Pout (dBm)')
+plt.title('Worst case Pout' + ' ' + text)
+plt.legend()
+
+plt.subplot(312)
+text = 'Gset =' + str(int(x_test[median_pout_id][0])) + '(dB) ' + 'Tilt = '  + str(int(round((x_test[median_pout_id][1] - x_test[median_pout_id][len(x_test[median_pout_id]) - 1]), 0))) + '(dBm)'
+plt.plot(wavelength, median_diff_out, 'o-', label='predicted pout')
+plt.plot(wavelength, median_diff_test, 'o-', label='expected pout')
+plt.ylabel('Pout (dBm)')
+plt.title('Median case Pout' + ' ' + text)
+plt.legend()
+
+plt.subplot(313)
+text = 'Gset =' + str(int(x_test[smallest_pout_id][0])) + '(dB) ' + 'Tilt = '  + str(int(round((x_test[smallest_pout_id][1] - x_test[smallest_pout_id][len(x_test[smallest_pout_id]) - 1]), 0))) + '(dBm)'
+plt.plot(wavelength, smallest_diff_out, 'o-', label='predicted pout')
+plt.plot(wavelength, smallest_diff_test, 'o-', label='expected pout')
+plt.xlabel('wavelength')
+plt.ylabel('Pout (dBm)')
+plt.title('Best case Pout' + ' ' + text)
+plt.legend()
+plt.savefig('Diference40PlotPout.png', dpi = 200)
+
 
 
 #Boxplot

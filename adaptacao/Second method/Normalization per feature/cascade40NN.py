@@ -135,7 +135,8 @@ for i in range(2, int(len(columns_1)/2)+1):
 
 	diff_current = []
 	for j in range(0, y_out.shape[0]):
-		diff_current.append(abs(float(y_out[j]) - dataframe_1[columns_1[i]][k]))
+		
+		diff_current.append(abs(float(y_out[j]) - dataframe_1[columns_1[i]][j]))
 	diff_scenario1.append(diff_current)
 	
 	signal_current = []
@@ -211,7 +212,7 @@ for i in range(2, len(columns_2)):
 	
 	diff_current = []
 	for j in range(0, y_out.shape[0]):
-		diff_current.append(abs(float(y_out[j]) - dataframe_2[columns_2[i]][k]))
+		diff_current.append(abs(float(y_out[j]) - dataframe_2[columns_2[i]][j]))
 	diff_scenario2.append(diff_current)
 	if i == len(columns_1)/2:
 		middle_predict = y_out

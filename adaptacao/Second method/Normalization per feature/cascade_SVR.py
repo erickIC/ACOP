@@ -10,7 +10,6 @@ def normalization(x, min, max, range_a, range_b):
 
 def unnormalization(data, min, max, range_a, range_b):
 	unnormalized_data = []
-	
 	values = []
 	for j in range(0, data.shape[0]):
 		values.append(((float(data[j]) - float(range_a)) * (float(max)-float(min))) / (float(range_b) - float(range_a)) + float(min))
@@ -115,12 +114,12 @@ for i in range(2, len(columns_1)-5):
 	aux = svr_t1.predict(x_in)
 	aux += svr_t2.predict(x_in)
 	aux += svr_t3.predict(x_in)
-	aux += svr_t4.predict(x_in)
-	aux += svr_t5.predict(x_in)
-	aux += svr_t6.predict(x_in)
-	aux += svr_t7.predict(x_in)
+	# aux += svr_t4.predict(x_in)
+	# aux += svr_t5.predict(x_in)
+	# aux += svr_t6.predict(x_in)
+	# aux += svr_t7.predict(x_in)
 
-	y_out = aux / 7
+	y_out = aux / 3
 	y_out = y_out[:, :40]
 	
 	# De-normalizing data
@@ -194,12 +193,12 @@ for i in range(2, len(columns_2)):
 	aux = svr_t1.predict(x_in)
 	aux += svr_t2.predict(x_in)
 	aux += svr_t3.predict(x_in)
-	aux += svr_t4.predict(x_in)
-	aux += svr_t5.predict(x_in)
-	aux += svr_t6.predict(x_in)
-	aux += svr_t7.predict(x_in)
+	# aux += svr_t4.predict(x_in)
+	# aux += svr_t5.predict(x_in)
+	# aux += svr_t6.predict(x_in)
+	# aux += svr_t7.predict(x_in)
 
-	y_out = aux / 7
+	y_out = aux / 3
 	y_out = y_out[:, :40]
 	
 	# De-normalizing data
@@ -282,12 +281,12 @@ for i in range(2, len(columns_3)):
 	aux = svr_t1.predict(x_in)
 	aux += svr_t2.predict(x_in)
 	aux += svr_t3.predict(x_in)
-	aux += svr_t4.predict(x_in)
-	aux += svr_t5.predict(x_in)
-	aux += svr_t6.predict(x_in)
-	aux += svr_t7.predict(x_in)
+	# aux += svr_t4.predict(x_in)
+	# aux += svr_t5.predict(x_in)
+	# aux += svr_t6.predict(x_in)
+	# aux += svr_t7.predict(x_in)
 
-	y_out = aux / 7
+	y_out = aux / 3
 	y_out = y_out[:, :40]
 	
 	# De-normalizing data
@@ -331,5 +330,5 @@ plt.ylabel('P_Out (dBm)')
 plt.xlabel('Wavelenght')
 plt.legend()
 
-plt.savefig('ScenariosSVRWithMiddle(5amps-7models).png', dpi = 200)
+plt.savefig('ScenariosSVRWithMiddle(5amps-3models).png', dpi = 200)
 plt.show()

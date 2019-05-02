@@ -2,6 +2,7 @@ import numpy as np
 from random import randint
 from sklearn.svm import SVR
 from sklearn.multioutput import MultiOutputRegressor
+import copy as cp
 from sklearn.metrics import mean_squared_error
 import pickle
 import matplotlib.pyplot as plt
@@ -170,13 +171,13 @@ test_y = np.array(array_yt)
 svr = SVR(kernel='poly', degree=3, gamma='auto', coef0=1, epsilon=0.01)
 svr_t = MultiOutputRegressor(svr)
 
-svr_t1 = svr_t.fit(training_x1, training_y1)
-svr_t2 = svr_t.fit(training_x2, training_y2)
-svr_t3 = svr_t.fit(training_x3, training_y3)
-svr_t4 = svr_t.fit(training_x4, training_y4)
-svr_t5 = svr_t.fit(training_x5, training_y5)
-svr_t6 = svr_t.fit(training_x6, training_y6)
-svr_t7 = svr_t.fit(training_x7, training_y7)
+svr_t1 = cp.deepcopy(svr_t.fit(training_x1, training_y1))
+svr_t2 = cp.deepcopy(svr_t.fit(training_x2, training_y2))
+svr_t3 = cp.deepcopy(svr_t.fit(training_x3, training_y3))
+svr_t4 = cp.deepcopy(svr_t.fit(training_x4, training_y4))
+svr_t5 = cp.deepcopy(svr_t.fit(training_x5, training_y5))
+svr_t6 = cp.deepcopy(svr_t.fit(training_x6, training_y6))
+svr_t7 = cp.deepcopy(svr_t.fit(training_x7, training_y7))
 
 # Saving models for later use
 with open('svr_model_1.pkl', 'wb') as f:

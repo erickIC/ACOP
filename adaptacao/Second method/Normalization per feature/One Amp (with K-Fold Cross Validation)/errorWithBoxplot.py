@@ -564,5 +564,6 @@ plt.boxplot([diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4], np
 diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4], np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0)])
 plt.title('Absolute difference Pout')
 plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], ['41-Fold5', '41-Fold4', '41-Fold3', '41-Fold2', '41-Fold1', '41-all', '42-Fold5', '42-Fold4', '42-Fold3', '42-Fold2', '42-Fold1', '42-all'])
+plt.ylabel('(dB)')
 
 plt.savefig('DifferentsNNsBoxPlot.png', dpi = 200)

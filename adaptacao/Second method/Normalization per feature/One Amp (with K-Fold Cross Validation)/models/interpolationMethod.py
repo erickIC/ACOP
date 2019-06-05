@@ -48,7 +48,8 @@ def getOutputSpectrum (frequencys, pins, Gset, tilt, PowerMask):
     #Apply gain matching algorithm
     pouts_mW = list(map(dB_to_mW,pouts))
     Pout_mW = sum(pouts_mW)
-    adj_factor = (Pout_mW / Pin_mW) / Gset # Total Gain / Gain desired
+    Gset_mW = pow(10, x/10) #dB to mW
+    adj_factor = (Pout_mW / Pin_mW) / Gset_mW # Total Gain / Gain desired
     gain_matching = lambda x : x*adj_factor
     pouts_mW = list(map(gain_matching,pouts_mW))
     pouts = list(map(mW_to_dB,pouts_mW))

@@ -34,24 +34,35 @@ def getPoutAnyTilt (frequency, Pin, Gset, PowerMask, tilt):
 
 def getOutputSpectrum (frequencys, pins, Gset, tilt, PowerMask):
     dB_to_mW = lambda x : pow(10, x/10)
-    mW_to_dB = lambda x : 10*math.log10(x)
     
     #Calculates Pin (total input power) using 'TIP algorithm'
     pins_mW = list(map(dB_to_mW,pins))
     Pin_mW = sum(pins_mW)
     Pin = 10*math.log10(Pin_mW) #mW to dB
 
+    #Calcuates pout for each channel
     pouts = []
     for frequency in frequencys:
         pouts.append(getPoutAnyPin(frequency,Pin,Gset,tilt,PowerMask))
     
     #Apply gain matching algorithm
+    return applyGainMatching(pins, Gset, pouts)
+
+def applyGainMatching(pins, Gset, pouts):
+    dB_to_mW = lambda x : pow(10, x/10)
+    mW_to_dB = lambda x : 10*math.log10(x)
+    
+    pins_mW = list(map(dB_to_mW,pins))
+    Pin_mW = sum(pins_mW)
+    
+    Gset_mW = pow(10, x/10) #dB to mW
+    
     pouts_mW = list(map(dB_to_mW,pouts))
     Pout_mW = sum(pouts_mW)
-    Gset_mW = pow(10, x/10) #dB to mW
+    
     adj_factor = (Pout_mW / Pin_mW) / Gset_mW # Total Gain / Gain desired
     gain_matching = lambda x : x*adj_factor
     pouts_mW = list(map(gain_matching,pouts_mW))
     pouts = list(map(mW_to_dB,pouts_mW))
-
+    
     return pouts

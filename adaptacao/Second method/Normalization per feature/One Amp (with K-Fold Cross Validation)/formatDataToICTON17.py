@@ -11,8 +11,8 @@ for i in range(1, len(entries)):
 	channels = entries[i].split()
 	tilt = float(channels[3]) - float(channels[3 + number_of_channels-1])
 	for j in range(0, number_of_channels):
-		# Total P_in, G_set, Wavelength, Tilt, G_ch(P_out-P_in), Noise Figure(NF)
-		channel.append(str(channels[0]) + ' ' + str(channels[2]) + ' ' + str(channels[3 + (3 * number_of_channels) + j]) + ' ' + str(tilt) + ' ' + str(float(channels[3 + number_of_channels + j]) - float(channels[3 + j])) + ' ' + str(channels[3 + (2 * number_of_channels) + j]) + '\n')
+		# Total P_in, G_set, Wavelength, Tilt, Channel P_out, Noise Figure(NF)
+		channel.append(str(channels[0]) + ' ' + str(channels[2]) + ' ' + str(channels[3 + (3 * number_of_channels) + j]) + ' ' + str(tilt) + ' ' + str(float(channels[3 + number_of_channels + j])) + ' ' + str(channels[3 + (2 * number_of_channels) + j]) + '\n')
 
 with open(output_file, 'w') as f_out:
 	f_out.writelines(channel)

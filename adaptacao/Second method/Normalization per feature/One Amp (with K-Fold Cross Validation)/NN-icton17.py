@@ -163,16 +163,3 @@ for i in range(0, k):
 
 
 print(models[0].summary())
-
-#input()
-
-
-
-# model.fit(training_x, training_y, epochs = 100)
-
-# loss, acc = model.evaluate(test_x, test_y)
-
-# t = "Trained model accuracy: " + str((acc*100)) + "%" + " and the loss: " + str(loss)
-# print(t)
-
-# file.close()

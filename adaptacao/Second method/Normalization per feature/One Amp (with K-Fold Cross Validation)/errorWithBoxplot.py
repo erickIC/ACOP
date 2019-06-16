@@ -283,7 +283,136 @@ fold42_y5 = np.array(fold_y5)
 fold42_x = [fold42_x1, fold42_x2, fold42_x3, fold42_x4, fold42_x5]
 fold42_y = [fold42_y1, fold42_y2, fold42_y3, fold42_y4, fold42_y5]
 
-#################################### ICTON 17 ##################################################
+############################## 41 to 1 ##################################################
+
+fold_x1 = []
+array_y1 = []
+array_yt1 = []
+
+fold_x2 = []
+array_y2 = []
+array_yt2 = []
+
+fold_x3 = []
+array_y3 = []
+array_yt3 = []
+
+fold_x4 = []
+array_y4 = []
+array_yt4 = []
+
+fold_x5 = []
+array_y5 = []
+array_yt5 = []
+
+for i in range(0, number_channels):
+    array_y1.append([])
+    array_yt1.append([])
+    array_y2.append([])
+    array_yt2.append([])
+    array_y3.append([])
+    array_yt3.append([])
+    array_y4.append([])
+    array_yt4.append([])
+    array_y5.append([])
+    array_yt5.append([])
+
+
+for i in range(0, len(data1)):
+    auxiliary = data1[i]
+    x = [auxiliary[0]]
+
+    for i in range(0, number_channels):
+            x.append(auxiliary[1+i])
+            
+            array_y1[i].append([auxiliary[42+i]])
+            array_y2[i].append([auxiliary[42+i]])
+            array_y3[i].append([auxiliary[42+i]])
+            array_y4[i].append([auxiliary[42+i]])
+            array_yt5[i].append([auxiliary[42+i]])
+    fold_x1.append(x)
+
+for i in range(0, len(data2)):
+    auxiliary = data2[i]
+    x = [auxiliary[0]]
+    for i in range(0, number_channels):
+            x.append(auxiliary[1+i])
+            array_y1[i].append([auxiliary[42+i]])
+            array_y2[i].append([auxiliary[42+i]])
+            array_y3[i].append([auxiliary[42+i]])
+            array_yt4[i].append([auxiliary[42+i]])
+            array_y5[i].append([auxiliary[42+i]])
+    fold_x2.append(x)
+
+for i in range(0, len(data3)):
+    auxiliary = data3[i]
+    x = [auxiliary[0]]
+
+    for i in range(0, number_channels):
+            x.append(auxiliary[1+i])
+            array_y1[i].append([auxiliary[42+i]])
+            array_y2[i].append([auxiliary[42+i]])
+            array_yt3[i].append([auxiliary[42+i]])
+            array_y4[i].append([auxiliary[42+i]])
+            array_y5[i].append([auxiliary[42+i]])
+    fold_x3.append(x)
+
+for i in range(0, len(data4)):
+    auxiliary = data4[i]
+    x = [auxiliary[0]]
+    
+    for i in range(0, number_channels):
+            x.append(auxiliary[1+i])
+            array_y1[i].append([auxiliary[42+i]])
+            array_yt2[i].append([auxiliary[42+i]])
+            array_y3[i].append([auxiliary[42+i]])
+            array_y4[i].append([auxiliary[42+i]])
+            array_y5[i].append([auxiliary[42+i]])
+    fold_x4.append(x)
+
+for i in range(0, len(data5)):
+    auxiliary = data5[i]
+    x = [auxiliary[0]]
+   
+    for i in range(0, number_channels):
+            x.append(auxiliary[1+i])
+            array_yt1[i].append([auxiliary[42+i]])
+            array_y2[i].append([auxiliary[42+i]])
+            array_y3[i].append([auxiliary[42+i]])
+            array_y4[i].append([auxiliary[42+i]])
+            array_y5[i].append([auxiliary[42+i]])
+    fold_x5.append(x)
+
+
+fold41to1_x1 = np.array(fold_x1)
+array_y1 = np.array(array_y1)
+array_yt1 = np.array(array_yt1)
+
+fold41to1_x2 = np.array(fold_x2)
+array_y2 = np.array(array_y2)
+array_yt2 = np.array(array_yt2)
+
+fold41to1_x3 = np.array(fold_x3)
+array_y3 = np.array(array_y3)
+array_yt3 = np.array(array_yt3)
+
+fold41to1_x4 = np.array(fold_x4)
+array_y4 = np.array(array_y4)
+array_yt4 = np.array(array_yt4)
+
+fold41to1_x5 = np.array(fold_x5)
+array_y5 = np.array(array_y5)
+array_yt5 = np.array(array_yt5)
+
+
+fold41to1_x = [fold41to1_x1, fold41to1_x2, fold41to1_x3, fold41to1_x4, fold41to1_x5]
+fold41to1_y = [array_y1, array_y2, array_y3, array_y4, array_y5]
+fold41to1_yt = [array_yt1, array_yt2, array_yt3, array_yt4, array_yt5]
+
+if DEBUG:
+    print(len(array_y1[0]))
+
+#################################### ICTON 17 with tilt ##################################################
 
 
 input_folder1 = "masks/mask-edfa1-padtec-icton17-fold-1.txt"
@@ -378,19 +507,82 @@ foldic_y5 = np.array(fold_y5)
 foldic_x = [foldic_x1, foldic_x2, foldic_x3, foldic_x4, foldic_x5]
 foldic_y = [foldic_y1, foldic_y2, foldic_y3, foldic_y4, foldic_y5]
 
+
+
+#################################### ICTON 17 original ##################################################
+
+
+fold_x1 = []
+fold_y1 = []
+
+fold_x2 = []
+fold_y2 = []
+
+fold_x3 = []
+fold_y3 = []
+
+fold_x4 = []
+fold_y4 = []
+
+fold_x5 = []
+fold_y5 = []
+
+for i in range(0, len(data1)):
+	fold_x1.append([data1[i][0], data1[i][1], data1[i][2]])
+	fold_y1.append([data1[i][4], data1[i][5]])
+
+	fold_x2.append([data2[i][0], data2[i][1], data2[i][2]])
+	fold_y2.append([data2[i][4], data2[i][5]])
+
+	fold_x3.append([data3[i][0], data3[i][1], data3[i][2]])
+	fold_y3.append([data3[i][4], data3[i][5]])
+
+	fold_x4.append([data4[i][0], data4[i][1], data4[i][2]])
+	fold_y4.append([data4[i][4], data4[i][5]])
+
+	fold_x5.append([data5[i][0], data5[i][1], data5[i][2]])
+	fold_y5.append([data5[i][4], data5[i][5]])
+
+foldico_x1 = np.array(fold_x1)
+foldico_y1 = np.array(fold_y1)
+
+foldico_x2 = np.array(fold_x2)
+foldico_y2 = np.array(fold_y2)
+
+foldico_x3 = np.array(fold_x3)
+foldico_y3 = np.array(fold_y3)
+
+foldico_x4 = np.array(fold_x4)
+foldico_y4 = np.array(fold_y4)
+
+foldico_x5 = np.array(fold_x5)
+foldico_y5 = np.array(fold_y5)
+
+foldico_x = [foldico_x1, foldico_x2, foldico_x3, foldico_x4, foldico_x5]
+foldico_y = [foldico_y1, foldico_y2, foldico_y3, foldico_y4, foldico_y5]
+
+
+
+
 ######## Loading models ###########
+
 
 k = 5
 models41to40 = []
 models42to40 = []
+models41to1 = []
 modelsicton = []
-
+modelsictono = []
 
 
 for i in range(0, k):
     model_name = 'models/nn-icon17' + str(i + 1) + '.h5'
     model_current = load_model(model_name)
     modelsicton.append(model_current)
+
+    model_name = 'models/nn-icon17-o' + str(i + 1) + '.h5'
+    model_current = load_model(model_name)
+    modelsictono.append(model_current)
 
     model_name = 'models/nn-41to40' + str(i + 1) + '.h5'
     model_current = load_model(model_name)
@@ -400,23 +592,37 @@ for i in range(0, k):
     model_current = load_model(model_name)
     models42to40.append(model_current)
 
+    models41to1.append([])
+    for j in range(0, number_channels):
+        model_name = 'models/NN-41to1-' + str(i + 1) + str(j + 1) + '.h5'
+        model_current = load_model(model_name)
+        models41to1[i].append(model_current)
+
+
+print(len(models41to1), len(models41to1[0]))
+
 if DEBUG: 
-    print(len(modelsicton), len(models41to40), len(models42to40))
+    print(len(modelsicton), len(modelsictono), len(models41to40), len(models42to40))
 
 
 ########### Predicting ################
 
 pred_ic = []
+pred_io = []
 pred_41 = []
 pred_42 = []
+pred_41to1 = []
 
 for i in range(0, k):
     pred_ic.append(modelsicton[i].predict(foldic_x[(k-1)-i])) #Becausa the first model was trained with fold 5.
+    pred_io.append(modelsictono[i].predict(foldico_x[(k-1)-i]))
     pred_41.append(models41to40[i].predict(fold41_x[(k-1)-i]))
     pred_42.append(models42to40[i].predict(fold42_x[(k-1)-i]))
 
+
+
 if DEBUG:
-    print(pred_ic[0][0], pred_41[0][0], pred_42[0][0])
+    print(pred_ic[0][0], pred_io[0][0], pred_41[0][0], pred_42[0][0])
 
 ########### Take the infos to unnormalize the data #####################
 
@@ -466,21 +672,29 @@ if DEBUG:
 ########## Calcule the error ############
 
 pred_y41 = []
+pred_y41to1= []
 pred_y42 = []
 pred_yic = []
+pred_yio = []
+
 
 test_y41 = []
+test_y41to1 = []
 test_y42 = []
 test_yic = []
+test_yio = []
 
 for i in range(0, len(pred_41)):
     pred_y41.append(unnormalization(pred_41[i], min_pout, max_pout, range_a, range_b))
     pred_y42.append(unnormalization(pred_42[i], min_pout, max_pout, range_a, range_b))
     pred_yic.append(unnormalizationic(pred_ic[i], min_gch, max_gch, min_nf, max_nf, range_a, range_b))
+    pred_yio.append(unnormalizationic(pred_io[i], min_gch, max_gch, min_nf, max_nf, range_a, range_b))
+    
 
     test_y41.append(unnormalization(fold41_y[(k-1)-i], min_pout, max_pout, range_a, range_b))
     test_y42.append(unnormalization(fold42_y[(k-1)-i], min_pout, max_pout, range_a, range_b))
     test_yic.append(unnormalizationic(foldic_y[(k-1)-i], min_gch, max_gch, min_nf, max_nf, range_a, range_b))
+    test_yio.append(unnormalizationic(foldico_y[(k-1)-i], min_gch, max_gch, min_nf, max_nf, range_a, range_b))
 
 if DEBUG:
     print(pred_y41[4][0], test_y41[4][0], test_yic[0][0])
@@ -489,7 +703,7 @@ if DEBUG:
 diffs_41 = []
 diffs_42 = []
 diffs_ic = []
-
+diffs_io = []
 
 for i in range(0 , len(pred_y41)):
     diff_current = []
@@ -549,21 +763,43 @@ if DEBUG:
     print(len(diffs_ic[0]))
 
 
+diffs_nf2 = []
+
+for i in range(0 , len(pred_yio)):
+    diff_current = []
+    diff_current2 = []
+    for j in range(0, len(pred_yio[i])):
+        
+        current = pred_yio[i][j]
+        
+        diff = int(0)
+        diff2 = int(0)
+        
+        diff += abs(current[0] - test_yio[i][j][0])
+        diff2 += abs(current[1] - test_yio[i][j][1])
+        if DEBUG:
+            print(current[0], test_yio[i][j][0])
+
+        diff_current.append(diff)
+        diff_current2.append(diff2)
+    diffs_io.append(diff_current)
+    diffs_nf2.append(diff_current2)
+
+if DEBUG:
+    print(len(diffs_io[0]))
+
+
 ########## Boxplot #######################
 
 plt.figure(figsize=(16,10))
 
-plt.subplot(211)
-plt.boxplot([diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4], np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0)])
-plt.title('Absolute difference Gch ICTON')
-plt.xticks([1, 2, 3, 4, 5, 6], ['Fold5', 'Fold4', 'Fold3', 'Fold2', 'Fold1', 'all'])
-plt.ylabel('(dB)')
-
-plt.subplot(212)
-plt.boxplot([diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4], np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0), 
-diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4], np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0)])
+plt.boxplot([
+            np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_io[4]), axis = 0),
+            np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0),         #icton17 with tilt 
+            np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
+            np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0)])        #42to40 with tilt
 plt.title('Absolute difference Pout')
-plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], ['41-Fold5', '41-Fold4', '41-Fold3', '41-Fold2', '41-Fold1', '41-all', '42-Fold5', '42-Fold4', '42-Fold3', '42-Fold2', '42-Fold1', '42-all'])
+plt.xticks([1, 2, 3, 4], ['ICTONOriginal', 'ICTONWithTilt', '41-to-40', '42-to40'])
 plt.ylabel('(dB)')
 
 plt.savefig('DifferentsNNsBoxPlot.png', dpi = 200)

@@ -594,6 +594,7 @@ for i in range(0, k):
 
     models41to1.append([])
     for j in range(0, number_channels):
+        print(str(i) + str(j))
         model_name = 'models/NN-41to1-' + str(i + 1) + str(j + 1) + '.h5'
         model_current = load_model(model_name)
         models41to1[i].append(model_current)
@@ -618,8 +619,12 @@ for i in range(0, k):
     pred_io.append(modelsictono[i].predict(foldico_x[(k-1)-i]))
     pred_41.append(models41to40[i].predict(fold41_x[(k-1)-i]))
     pred_42.append(models42to40[i].predict(fold42_x[(k-1)-i]))
+    pred_41to1.append([])
+    for j in range(0, number_channels):
+        print(str(i) + str(j) + '2')
+        pred_41to1[i].append(models41to1[i][j].predict(fold41to1_x[(k-1)-i]))
 
-
+print(len(pred_41to1[0]), len(pred_41to1[0][0]))
 
 if DEBUG:
     print(pred_ic[0][0], pred_io[0][0], pred_41[0][0], pred_42[0][0])
@@ -672,7 +677,7 @@ if DEBUG:
 ########## Calcule the error ############
 
 pred_y41 = []
-pred_y41to1= []
+pred_y41to1 = []
 pred_y42 = []
 pred_yic = []
 pred_yio = []
@@ -689,12 +694,18 @@ for i in range(0, len(pred_41)):
     pred_y42.append(unnormalization(pred_42[i], min_pout, max_pout, range_a, range_b))
     pred_yic.append(unnormalizationic(pred_ic[i], min_gch, max_gch, min_nf, max_nf, range_a, range_b))
     pred_yio.append(unnormalizationic(pred_io[i], min_gch, max_gch, min_nf, max_nf, range_a, range_b))
-    
+    pred_y41to1.append([])
+    for j in range(0, number_channels): #pred_41to1[i]
+        pred_y41to1[i].append(unnormalization(pred_41to1[i][j], min_pout, max_pout, range_a, range_b))
 
     test_y41.append(unnormalization(fold41_y[(k-1)-i], min_pout, max_pout, range_a, range_b))
     test_y42.append(unnormalization(fold42_y[(k-1)-i], min_pout, max_pout, range_a, range_b))
+    test_y41to1.append(unnormalization(fold41to1_yt[i], min_pout, max_pout, range_a, range_b))  #only in the inverted order 
     test_yic.append(unnormalizationic(foldic_y[(k-1)-i], min_gch, max_gch, min_nf, max_nf, range_a, range_b))
     test_yio.append(unnormalizationic(foldico_y[(k-1)-i], min_gch, max_gch, min_nf, max_nf, range_a, range_b))
+
+print(test_y41to1[0], pred_y41to1[0][0])
+print(len(test_y41to1[0]), len(pred_y41to1[0][0]))
 
 if DEBUG:
     print(pred_y41[4][0], test_y41[4][0], test_yic[0][0])
@@ -704,6 +715,7 @@ diffs_41 = []
 diffs_42 = []
 diffs_ic = []
 diffs_io = []
+diffs_41to1 = []
 
 for i in range(0 , len(pred_y41)):
     diff_current = []
@@ -734,6 +746,19 @@ for i in range(0 , len(pred_y42)):
 
 if DEBUG:
     print(len(diffs_42))
+
+
+for i in range(0, len(test_y41to1)):
+    diff_current = []
+    for j in range(0, len(test_y41to1[i])): #5
+        current = test_y41to1[i][j]
+        diff = int(0)
+        for k in range(0, len(current)):
+            diff += abs(current[k] - pred_y41to1[i][j][k][0])
+        diff_current.append(diff/len(current))
+    diffs_41to1.append(diff_current)
+
+
 
 diffs_nf = []
 
@@ -793,13 +818,47 @@ if DEBUG:
 
 plt.figure(figsize=(16,10))
 
+plt.subplot(211)
 plt.boxplot([
             np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_io[4]), axis = 0),
             np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0),         #icton17 with tilt 
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
-            np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0)])        #42to40 with tilt
+            np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
+            np.concatenate((diffs_41to1[0], diffs_41to1[1], diffs_41to1[2], diffs_41to1[3], diffs_41to1[4]), axis = 0)
+            ])        
 plt.title('Absolute difference Pout')
-plt.xticks([1, 2, 3, 4], ['ICTONOriginal', 'ICTONWithTilt', '41-to-40', '42-to40'])
+plt.xticks([1, 2, 3, 4, 5], ['ICTONOriginal', 'ICTONWithTilt', '41-to-40', '42-to-40', '41-to-1'])
 plt.ylabel('(dB)')
 
+plt.subplot(212)
+io = np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_io[4]), axis = 0)
+ic = np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0)
+n4140 = np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0)
+n4240 = np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0)
+n411  = np.concatenate((diffs_41to1[0], diffs_41to1[1], diffs_41to1[2], diffs_41to1[3], diffs_41to1[4]), axis = 0)
+
+col_labels = ['mean', 'std']
+row_labels = ['ICTON', 'ICTONwT', '41-to-40', '42-to-40', '41-to-1']
+
+table_vals = [[round(np.mean(io), 4), round(np.std(io), 4)], 
+              [round(np.mean(ic), 4), round(np.std(ic), 4)], 
+              [round(np.mean(n4140), 4), round(np.std(n4140), 4)],
+              [round(np.mean(n4240), 4), round(np.std(n4240), 4)], 
+              [round(np.mean(n411), 4), round(np.std(n411), 4)]]
+
+# Draw table
+the_table = plt.table(cellText=table_vals,
+                      colWidths=[0.1] * 3,
+                      rowLabels=row_labels,
+                      colLabels=col_labels,
+                      loc='center')
+the_table.auto_set_font_size(False)
+the_table.set_fontsize(20)
+the_table.scale(4, 4)
+plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+plt.tick_params(axis='y', which='both', right=False, left=False, labelleft=False)
+for pos in ['right','top','bottom','left']:
+    plt.gca().spines[pos].set_visible(False)
+
 plt.savefig('DifferentsNNsBoxPlot.png', dpi = 200)
+

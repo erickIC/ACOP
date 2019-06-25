@@ -15,12 +15,12 @@ def unnormalization(x, max, min, range_a, range_b):
 
 
 ### Reading file and placing data in an matrix where each row is a channel of a input
-input_folder1 = "masks/mask-edfa1-padtec-icton17-fold-1.txt"
-input_folder2 = "masks/mask-edfa1-padtec-icton17-fold-2.txt"
-input_folder3 = "masks/mask-edfa1-padtec-icton17-fold-3.txt"
-input_folder4 = "masks/mask-edfa1-padtec-icton17-fold-4.txt"
-input_folder5 = "masks/mask-edfa1-padtec-icton17-fold-5.txt"
-info_file = "masks/mask-edfa1-padtec-icton17-info.txt"
+input_folder1 = "masks/mask-edfa1-padtec-icton17-fold-1v2.txt"
+input_folder2 = "masks/mask-edfa1-padtec-icton17-fold-2v2.txt"
+input_folder3 = "masks/mask-edfa1-padtec-icton17-fold-3v2.txt"
+input_folder4 = "masks/mask-edfa1-padtec-icton17-fold-4v2.txt"
+input_folder5 = "masks/mask-edfa1-padtec-icton17-fold-5v2.txt"
+info_file = "masks/mask-edfa1-padtec-icton17-infov2.txt"
 
 with open(input_folder1, 'r') as f_in:
 	data1 = []
@@ -157,7 +157,7 @@ for i in range(0, k):
 
 	history = model.fit(trainings_x[i], trainings_y[i], validation_data=(tests_x[i], tests_y[i]), epochs = num_epochs,callbacks=[cb])
 
-	model.save('nn-icon17' + str(i + 1) + '.h5')
+	model.save('nn-icon17v2' + str(i + 1) + '.h5')
 	models.append(model)
 	histories.append(history)
 

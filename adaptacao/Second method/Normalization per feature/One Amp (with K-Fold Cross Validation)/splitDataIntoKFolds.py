@@ -1,20 +1,20 @@
 import random
 
 ## Files for ICTON 17
-icton_input_file = "masks/mask-edfa1-padtec-icton17-normalized.txt"
-icton_output_file_1 = "masks/mask-edfa1-padtec-icton17-fold-1.txt"
-icton_output_file_2 = "masks/mask-edfa1-padtec-icton17-fold-2.txt"
-icton_output_file_3 = "masks/mask-edfa1-padtec-icton17-fold-3.txt"
-icton_output_file_4 = "masks/mask-edfa1-padtec-icton17-fold-4.txt"
-icton_output_file_5 = "masks/mask-edfa1-padtec-icton17-fold-5.txt"
+icton_input_file = "masks/mask-edfa1-padtec-icton17-normalizedv2.txt"
+icton_output_file_1 = "masks/mask-edfa1-padtec-icton17-fold-1v2.txt"
+icton_output_file_2 = "masks/mask-edfa1-padtec-icton17-fold-2v2.txt"
+icton_output_file_3 = "masks/mask-edfa1-padtec-icton17-fold-3v2.txt"
+icton_output_file_4 = "masks/mask-edfa1-padtec-icton17-fold-4v2.txt"
+icton_output_file_5 = "masks/mask-edfa1-padtec-icton17-fold-5v2.txt"
 
 ## Files for New Models
-others_input_file = "masks/mask-edfa1-padtec-new-models-normalized.txt"
-others_output_file_1 = "masks/mask-edfa1-padtec-new-models-fold-1.txt"
-others_output_file_2 = "masks/mask-edfa1-padtec-new-models-fold-2.txt"
-others_output_file_3 = "masks/mask-edfa1-padtec-new-models-fold-3.txt"
-others_output_file_4 = "masks/mask-edfa1-padtec-new-models-fold-4.txt"
-others_output_file_5 = "masks/mask-edfa1-padtec-new-models-fold-5.txt"
+others_input_file = "masks/mask-edfa1-padtec-new-models-normalizedv2.txt"
+others_output_file_1 = "masks/mask-edfa1-padtec-new-models-fold-1v2.txt"
+others_output_file_2 = "masks/mask-edfa1-padtec-new-models-fold-2v2.txt"
+others_output_file_3 = "masks/mask-edfa1-padtec-new-models-fold-3v2.txt"
+others_output_file_4 = "masks/mask-edfa1-padtec-new-models-fold-4v2.txt"
+others_output_file_5 = "masks/mask-edfa1-padtec-new-models-fold-5v2.txt"
 
 icton_output_files = [icton_output_file_1, icton_output_file_2, icton_output_file_3, icton_output_file_4, icton_output_file_5]
 others_output_files = [others_output_file_1, others_output_file_2, others_output_file_3, others_output_file_4, others_output_file_5]

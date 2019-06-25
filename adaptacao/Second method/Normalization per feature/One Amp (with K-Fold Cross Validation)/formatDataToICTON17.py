@@ -1,5 +1,5 @@
-input_file = "masks/mask-edfa1-padtec.txt"
-output_file = "masks/mask-edfa1-padtec-icton17.txt"
+input_file = "masks/mask-edfa1-padtec2.txt"
+output_file = "masks/mask-edfa1-padtec-icton17v2.txt"
 
 # Formatting data to match ICTON 17 model
 with open(input_file, 'r') as f_in:

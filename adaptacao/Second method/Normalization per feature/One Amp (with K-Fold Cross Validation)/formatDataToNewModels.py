@@ -1,5 +1,5 @@
-input_file = "masks/mask-edfa1-padtec.txt"
-output_file = "masks/mask-edfa1-padtec-new-models.txt"
+input_file = "masks/mask-edfa1-padtec2.txt"
+output_file = "masks/mask-edfa1-padtec-new-modelsv2.txt"
 
 # Formatting data to match new models
 with open(output_file, 'w') as f_out:

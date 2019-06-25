@@ -4,9 +4,9 @@ def normalization(x, min, max, range_a, range_b):
 	z = ((float(range_b) - float(range_a)) * ((x - float(min))/(float(max) - float(min)))) + float(range_a)
 	return z
 
-input_file = "masks/mask-edfa1-padtec-new-models.txt"
-output_file = "masks/mask-edfa1-padtec-new-models-normalized.txt"
-info_file = "masks/mask-edfa1-padtec-new-models-info.txt"
+input_file = "masks/mask-edfa1-padtec-new-modelsv2.txt"
+output_file = "masks/mask-edfa1-padtec-new-models-normalizedv2.txt"
+info_file = "masks/mask-edfa1-padtec-new-models-infov2.txt"
 
 # Reading data
 with open(input_file, 'r') as f_in:

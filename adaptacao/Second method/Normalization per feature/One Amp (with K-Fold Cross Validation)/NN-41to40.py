@@ -20,12 +20,12 @@ def unnormalization(data, min, max, range_a, range_b):
 
 #Read the file. 
 
-input_folder1 = "masks/mask-edfa1-padtec-new-models-fold-1.txt"
-input_folder2 = "masks/mask-edfa1-padtec-new-models-fold-2.txt"
-input_folder3 = "masks/mask-edfa1-padtec-new-models-fold-3.txt"
-input_folder4 = "masks/mask-edfa1-padtec-new-models-fold-4.txt"
-input_folder5 = "masks/mask-edfa1-padtec-new-models-fold-5.txt"
-info_file = "masks/mask-edfa1-padtec-new-models-info.txt"
+input_folder1 = "masks/mask-edfa1-padtec-new-models-fold-1v2.txt"
+input_folder2 = "masks/mask-edfa1-padtec-new-models-fold-2v2.txt"
+input_folder3 = "masks/mask-edfa1-padtec-new-models-fold-3v2.txt"
+input_folder4 = "masks/mask-edfa1-padtec-new-models-fold-4v2.txt"
+input_folder5 = "masks/mask-edfa1-padtec-new-models-fold-5v2.txt"
+info_file = "masks/mask-edfa1-padtec-new-models-infov2.txt"
 
 #Data into a array with floats.
 with open(input_folder1, 'r') as file:
@@ -214,7 +214,7 @@ for i in range(0, k):
 
 	history = model.fit(trainings_x[i], trainings_y[i], validation_data=(tests_x[i], tests_y[i]), epochs = num_epochs,callbacks=[cb])
 
-	model.save('nn-41to40' + str(i + 1) + '.h5')
+	model.save('nn-41to40v2' + str(i + 1) + '.h5')
 
 	models.append(model)
 	histories.append(history)

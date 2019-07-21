@@ -640,35 +640,36 @@ diffs_io = []
 for i in range(0 , len(pred_y41)):
     diff_current = []
     for j in range(0, len(pred_y41[i])):
-        if (i == 1):
+        if (i == 2):
             if j == 1:
                 plt.figure(figsize=(10,8))
-                plt.title('Comparation gain matching')
                 plt.subplot(321)
+                plt.title('Comparation gain matching 2')
             if j == int(len(pred_y41[i])/2):
-                plt.subplot(322)
+                plt.subplot(323)
             if j == int(len(pred_y41[i])*(2/3)):
                 plt.subplot(325)
-        if (i == 3):
+        if (i == 4):
             if j == 1:
                 plt.subplot(324)
             if j == int(len(pred_y41[i])/2):
-                plt.subplot(323)
+                plt.subplot(322)
             if j == int(len(pred_y41[i])*(2/3)):
                 plt.subplot(326)
 
         current = pred_y41[i][j]
-        if (i == 1) or (i == 3):
+        if (i == 2) or (i == 4):
             if j == 1 or j == int(len(pred_y41[i])/2) or j == int(len(pred_y41[i])*(2/3)):
                 plt.plot(wavelength, current, label='original')
         
 
         current_in = pred_x41[i][j]
         current = applyGainMatching(current_in[1:], int(current_in[0]), current)
-        if (i == 1) or (i == 3):
+        if (i == 2) or (i == 4):
             if j == 1 or j == int(len(pred_y41[i])/2) or j == int(len(pred_y41[i])*(2/3)):
                 plt.plot(wavelength, current, label='Gain matching')
-                if i == 1:
+                plt.plot(wavelength, test_y41[i][j],'--' ,label='Expected')
+                if i == 2:
                     plt.ylabel('Pout (db)')
                 plt.legend()
 
@@ -681,7 +682,7 @@ for i in range(0 , len(pred_y41)):
     diffs_41.append(diff_current)
 
 
-plt.savefig('Comparation gain matching.png', dpi = 200)
+plt.savefig('Comparation gain matching 2.png', dpi = 200)
 
 if DEBUG:
     print(len(diffs_41))

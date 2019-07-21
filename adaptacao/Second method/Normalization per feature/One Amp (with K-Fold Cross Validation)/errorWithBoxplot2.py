@@ -78,7 +78,7 @@ plt.rc('axes', titlesize=medium_size)        # fontsize of the axes title
 plt.rc('axes', labelsize=medium_size)        # fontsize of the x and y labels
 plt.rc('xtick', labelsize=smaller_size)      # fontsize of the tick labels
 plt.rc('ytick', labelsize=smaller_size)      # fontsize of the tick labels
-plt.rc('legend', fontsize=medium_size)       # legend fontsize
+plt.rc('legend', fontsize=smaller_size)       # legend fontsize
 plt.rc('figure', titlesize=bigger_size)      # fontsize of the figure title
 
 #### Getting the folds
@@ -89,6 +89,13 @@ input_folder4 = "masks/mask-edfa1-padtec-new-models-fold-4v2.txt"
 input_folder5 = "masks/mask-edfa1-padtec-new-models-fold-5v2.txt"
 
 DEBUG = False
+wavelength = [1560.713, 1559.794, 1559.04, 1558.187, 1557.433, 1556.613, 
+               1555.858, 1555.038, 1554.153, 1553.398, 1552.578, 1551.758,
+               1550.971, 1550.02, 1549.397, 1548.61, 1547.822, 1547.002, 
+               1546.182, 1545.395, 1544.608, 1543.788, 1543.001, 1542.214,
+               1541.426, 1540.639, 1539.852, 1538.966, 1538.278, 1537.425, 
+               1536.638, 1535.883, 1535.096, 1534.342, 1533.587, 1532.8, 
+               1532.013, 1531.226, 1530.438, 1529.651]
 
 ############################## 41 to 40 #############################################
 
@@ -633,9 +640,38 @@ diffs_io = []
 for i in range(0 , len(pred_y41)):
     diff_current = []
     for j in range(0, len(pred_y41[i])):
+        if (i == 1):
+            if j == 1:
+                plt.figure(figsize=(10,8))
+                plt.title('Comparation gain matching')
+                plt.subplot(321)
+            if j == int(len(pred_y41[i])/2):
+                plt.subplot(322)
+            if j == int(len(pred_y41[i])*(2/3)):
+                plt.subplot(325)
+        if (i == 3):
+            if j == 1:
+                plt.subplot(324)
+            if j == int(len(pred_y41[i])/2):
+                plt.subplot(323)
+            if j == int(len(pred_y41[i])*(2/3)):
+                plt.subplot(326)
+
         current = pred_y41[i][j]
+        if (i == 1) or (i == 3):
+            if j == 1 or j == int(len(pred_y41[i])/2) or j == int(len(pred_y41[i])*(2/3)):
+                plt.plot(wavelength, current, label='original')
+        
+
         current_in = pred_x41[i][j]
         current = applyGainMatching(current_in[1:], int(current_in[0]), current)
+        if (i == 1) or (i == 3):
+            if j == 1 or j == int(len(pred_y41[i])/2) or j == int(len(pred_y41[i])*(2/3)):
+                plt.plot(wavelength, current, label='Gain matching')
+                if i == 1:
+                    plt.ylabel('Pout (db)')
+                plt.legend()
+
         diff = int(0)
         for k in range(0, len(current)):
             diff += abs(current[k] - test_y41[i][j][k])
@@ -643,6 +679,9 @@ for i in range(0 , len(pred_y41)):
                 print(current[k], test_y41[i][j][k])
         diff_current.append(diff/len(current))
     diffs_41.append(diff_current)
+
+
+plt.savefig('Comparation gain matching.png', dpi = 200)
 
 if DEBUG:
     print(len(diffs_41))
@@ -730,7 +769,7 @@ if DEBUG:
 
 ########## Boxplot #######################
 
-plt.figure(figsize=(16,10))
+plt.figure(figsize=(10,8))
 
 plt.subplot(211)
 plt.boxplot([
@@ -756,7 +795,7 @@ plt.ylabel('(dB)')
 
 plt.savefig('DifferentsNNsBoxPlotv2t.png', dpi = 200)
 
-plt.figure(figsize=(16,10))
+plt.figure(figsize=(8,6))
 
 io = np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_io[4]), axis = 0)
 ic = np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0)
@@ -786,5 +825,5 @@ plt.tick_params(axis='y', which='both', right=False, left=False, labelleft=False
 for pos in ['right','top','bottom','left']:
     plt.gca().spines[pos].set_visible(False)
 
-plt.savefig('TableNNsBoxPlotv2t.png', dpi = 200)
+plt.savefig('TableNNsBoxPlotv2t1.png', dpi = 200)
 

@@ -74,18 +74,21 @@ test_data = np.array(test_data)
 max_gset = training_data[0][0]
 min_gset = training_data[0][0]
 
-for i in range(1, training_data.shape[0]):
+# Pin
+max_pin = training_data[0][1]
+min_pin = training_data[0][1]
+
+# Pout
+max_pout = training_data[0][41]
+min_pout = training_data[0][41]
+
+for i in range(0, training_data.shape[0]):
 	if training_data[i][0] > max_gset:
 		max_gset = training_data[i][0]
 		continue
 	if training_data[i][0] < min_gset:
 		min_gset = training_data[i][0]
 
-# Pin
-max_pin = training_data[0][1]
-min_pin = training_data[0][1]
-
-for i in range(0, training_data.shape[0]):
 	for j in range(1, 41):
 		if training_data[i][j] > max_pin:
 			max_pin = training_data[i][j]
@@ -93,11 +96,6 @@ for i in range(0, training_data.shape[0]):
 		if training_data[i][j] < min_pin:
 			min_pin = training_data[i][j]
 
-# Pout
-max_pout = training_data[0][42]
-min_pout = training_data[0][42]
-
-for i in range(0, training_data.shape[0]):
 	for j in range(41, 81):
 		if training_data[i][j] > max_pout:
 			max_pout = training_data[i][j]
@@ -149,7 +147,7 @@ for i in range(0 , output.shape[0]):
     current_diff = 0
     for j in range(0, output.shape[1]):
         current_diff += abs(test_data[i, 41+j] - output[i, j])
-    diff.append(current_diff/test_data.shape[1])
+    diff.append(current_diff/output.shape[1])
 
 ## Plot result
 plt.boxplot(diff)

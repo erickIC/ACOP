@@ -13,7 +13,8 @@ tilt_value = ["flat_modified", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
 				"-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8", "-9", "-10", "-11", "-12", "-13", "-14"]
 
 number_of_channels = 40
-caught = []
+caught = []	# keep the masks already used
+diffs = []	# error per boxplot
 
 def normalization(x, min, max, range_a, range_b):
 	z = ((float(range_b) - float(range_a)) * ((x - float(min))/(float(max) - float(min)))) + float(range_a)
@@ -56,101 +57,270 @@ def read_files(data, step):
 					line[41+m] = float(auxiliary[49+m])	# P_out (channel)
 				data.append(line)
 
-# Mask step
-step_db = 14
+def read_files_for_1dB_step(data, tilts):
+	for i in range(len(tilts)):
+		# Positive mask
+		input_file = path + str(tilts[i]) + dB + extension
+		if input_file not in caught:
+			with open(input_file, 'r') as f_in:
+				caught.append(input_file)
+				entries = f_in.readlines()
+			for j in range(0, len(entries)):
+				auxiliary = entries[j].split()
+				line = [0] * 81
+				line[0] = float(auxiliary[6])	# G_set
+				for k in range(0, number_of_channels):
+					line[1+k] = float(auxiliary[9+k])	# P_in (channel)
+				for m in range(0, number_of_channels):
+					line[41+m] = float(auxiliary[49+m])	# P_out (channel)
+				data.append(line)
 
-## Reading training and test data
-training_data = []
-read_files(training_data, step_db)
-training_data = np.array(training_data)
+		# Negative mask
+		input_file = path + '-' + str(tilts[i]) + dB + extension
+		if input_file not in caught:
+			with open(input_file, 'r') as f_in:
+				caught.append(input_file)
+				entries = f_in.readlines()
+			for j in range(0, len(entries)):
+				auxiliary = entries[j].split()
+				line = [0] * 81
+				line[0] = float(auxiliary[6])	# G_set
+				for k in range(0, number_of_channels):
+					line[1+k] = float(auxiliary[9+k])	# P_in (channel)
+				for m in range(0, number_of_channels):
+					line[41+m] = float(auxiliary[49+m])	# P_out (channel)
+				data.append(line)
 
-test_data = []
-read_files(test_data, 1)
-test_data = np.array(test_data)
+def include_flat_modified(data):
+	input_file = path + tilt_value[0] + extension
+	with open(input_file, 'r') as f_in:
+		entries = f_in.readlines()
+	for j in range(0, len(entries)):
+		auxiliary = entries[j].split()
+		line = [0] * 81
+		line[0] = float(auxiliary[6])	# G_set
+		for k in range(0, number_of_channels):
+			line[1+k] = float(auxiliary[9+k])	# P_in (channel)
+		for m in range(0, number_of_channels):
+			line[41+m] = float(auxiliary[49+m])	# P_out (channel)
+		data.append(line)
 
-## Setting max and min
+### 1dB step
 
-# Gset
-max_gset = training_data[0][0]
-min_gset = training_data[0][0]
+# Splitting into 7 folds
+k = 7
 
-# Pin
-max_pin = training_data[0][1]
-min_pin = training_data[0][1]
+tilt_list = np.arange(1, 15)
+np.random.shuffle(tilt_list)
 
-# Pout
-max_pout = training_data[0][41]
-min_pout = training_data[0][41]
+fold_size = int(len(tilt_list) / k)
 
-for i in range(0, training_data.shape[0]):
-	if training_data[i][0] > max_gset:
-		max_gset = training_data[i][0]
-		continue
-	if training_data[i][0] < min_gset:
-		min_gset = training_data[i][0]
+fold_1 = tilt_list[0:fold_size]
+fold_2 = tilt_list[fold_size:fold_size*2]
+fold_3 = tilt_list[fold_size*2:fold_size*3]
+fold_4 = tilt_list[fold_size*3:fold_size*4]
+fold_5 = tilt_list[fold_size*4:fold_size*5]
+fold_6 = tilt_list[fold_size*5:fold_size*6]
+fold_7 = tilt_list[fold_size*6:]
+folds = [fold_1, fold_2, fold_3, fold_4, fold_5, fold_6, fold_7]
 
-	for j in range(1, 41):
-		if training_data[i][j] > max_pin:
-			max_pin = training_data[i][j]
-			continue
-		if training_data[i][j] < min_pin:
-			min_pin = training_data[i][j]
-
-	for j in range(41, 81):
-		if training_data[i][j] > max_pout:
-			max_pout = training_data[i][j]
-			continue
-		if training_data[i][j] < min_pout:
-			min_pout = training_data[i][j]
-
-## Normalize data
-range_a = 0.15
-range_b = 0.85
-
-normalized_training_data = np.zeros_like(training_data)
-normalized_test_data = np.zeros_like(test_data)
-
-# Training data
-for i in range(0, training_data.shape[0]):
-	normalized_training_data[i, 0] = normalization(training_data[i, 0], min_gset, max_gset, range_a, range_b)
-	for j in range(1, 41):
-		normalized_training_data[i, j] = normalization(training_data[i, j], min_pin, max_pin, range_a, range_b)
-	for j in range(41, 81):
-		normalized_training_data[i, j] = normalization(training_data[i, j], min_pout, max_pout, range_a, range_b)
-
-# Test data
-for i in range(0, test_data.shape[0]):
-	normalized_test_data[i, 0] = normalization(test_data[i, 0], min_gset, max_gset, range_a, range_b)
-	for j in range(1, 41):
-		normalized_test_data[i, j] = normalization(test_data[i, j], min_pin, max_pin, range_a, range_b)
-	for j in range(41, 81):
-		normalized_test_data[i, j] = normalization(test_data[i, j], min_pout, max_pout, range_a, range_b)
-
-## Building neural network
-num_epochs = 5000
-model = Sequential()
-model.add(Dense(54, input_dim = 41, activation='sigmoid'))
-model.add(Dropout(0.1))
-model.add(Dense(54, activation='sigmoid'))
-model.add(Dense(40, activation='sigmoid'))
-model.compile(optimizer = 'adam', loss = 'mse', metrics = ['acc'])
-cb = callbacks.EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 120, verbose = 0, mode='auto')
-model.fit(normalized_training_data[:, :41], normalized_training_data[:, 41:], validation_data=(normalized_test_data[:, :41], normalized_test_data[:, 41:]), epochs = num_epochs,callbacks=[cb])
-output = model.predict(normalized_test_data[:, :41])
-
-## Unnormalizing output
-output = unnormalization(output, min_pout, max_pout, range_a, range_b)
-
-## Calculating absolute error
 diff = []
-for i in range(0 , output.shape[0]):
-    current_diff = 0
-    for j in range(0, output.shape[1]):
-        current_diff += abs(test_data[i, 41+j] - output[i, j])
-    diff.append(current_diff/output.shape[1])
+
+for fold in folds:
+	test_data = []
+	read_files_for_1dB_step(test_data, fold)
+	test_data = np.array(test_data)
+
+	training_data = []
+	read_files_for_1dB_step(training_data, tilt_list)
+	include_flat_modified(training_data)
+	training_data = np.array(training_data)
+
+	caught = []
+
+	## Setting max and min
+	# Gset
+	max_gset = training_data[0][0]
+	min_gset = training_data[0][0]
+
+	# Pin
+	max_pin = training_data[0][1]
+	min_pin = training_data[0][1]
+
+	# Pout
+	max_pout = training_data[0][41]
+	min_pout = training_data[0][41]
+
+	for i in range(0, training_data.shape[0]):
+		if training_data[i][0] > max_gset:
+			max_gset = training_data[i][0]
+			continue
+		if training_data[i][0] < min_gset:
+			min_gset = training_data[i][0]
+
+		for j in range(1, 41):
+			if training_data[i][j] > max_pin:
+				max_pin = training_data[i][j]
+				continue
+			if training_data[i][j] < min_pin:
+				min_pin = training_data[i][j]
+
+		for j in range(41, 81):
+			if training_data[i][j] > max_pout:
+				max_pout = training_data[i][j]
+				continue
+			if training_data[i][j] < min_pout:
+				min_pout = training_data[i][j]
+
+	## Normalize data
+	range_a = 0.15
+	range_b = 0.85
+
+	normalized_training_data = np.zeros_like(training_data)
+	normalized_test_data = np.zeros_like(test_data)
+
+	# Training data
+	for i in range(0, training_data.shape[0]):
+		normalized_training_data[i, 0] = normalization(training_data[i, 0], min_gset, max_gset, range_a, range_b)
+		for j in range(1, 41):
+			normalized_training_data[i, j] = normalization(training_data[i, j], min_pin, max_pin, range_a, range_b)
+		for j in range(41, 81):
+			normalized_training_data[i, j] = normalization(training_data[i, j], min_pout, max_pout, range_a, range_b)
+
+	# Test data
+	for i in range(0, test_data.shape[0]):
+		normalized_test_data[i, 0] = normalization(test_data[i, 0], min_gset, max_gset, range_a, range_b)
+		for j in range(1, 41):
+			normalized_test_data[i, j] = normalization(test_data[i, j], min_pin, max_pin, range_a, range_b)
+		for j in range(41, 81):
+			normalized_test_data[i, j] = normalization(test_data[i, j], min_pout, max_pout, range_a, range_b)
+
+	## Building neural network
+	num_epochs = 5000
+	model = Sequential()
+	model.add(Dense(54, input_dim = 41, activation='sigmoid'))
+	model.add(Dropout(0.1))
+	model.add(Dense(54, activation='sigmoid'))
+	model.add(Dense(40, activation='sigmoid'))
+	model.compile(optimizer = 'adam', loss = 'mse', metrics = ['acc'])
+	cb = callbacks.EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 120, verbose = 0, mode='auto')
+	model.fit(normalized_training_data[:, :41], normalized_training_data[:, 41:], validation_data=(normalized_test_data[:, :41], normalized_test_data[:, 41:]), epochs = num_epochs,callbacks=[cb])
+	output = model.predict(normalized_test_data[:, :41])
+
+	## Unnormalizing output
+	output = unnormalization(output, min_pout, max_pout, range_a, range_b)
+
+	## Calculating absolute error
+	for i in range(0 , output.shape[0]):
+		current_diff = 0
+		for j in range(0, output.shape[1]):
+			current_diff += abs(test_data[i, 41+j] - output[i, j])
+		diff.append(current_diff/output.shape[1])
+	
+diffs.append(diff)
+
+### Other steps
+
+# Mask steps
+steps = [2, 4, 7, 14]
+
+for step_db in steps:
+	## Reading training and test data
+	training_data = []
+	read_files(training_data, step_db)
+	training_data = np.array(training_data)
+
+	test_data = []
+	read_files(test_data, 1)
+	test_data = np.array(test_data)
+
+	caught  = []
+
+	## Setting max and min
+	# Gset
+	max_gset = training_data[0][0]
+	min_gset = training_data[0][0]
+
+	# Pin
+	max_pin = training_data[0][1]
+	min_pin = training_data[0][1]
+
+	# Pout
+	max_pout = training_data[0][41]
+	min_pout = training_data[0][41]
+
+	for i in range(0, training_data.shape[0]):
+		if training_data[i][0] > max_gset:
+			max_gset = training_data[i][0]
+			continue
+		if training_data[i][0] < min_gset:
+			min_gset = training_data[i][0]
+
+		for j in range(1, 41):
+			if training_data[i][j] > max_pin:
+				max_pin = training_data[i][j]
+				continue
+			if training_data[i][j] < min_pin:
+				min_pin = training_data[i][j]
+
+		for j in range(41, 81):
+			if training_data[i][j] > max_pout:
+				max_pout = training_data[i][j]
+				continue
+			if training_data[i][j] < min_pout:
+				min_pout = training_data[i][j]
+
+	## Normalize data
+	range_a = 0.15
+	range_b = 0.85
+
+	normalized_training_data = np.zeros_like(training_data)
+	normalized_test_data = np.zeros_like(test_data)
+
+	# Training data
+	for i in range(0, training_data.shape[0]):
+		normalized_training_data[i, 0] = normalization(training_data[i, 0], min_gset, max_gset, range_a, range_b)
+		for j in range(1, 41):
+			normalized_training_data[i, j] = normalization(training_data[i, j], min_pin, max_pin, range_a, range_b)
+		for j in range(41, 81):
+			normalized_training_data[i, j] = normalization(training_data[i, j], min_pout, max_pout, range_a, range_b)
+
+	# Test data
+	for i in range(0, test_data.shape[0]):
+		normalized_test_data[i, 0] = normalization(test_data[i, 0], min_gset, max_gset, range_a, range_b)
+		for j in range(1, 41):
+			normalized_test_data[i, j] = normalization(test_data[i, j], min_pin, max_pin, range_a, range_b)
+		for j in range(41, 81):
+			normalized_test_data[i, j] = normalization(test_data[i, j], min_pout, max_pout, range_a, range_b)
+
+	## Building neural network
+	num_epochs = 5000
+	model = Sequential()
+	model.add(Dense(54, input_dim = 41, activation='sigmoid'))
+	model.add(Dropout(0.1))
+	model.add(Dense(54, activation='sigmoid'))
+	model.add(Dense(40, activation='sigmoid'))
+	model.compile(optimizer = 'adam', loss = 'mse', metrics = ['acc'])
+	cb = callbacks.EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 120, verbose = 0, mode='auto')
+	model.fit(normalized_training_data[:, :41], normalized_training_data[:, 41:], validation_data=(normalized_test_data[:, :41], normalized_test_data[:, 41:]), epochs = num_epochs,callbacks=[cb])
+	output = model.predict(normalized_test_data[:, :41])
+
+	## Unnormalizing output
+	output = unnormalization(output, min_pout, max_pout, range_a, range_b)
+
+	## Calculating absolute error
+	diff = []
+	for i in range(0 , output.shape[0]):
+		current_diff = 0
+		for j in range(0, output.shape[1]):
+			current_diff += abs(test_data[i, 41+j] - output[i, j])
+		diff.append(current_diff/output.shape[1])
+	
+	diffs.append(diff)
 
 ## Plot result
-plt.boxplot(diff)
-plt.title('Error using less masks (14dB step)')
-plt.ylabel('P_out (dB)')
+plt.boxplot([diffs[0], diffs[1], diffs[2], diffs[3], diffs[4]])
+plt.title('Absolute difference per mask quantity')
+plt.xticks([1, 2, 3, 4, 5], ['25 masks', '15 masks', '7 masks', '5 masks', '3 masks'])
+plt.ylabel('Error (dB)')
 plt.show()

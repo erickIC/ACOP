@@ -107,22 +107,13 @@ def include_flat_modified(data):
 
 ### 1dB step
 
-# Splitting into 7 folds
-k = 7
+# Splitting into 14 folds
+k = 14
 
 tilt_list = np.arange(1, 15)
-np.random.shuffle(tilt_list)
 
 fold_size = int(len(tilt_list) / k)
-
-fold_1 = tilt_list[0:fold_size]
-fold_2 = tilt_list[fold_size:fold_size*2]
-fold_3 = tilt_list[fold_size*2:fold_size*3]
-fold_4 = tilt_list[fold_size*3:fold_size*4]
-fold_5 = tilt_list[fold_size*4:fold_size*5]
-fold_6 = tilt_list[fold_size*5:fold_size*6]
-fold_7 = tilt_list[fold_size*6:]
-folds = [fold_1, fold_2, fold_3, fold_4, fold_5, fold_6, fold_7]
+folds = np.split(tilt_list, k)
 
 diff = []
 
@@ -321,6 +312,6 @@ for step_db in steps:
 ## Plot result
 plt.boxplot([diffs[0], diffs[1], diffs[2], diffs[3], diffs[4]])
 plt.title('Absolute difference per mask quantity')
-plt.xticks([1, 2, 3, 4, 5], ['25 masks', '15 masks', '7 masks', '5 masks', '3 masks'])
+plt.xticks([1, 2, 3, 4, 5], ['27 masks', '15 masks', '7 masks', '5 masks', '3 masks'])
 plt.ylabel('Error (dB)')
 plt.show()

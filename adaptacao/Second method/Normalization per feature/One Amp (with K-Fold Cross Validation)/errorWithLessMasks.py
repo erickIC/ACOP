@@ -105,110 +105,108 @@ def include_flat_modified(data):
 			line[41+m] = float(auxiliary[49+m])	# P_out (channel)
 		data.append(line)
 
-### 1dB step
+# ### 1dB step
 
-# Splitting into 14 folds
-k = 14
+# # Splitting into 14 folds
+# k = 14
 
-tilt_list = np.arange(1, 15)
+# tilt_list = np.arange(1, 15)
+# folds = np.split(tilt_list, k)
 
-fold_size = int(len(tilt_list) / k)
-folds = np.split(tilt_list, k)
+# diff = []
 
-diff = []
+# for fold in folds:
+# 	test_data = []
+# 	read_files_for_1dB_step(test_data, fold)
+# 	test_data = np.array(test_data)
 
-for fold in folds:
-	test_data = []
-	read_files_for_1dB_step(test_data, fold)
-	test_data = np.array(test_data)
+# 	training_data = []
+# 	read_files_for_1dB_step(training_data, tilt_list)
+# 	include_flat_modified(training_data)
+# 	training_data = np.array(training_data)
 
-	training_data = []
-	read_files_for_1dB_step(training_data, tilt_list)
-	include_flat_modified(training_data)
-	training_data = np.array(training_data)
+# 	caught = []
 
-	caught = []
+# 	## Setting max and min
+# 	# Gset
+# 	max_gset = training_data[0][0]
+# 	min_gset = training_data[0][0]
 
-	## Setting max and min
-	# Gset
-	max_gset = training_data[0][0]
-	min_gset = training_data[0][0]
+# 	# Pin
+# 	max_pin = training_data[0][1]
+# 	min_pin = training_data[0][1]
 
-	# Pin
-	max_pin = training_data[0][1]
-	min_pin = training_data[0][1]
+# 	# Pout
+# 	max_pout = training_data[0][41]
+# 	min_pout = training_data[0][41]
 
-	# Pout
-	max_pout = training_data[0][41]
-	min_pout = training_data[0][41]
+# 	for i in range(0, training_data.shape[0]):
+# 		if training_data[i][0] > max_gset:
+# 			max_gset = training_data[i][0]
+# 			continue
+# 		if training_data[i][0] < min_gset:
+# 			min_gset = training_data[i][0]
 
-	for i in range(0, training_data.shape[0]):
-		if training_data[i][0] > max_gset:
-			max_gset = training_data[i][0]
-			continue
-		if training_data[i][0] < min_gset:
-			min_gset = training_data[i][0]
+# 		for j in range(1, 41):
+# 			if training_data[i][j] > max_pin:
+# 				max_pin = training_data[i][j]
+# 				continue
+# 			if training_data[i][j] < min_pin:
+# 				min_pin = training_data[i][j]
 
-		for j in range(1, 41):
-			if training_data[i][j] > max_pin:
-				max_pin = training_data[i][j]
-				continue
-			if training_data[i][j] < min_pin:
-				min_pin = training_data[i][j]
+# 		for j in range(41, 81):
+# 			if training_data[i][j] > max_pout:
+# 				max_pout = training_data[i][j]
+# 				continue
+# 			if training_data[i][j] < min_pout:
+# 				min_pout = training_data[i][j]
 
-		for j in range(41, 81):
-			if training_data[i][j] > max_pout:
-				max_pout = training_data[i][j]
-				continue
-			if training_data[i][j] < min_pout:
-				min_pout = training_data[i][j]
+# 	## Normalize data
+# 	range_a = 0.15
+# 	range_b = 0.85
 
-	## Normalize data
-	range_a = 0.15
-	range_b = 0.85
+# 	normalized_training_data = np.zeros_like(training_data)
+# 	normalized_test_data = np.zeros_like(test_data)
 
-	normalized_training_data = np.zeros_like(training_data)
-	normalized_test_data = np.zeros_like(test_data)
+# 	# Training data
+# 	for i in range(0, training_data.shape[0]):
+# 		normalized_training_data[i, 0] = normalization(training_data[i, 0], min_gset, max_gset, range_a, range_b)
+# 		for j in range(1, 41):
+# 			normalized_training_data[i, j] = normalization(training_data[i, j], min_pin, max_pin, range_a, range_b)
+# 		for j in range(41, 81):
+# 			normalized_training_data[i, j] = normalization(training_data[i, j], min_pout, max_pout, range_a, range_b)
 
-	# Training data
-	for i in range(0, training_data.shape[0]):
-		normalized_training_data[i, 0] = normalization(training_data[i, 0], min_gset, max_gset, range_a, range_b)
-		for j in range(1, 41):
-			normalized_training_data[i, j] = normalization(training_data[i, j], min_pin, max_pin, range_a, range_b)
-		for j in range(41, 81):
-			normalized_training_data[i, j] = normalization(training_data[i, j], min_pout, max_pout, range_a, range_b)
+# 	# Test data
+# 	for i in range(0, test_data.shape[0]):
+# 		normalized_test_data[i, 0] = normalization(test_data[i, 0], min_gset, max_gset, range_a, range_b)
+# 		for j in range(1, 41):
+# 			normalized_test_data[i, j] = normalization(test_data[i, j], min_pin, max_pin, range_a, range_b)
+# 		for j in range(41, 81):
+# 			normalized_test_data[i, j] = normalization(test_data[i, j], min_pout, max_pout, range_a, range_b)
 
-	# Test data
-	for i in range(0, test_data.shape[0]):
-		normalized_test_data[i, 0] = normalization(test_data[i, 0], min_gset, max_gset, range_a, range_b)
-		for j in range(1, 41):
-			normalized_test_data[i, j] = normalization(test_data[i, j], min_pin, max_pin, range_a, range_b)
-		for j in range(41, 81):
-			normalized_test_data[i, j] = normalization(test_data[i, j], min_pout, max_pout, range_a, range_b)
+# 	## Building neural network
+# 	num_epochs = 5000
+# 	model = Sequential()
+# 	model.add(Dense(54, input_dim = 41, activation='sigmoid'))
+# 	model.add(Dropout(0.1))
+# 	model.add(Dense(54, activation='sigmoid'))
+# 	model.add(Dense(40, activation='sigmoid'))
+# 	model.compile(optimizer = 'adam', loss = 'mse', metrics = ['acc'])
+# 	cb = callbacks.EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 120, verbose = 0, mode='auto')
+# 	model.fit(normalized_training_data[:, :41], normalized_training_data[:, 41:], validation_data=(normalized_test_data[:, :41], normalized_test_data[:, 41:]), epochs = num_epochs,callbacks=[cb])
+# 	output = model.predict(normalized_test_data[:, :41])
 
-	## Building neural network
-	num_epochs = 5000
-	model = Sequential()
-	model.add(Dense(54, input_dim = 41, activation='sigmoid'))
-	model.add(Dropout(0.1))
-	model.add(Dense(54, activation='sigmoid'))
-	model.add(Dense(40, activation='sigmoid'))
-	model.compile(optimizer = 'adam', loss = 'mse', metrics = ['acc'])
-	cb = callbacks.EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 120, verbose = 0, mode='auto')
-	model.fit(normalized_training_data[:, :41], normalized_training_data[:, 41:], validation_data=(normalized_test_data[:, :41], normalized_test_data[:, 41:]), epochs = num_epochs,callbacks=[cb])
-	output = model.predict(normalized_test_data[:, :41])
+# 	## Unnormalizing output
+# 	output = unnormalization(output, min_pout, max_pout, range_a, range_b)
 
-	## Unnormalizing output
-	output = unnormalization(output, min_pout, max_pout, range_a, range_b)
-
-	## Calculating absolute error
-	for i in range(0 , output.shape[0]):
-		current_diff = 0
-		for j in range(0, output.shape[1]):
-			current_diff += abs(test_data[i, 41+j] - output[i, j])
-		diff.append(current_diff/output.shape[1])
+# 	## Calculating absolute error
+# 	for i in range(0 , output.shape[0]):
+# 		current_diff = 0
+# 		for j in range(0, output.shape[1]):
+# 			current_diff += abs(test_data[i, 41+j] - output[i, j])
+# 		diff.append(current_diff/output.shape[1])
 	
-diffs.append(diff)
+# diffs.append(diff)
 
 ### Other steps
 
@@ -310,8 +308,8 @@ for step_db in steps:
 	diffs.append(diff)
 
 ## Plot result
-plt.boxplot([diffs[0], diffs[1], diffs[2], diffs[3], diffs[4]])
+plt.boxplot([diffs[0], diffs[1], diffs[2], diffs[3]])
 plt.title('Absolute difference per mask quantity')
-plt.xticks([1, 2, 3, 4, 5], ['27 masks', '15 masks', '7 masks', '5 masks', '3 masks'])
+plt.xticks([1, 2, 3, 4], ['15 masks', '7 masks', '5 masks', '3 masks'])
 plt.ylabel('Error (dB)')
 plt.show()

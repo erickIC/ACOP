@@ -297,19 +297,29 @@ for step_db in steps:
 	## Unnormalizing output
 	output = unnormalization(output, min_pout, max_pout, range_a, range_b)
 
-	## Calculating absolute error
+	# ## Calculating absolute error
+	# diff = []
+	# for i in range(0 , output.shape[0]):
+	# 	current_diff = 0
+	# 	for j in range(0, output.shape[1]):
+	# 		current_diff += abs(test_data[i, 41+j] - output[i, j])
+	# 	diff.append(current_diff/output.shape[1])
+
+	## Find worst error
 	diff = []
-	for i in range(0 , output.shape[0]):
-		current_diff = 0
+	for i in range(0, output.shape[0]):
+		biggest_diff = -float('inf')
 		for j in range(0, output.shape[1]):
-			current_diff += abs(test_data[i, 41+j] - output[i, j])
-		diff.append(current_diff/output.shape[1])
+			current_diff = abs(test_data[i, 41+j] - output[i, j])
+			if current_diff > biggest_diff:
+				biggest_diff = current_diff
+		diff.append(biggest_diff)
 	
 	diffs.append(diff)
 
 ## Plot result
 plt.boxplot([diffs[0], diffs[1], diffs[2], diffs[3]])
-plt.title('Absolute difference per mask quantity')
+plt.title('Biggest difference per mask quantity')
 plt.xticks([1, 2, 3, 4], ['15 masks', '7 masks', '5 masks', '3 masks'])
 plt.ylabel('Error (dB)')
 plt.show()

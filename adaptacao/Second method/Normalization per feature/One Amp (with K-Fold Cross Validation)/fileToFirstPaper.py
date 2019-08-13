@@ -396,15 +396,19 @@ for i in range(0, len(data1)):
 	fold_x1.append([data1[i][0], data1[i][1], data1[i][2], data1[i][3]])
 	fold_y1.append([data1[i][4], data1[i][5]])
 
+for i in range(0, len(data2)):
 	fold_x2.append([data2[i][0], data2[i][1], data2[i][2], data2[i][3]])
 	fold_y2.append([data2[i][4], data2[i][5]])
-
+    
+for i in range(0, len(data3)):
 	fold_x3.append([data3[i][0], data3[i][1], data3[i][2], data3[i][3]])
 	fold_y3.append([data3[i][4], data3[i][5]])
-
+    
+for i in range(0, len(data4)):
 	fold_x4.append([data4[i][0], data4[i][1], data4[i][2], data4[i][3]])
 	fold_y4.append([data4[i][4], data4[i][5]])
-
+    
+for i in range(0, len(data5)):
 	fold_x5.append([data5[i][0], data5[i][1], data5[i][2], data5[i][3]])
 	fold_y5.append([data5[i][4], data5[i][5]])
 
@@ -450,15 +454,19 @@ for i in range(0, len(data1)):
 	fold_x1.append([data1[i][0], data1[i][1], data1[i][2]])
 	fold_y1.append([data1[i][4], data1[i][5]])
 
+for i in range(0, len(data2)):
 	fold_x2.append([data2[i][0], data2[i][1], data2[i][2]])
 	fold_y2.append([data2[i][4], data2[i][5]])
 
+for i in range(0, len(data3)):
 	fold_x3.append([data3[i][0], data3[i][1], data3[i][2]])
 	fold_y3.append([data3[i][4], data3[i][5]])
-
+    
+for i in range(0, len(data4)):
 	fold_x4.append([data4[i][0], data4[i][1], data4[i][2]])
 	fold_y4.append([data4[i][4], data4[i][5]])
 
+for i in range(0, len(data5)):
 	fold_x5.append([data5[i][0], data5[i][1], data5[i][2]])
 	fold_y5.append([data5[i][4], data5[i][5]])
 
@@ -747,14 +755,14 @@ if DEBUG:
 
 plt.figure(figsize=(10,8))
 
-
+print(len(diffs_io[0]), len(diffs_ic[0]), len(diffs_41[0]), len(diffs_42[0]))
 plt.boxplot([
             np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_io[4]), axis = 0),
             np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0),         #icton17 with tilt 
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
-plt.title('Maior erro da potência de saida')
+#plt.title('Maior erro da potência de saida')
 plt.xticks([1, 2, 3, 4], ['Modelo 1', 'Modelo 2', 'Modelo 3', 'Modelo 4'])
 plt.ylabel('(dB)')
 
@@ -766,7 +774,7 @@ plt.boxplot([
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
-plt.title('Maior erro da potência de saida')
+#plt.title('Maior erro da potência de saida')
 plt.xticks([1, 2], ['Modelo 3', 'Modelo 4'])
 plt.ylabel('(dB)')
 

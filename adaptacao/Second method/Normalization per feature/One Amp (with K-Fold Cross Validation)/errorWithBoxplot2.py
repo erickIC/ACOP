@@ -397,15 +397,19 @@ for i in range(0, len(data1)):
 	fold_x1.append([data1[i][0], data1[i][1], data1[i][2], data1[i][3]])
 	fold_y1.append([data1[i][4], data1[i][5]])
 
+for i in range(0, len(data2)):
 	fold_x2.append([data2[i][0], data2[i][1], data2[i][2], data2[i][3]])
 	fold_y2.append([data2[i][4], data2[i][5]])
-
+    
+for i in range(0, len(data3)):
 	fold_x3.append([data3[i][0], data3[i][1], data3[i][2], data3[i][3]])
 	fold_y3.append([data3[i][4], data3[i][5]])
-
+    
+for i in range(0, len(data4)):
 	fold_x4.append([data4[i][0], data4[i][1], data4[i][2], data4[i][3]])
 	fold_y4.append([data4[i][4], data4[i][5]])
-
+    
+for i in range(0, len(data5)):
 	fold_x5.append([data5[i][0], data5[i][1], data5[i][2], data5[i][3]])
 	fold_y5.append([data5[i][4], data5[i][5]])
 
@@ -451,15 +455,19 @@ for i in range(0, len(data1)):
 	fold_x1.append([data1[i][0], data1[i][1], data1[i][2]])
 	fold_y1.append([data1[i][4], data1[i][5]])
 
+for i in range(0, len(data2)):
 	fold_x2.append([data2[i][0], data2[i][1], data2[i][2]])
 	fold_y2.append([data2[i][4], data2[i][5]])
 
+for i in range(0, len(data3)):
 	fold_x3.append([data3[i][0], data3[i][1], data3[i][2]])
 	fold_y3.append([data3[i][4], data3[i][5]])
-
+    
+for i in range(0, len(data4)):
 	fold_x4.append([data4[i][0], data4[i][1], data4[i][2]])
 	fold_y4.append([data4[i][4], data4[i][5]])
 
+for i in range(0, len(data5)):
 	fold_x5.append([data5[i][0], data5[i][1], data5[i][2]])
 	fold_y5.append([data5[i][4], data5[i][5]])
 

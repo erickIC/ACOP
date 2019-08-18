@@ -10,6 +10,7 @@ from keras import callbacks
 from keras.layers import Dropout
 from matplotlib.ticker import PercentFormatter
 import math
+from scipy.stats import wilcoxon
 
 def applyGainMatching(pins, Gset, pouts):
     dB_to_mW = lambda Gset : pow(10, Gset/10)
@@ -630,7 +631,7 @@ for i in range(0, len(pred_41)):
     test_yic.append(unnormalizationic(foldic_y[(k-1)-i], min_gch, max_gch, min_nf, max_nf, range_a, range_b))
     test_yio.append(unnormalizationic(foldico_y[(k-1)-i], min_gch, max_gch, min_nf, max_nf, range_a, range_b))
 
-print(pred_xic[0])
+# print(pred_xic[0])
 
 
 if DEBUG:
@@ -643,29 +644,62 @@ diffs_42 = []
 diffs_ic = []
 diffs_io = []
 
+# Biggest error for 41-40
+# for i in range(0 , len(pred_y41)):
+#     diff_current = []
+#     for j in range(0, len(pred_y41[i])):
+#         current = pred_y41[i][j]
 
+#         current_in = pred_x41[i][j]
+#         biggest_current = 0
+#         diff = int(0)
+#         for k in range(0, len(current)):
+#             diff = abs(current[k] - test_y41[i][j][k])
+#             if diff > biggest_current:
+#                 biggest_current = diff
+#             if DEBUG:
+#                 print(current[k], test_y41[i][j][k])
+#         diff_current.append(biggest_current)
+#     diffs_41.append(diff_current)
+
+# Mean error for 41-40
 for i in range(0 , len(pred_y41)):
     diff_current = []
     for j in range(0, len(pred_y41[i])):
         current = pred_y41[i][j]
-
         current_in = pred_x41[i][j]
         biggest_current = 0
         diff = int(0)
         for k in range(0, len(current)):
-            diff = abs(current[k] - test_y41[i][j][k])
-            if diff > biggest_current:
-                biggest_current = diff
-            if DEBUG:
-                print(current[k], test_y41[i][j][k])
-        diff_current.append(biggest_current)
+            diff += abs(current[k] - test_y41[i][j][k])
+            #if diff > biggest_current:
+            #    biggest_current = diff
+            #if DEBUG:
+            #    print(current[k], test_y41[i][j][k])
+        diff_current.append(diff/len(current))
     diffs_41.append(diff_current)
-
-
 
 if DEBUG:
     print(len(diffs_41))
 
+# Biggest error for 42-40
+# for i in range(0 , len(pred_y42)):
+#     diff_current = []
+#     for j in range(0, len(pred_y42[i])):
+#         current = pred_y42[i][j]
+#         current_in = pred_x42[i][j]
+#         biggest_current = 0
+#         diff = int(0)
+#         for k in range(0, len(current)):
+#             diff += abs(current[k] - test_y42[i][j][k])
+#             if diff > biggest_current:
+#                 biggest_current = diff
+#             if DEBUG:
+#                 print(current[k], test_y42[i][j][k])
+#         diff_current.append(biggest_current)
+#     diffs_42.append(diff_current)
+
+# Mean error for 42-40
 for i in range(0 , len(pred_y42)):
     diff_current = []
     for j in range(0, len(pred_y42[i])):
@@ -674,12 +708,12 @@ for i in range(0 , len(pred_y42)):
         biggest_current = 0
         diff = int(0)
         for k in range(0, len(current)):
-            diff = abs(current[k] - test_y42[i][j][k])
-            if diff > biggest_current:
-                biggest_current = diff
-            if DEBUG:
-                print(current[k], test_y42[i][j][k])
-        diff_current.append(biggest_current)
+            diff += abs(current[k] - test_y42[i][j][k])
+            # if diff > biggest_current:
+            #     biggest_current = diff
+            # if DEBUG:
+            #     print(current[k], test_y42[i][j][k])
+        diff_current.append(diff/len(current))
     diffs_42.append(diff_current)
 
 if DEBUG:
@@ -689,6 +723,34 @@ if DEBUG:
 
 diffs_nf = []
 
+# Biggest error for IC
+# for i in range(0 , len(pred_yic)):
+#     diff_current = []
+#     diff_current2 = []
+#     j = 0
+#     while j < len(pred_yic[i]):
+        
+#         current_in = [[pred_xic[i][j][0], 0], pred_xic[i][j][1]]
+#         current = []
+#         current_t = []
+#         for step in range(0, number_channels):
+#             current.append(pred_yic[i][j + step][0]) 
+#             current_t.append(test_yic[i][j + step][0])
+        
+#         j += step + 1
+        
+#         biggest_current = 0
+#         diff = int(0)
+#         for p in range(0, len(current)):
+#             diff = abs(current[p] - current_t[p])
+#             if diff > biggest_current:
+#                 biggest_current = diff
+
+#         diff_current.append(biggest_current)
+#     diffs_ic.append(diff_current)
+#     diffs_nf.append(diff_current2)
+
+# Mean error for IC
 for i in range(0 , len(pred_yic)):
     diff_current = []
     diff_current2 = []
@@ -707,11 +769,11 @@ for i in range(0 , len(pred_yic)):
         biggest_current = 0
         diff = int(0)
         for p in range(0, len(current)):
-            diff = abs(current[p] - current_t[p])
-            if diff > biggest_current:
-                biggest_current = diff
+            diff += abs(current[p] - current_t[p])
+            # if diff > biggest_current:
+            #     biggest_current = diff
 
-        diff_current.append(biggest_current)
+        diff_current.append(diff/len(current))
     diffs_ic.append(diff_current)
     diffs_nf.append(diff_current2)
 
@@ -721,6 +783,34 @@ if DEBUG:
 
 diffs_nf2 = []
 
+# Biggest error for IO
+# for i in range(0 , len(pred_yio)):
+#     diff_current = []
+#     diff_current2 = []
+#     j = 0
+#     while j < len(pred_yio[i]):
+        
+#         current_in = [[pred_xio[i][j][0], 0], pred_xio[i][j][1]]
+#         current = []
+#         current_t = []
+#         for step in range(0, number_channels):
+#             current.append(pred_yio[i][j + step][0]) 
+#             current_t.append(test_yio[i][j + step][0])
+        
+#         j += step + 1
+        
+#         biggest_current = 0
+#         diff = int(0)
+#         for p in range(0, len(current)):
+#             diff = abs(current[p] - current_t[p])
+#             if diff > biggest_current:
+#                 biggest_current = diff
+
+#         diff_current.append(biggest_current)
+#     diffs_io.append(diff_current)
+#     diffs_nf2.append(diff_current2)
+
+# Mean error for IO
 for i in range(0 , len(pred_yio)):
     diff_current = []
     diff_current2 = []
@@ -739,11 +829,11 @@ for i in range(0 , len(pred_yio)):
         biggest_current = 0
         diff = int(0)
         for p in range(0, len(current)):
-            diff = abs(current[p] - current_t[p])
-            if diff > biggest_current:
-                biggest_current = diff
+            diff += abs(current[p] - current_t[p])
+            # if diff > biggest_current:
+            #     biggest_current = diff
 
-        diff_current.append(biggest_current)
+        diff_current.append(diff/len(current))
     diffs_io.append(diff_current)
     diffs_nf2.append(diff_current2)
 
@@ -751,18 +841,52 @@ if DEBUG:
     print(len(diffs_io[0]))
 
 
-########## Boxplot #######################
+## Wilcoxon signed-rank test
+diffs_io_all = np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_io[4]), axis = 0)
+diffs_ic_all = np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0)
+diffs_41_all = np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0)
+diffs_42_all = np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0)
 
+print('io')
+ioVic_w, ioVic_p = wilcoxon(diffs_io_all, diffs_ic_all, alternative='less')
+print(ioVic_w, ioVic_p)
+ioV41_w, ioV41_p = wilcoxon(diffs_io_all, diffs_41_all, alternative='less')
+print(ioV41_w, ioV41_p)
+ioV42_w, ioV42_p = wilcoxon(diffs_io_all, diffs_42_all, alternative='less')
+print(ioV42_w, ioV42_p)
+print('ic')
+icVio_w, icVio_p = wilcoxon(diffs_ic_all, diffs_io_all, alternative='less')
+print(icVio_w, icVio_p)
+icV41_w, icV41_p = wilcoxon(diffs_ic_all, diffs_41_all, alternative='less')
+print(icV41_w, icV41_p)
+icV42_w, icV42_p = wilcoxon(diffs_ic_all, diffs_42_all, alternative='less')
+print(icV42_w, icV42_p)
+print('41')
+m41Vio_w, m41Vio_p = wilcoxon(diffs_41_all, diffs_io_all, alternative='less')
+print(m41Vio_w, m41Vio_p)
+m41Vic_w, m41Vic_p = wilcoxon(diffs_41_all, diffs_ic_all, alternative='less')
+print(m41Vic_w, m41Vic_p)
+m41V42_w, m41V42_p = wilcoxon(diffs_41_all, diffs_42_all, alternative='less')
+print(m41V42_w, m41V42_p)
+print('42')
+m42Vio_w, m42Vio_p = wilcoxon(diffs_42_all, diffs_io_all, alternative='less')
+print(m42Vio_w, m42Vio_p)
+m42Vic_w, m42Vic_p = wilcoxon(diffs_42_all, diffs_ic_all, alternative='less')
+print(m42Vic_w, m42Vic_p)
+m42V41_w, m42V41_p = wilcoxon(diffs_42_all, diffs_41_all, alternative='less')
+print(m42V41_w, m42V41_p)
+
+
+########## Boxplot #######################
 plt.figure(figsize=(10,8))
 
-print(len(diffs_io[0]), len(diffs_ic[0]), len(diffs_41[0]), len(diffs_42[0]))
 plt.boxplot([
             np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_io[4]), axis = 0),
             np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0),         #icton17 with tilt 
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
-#plt.title('Maior erro da potência de saida')
+#plt.title('Maior erro da potencia de saida')
 plt.xticks([1, 2, 3, 4], ['Modelo 1', 'Modelo 2', 'Modelo 3', 'Modelo 4'])
 plt.ylabel('(dB)')
 
@@ -774,7 +898,7 @@ plt.boxplot([
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
-#plt.title('Maior erro da potência de saida')
+#plt.title('Maior erro da potencia de saida')
 plt.xticks([1, 2], ['Modelo 3', 'Modelo 4'])
 plt.ylabel('(dB)')
 
@@ -789,7 +913,7 @@ n4140 = np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diff
 n4240 = np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0)
 
 
-col_labels = ['média', 'desvio padrão']
+col_labels = ['media', 'desvio padrao']
 row_labels = ['Modelo 1', 'Modelo 2', 'Modelo 3', 'Modelo 4']
 
 table_vals = [[round(np.mean(io), 4), round(np.std(io), 4)], 

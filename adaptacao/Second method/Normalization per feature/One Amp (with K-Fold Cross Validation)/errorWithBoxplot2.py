@@ -690,7 +690,7 @@ for i in range(0 , len(pred_y41)):
     diffs_41.append(diff_current)
 
 
-plt.savefig('Comparation gain matching 2.png', dpi = 200)
+# plt.savefig('Comparation gain matching 2.png', dpi = 200)
 
 if DEBUG:
     print(len(diffs_41))
@@ -780,29 +780,32 @@ if DEBUG:
 
 plt.figure(figsize=(10,8))
 
-plt.subplot(211)
+# plt.subplot(211)
 plt.boxplot([
             np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_io[4]), axis = 0),
             np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0),         #icton17 with tilt 
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
-plt.title('Absolute difference Pout')
-plt.xticks([1, 2, 3, 4], ['ICTONOriginal', 'ICTONWithTilt', '41-to-40', '42-to-40'])
+# plt.title('Absolute difference Pout')
+plt.xticks([1, 2, 3, 4], ['Modelo 1', 'Modelo 2', 'Modelo 3', 'Modelo 4'])
 plt.ylabel('(dB)')
 
-plt.subplot(212)
+plt.savefig('ErroMedioBoxplot.pdf', dpi = 200)
+
+plt.figure(figsize=(10,8))
+# plt.subplot(212)
 
 plt.boxplot([
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
-plt.title('Absolute difference Pout')
-plt.xticks([1, 2], ['41-to-40', '42-to-40'])
+# plt.title('Absolute difference Pout')
+plt.xticks([1, 2], ['Modelo 3', 'Modelo 4'])
 plt.ylabel('(dB)')
 
 
-plt.savefig('DifferentsNNsBoxPlotv2t.png', dpi = 200)
+plt.savefig('ZoomErroMedio.pdf', dpi = 200)
 
 plt.figure(figsize=(8,6))
 
@@ -812,8 +815,8 @@ n4140 = np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diff
 n4240 = np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0)
 
 
-col_labels = ['mean', 'std']
-row_labels = ['ICTON', 'ICTONwT', '41-to-40', '42-to-40']
+col_labels = ['media', 'desvio padrao']
+row_labels = ['Modelo 1', 'Modelo 2', 'Modelo 3', 'Modelo 4']
 
 table_vals = [[round(np.mean(io), 4), round(np.std(io), 4)], 
               [round(np.mean(ic), 4), round(np.std(ic), 4)], 
@@ -834,5 +837,5 @@ plt.tick_params(axis='y', which='both', right=False, left=False, labelleft=False
 for pos in ['right','top','bottom','left']:
     plt.gca().spines[pos].set_visible(False)
 
-plt.savefig('TableNNsBoxPlotv2t1.png', dpi = 200)
+plt.savefig('TabelaErroMedio.pdf', dpi = 200)
 

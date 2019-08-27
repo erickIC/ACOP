@@ -672,7 +672,7 @@ for i in range(0 , len(pred_y41)):
         
 
         current_in = pred_x41[i][j]
-        current = applyGainMatching(current_in[1:], int(current_in[0]), current)
+        #current = applyGainMatching(current_in[1:], int(current_in[0]), current)
         if (i == 2) or (i == 4):
             if j == 1 or j == int(len(pred_y41[i])/2) or j == int(len(pred_y41[i])*(2/3)):
                 plt.plot(wavelength, current, label='Gain matching')
@@ -700,7 +700,7 @@ for i in range(0 , len(pred_y42)):
     for j in range(0, len(pred_y42[i])):
         current = pred_y42[i][j]
         current_in = pred_x42[i][j]
-        current = applyGainMatching(current_in[1:len(current_in)-2], int(current_in[0]), current)
+        #current = applyGainMatching(current_in[1:len(current_in)-2], int(current_in[0]), current)
         diff = int(0)
         for k in range(0, len(current)):
             diff += abs(current[k] - test_y42[i][j][k])
@@ -731,7 +731,7 @@ for i in range(0 , len(pred_yic)):
         
         j += step + 1
         
-        current = applyGainMatching(np.array(current_in[0]), int(current_in[1]), current)
+        #current = applyGainMatching(np.array(current_in[0]), int(current_in[1]), current)
         
         diff = int(0)
         for p in range(0, len(current)):
@@ -762,7 +762,7 @@ for i in range(0 , len(pred_yio)):
         
         j += step + 1
         
-        current = applyGainMatching(np.array(current_in[0]), int(current_in[1]), current)
+        #current = applyGainMatching(np.array(current_in[0]), int(current_in[1]), current)
         
         diff = int(0)
         for p in range(0, len(current)):

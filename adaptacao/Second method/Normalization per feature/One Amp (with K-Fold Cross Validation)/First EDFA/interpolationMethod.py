@@ -2,18 +2,19 @@ import math
 import numpy as np
 
 # This is the function 'm' from the article
-def getPoutInMask (frequency, Pin, Gset, tilt, PowerMask):
-    # Find the channel that has the same frequency, Pin, Gset and tilt
+def getPoutInMask (frequency, Pin, Gset, PowerMask):
+    # Find the channel that has the same frequency, Pin, Gset
     Frequencys = PowerMask[:40, 2]
 
+	#TODO: verificar oq muda sem tilt a partir daqui
     for i in range(0, len(Frequencys)):
         if Frequencys[i] == frequency:
             for j in range(i, len(PowerMask), 40):
-                if PowerMask[j][0] == Pin and PowerMask[j][1] == Gset and PowerMask[j][3] == tilt:
+                if PowerMask[j][0] == Pin and PowerMask[j][1] == Gset:
                     return PowerMask[j][4]  # return the 'pout_ch' of this channel
 
 # This is the function 's' from the article
-def getPoutAnyFrequency (frequency, Pin, Gset, tilt, PowerMask):
+def getPoutAnyFrequency (frequency, Pin, Gset, PowerMask):
     # Get each Frequency from PowerMask and find closest values to it (f_1 and f_2)
     Frequencys = PowerMask[:40, 2]
     closest_lower = np.min(Frequencys)
@@ -36,10 +37,10 @@ def getPoutAnyFrequency (frequency, Pin, Gset, tilt, PowerMask):
     #         Gset = PowerMask[(i*40)][1]
 
     factorX = (frequency - f_1) / (f_2 - f_1)
-    return (1-factorX)*getPoutInMask(f_1,Pin,Gset,tilt,PowerMask) + factorX*getPoutInMask(f_2,Pin,Gset,tilt,PowerMask)
+    return (1-factorX)*getPoutInMask(f_1,Pin,Gset,PowerMask) + factorX*getPoutInMask(f_2,Pin,Gset,PowerMask)
 
 # This is the function 'g' from the article
-def getPoutAnyPin (frequency, Pin, Gset, tilt, PowerMask):
+def getPoutAnyPin (frequency, Pin, Gset, PowerMask):
     # Get each Pin from PowerMask and find closest values to it (Pin_1 and Pin_2)
     Pins = PowerMask[::40, 0]
     closest_lower = np.min(Pins)
@@ -55,7 +56,7 @@ def getPoutAnyPin (frequency, Pin, Gset, tilt, PowerMask):
     Pin_2 = closest_higher
 
     factorX = (Pin - Pin_1) / (Pin_2 - Pin_1)
-    return (1-factorX)*getPoutAnyFrequency(frequency,Pin_1,Gset,tilt,PowerMask) + factorX*getPoutAnyFrequency(frequency,Pin_2,Gset,tilt,PowerMask)
+    return (1-factorX)*getPoutAnyFrequency(frequency,Pin_1,Gset,PowerMask) + factorX*getPoutAnyFrequency(frequency,Pin_2,Gset,PowerMask)
 
 # This function is the adaptation of this method to consider the tilt
 # Proposed by us
@@ -80,14 +81,14 @@ def getPoutAnyTilt (frequency, Pin, Gset, tilt, PowerMask):
 #TODO: Maybe we could implement a function that finds the closest values for any parameter (tilt,Pin,frequency). 
 # The code would be more reusable
 
-def getOutputSpectrum (frequencys, Pin, Gset, tilt, PowerMask):
+def getOutputSpectrum (frequencys, pins, Gset, PowerMask):
     ### No need to calculate Pin_total because it's already in the PowerMask
-    # dB_to_mW = lambda x : pow(10, x/10)
+    dB_to_mW = lambda x : pow(10, x/10)
     
-    # #Calculates Pin (total input power) using 'TIP algorithm'
-    # pins_mW = list(map(dB_to_mW,pins))
-    # Pin_mW = sum(pins_mW)
-    # Pin = 10*math.log10(Pin_mW) #mW to dB
+    #Calculates Pin (total input power) using 'TIP algorithm'
+    pins_mW = list(map(dB_to_mW,pins))
+    Pin_mW = sum(pins_mW)
+    Pin = 10*math.log10(Pin_mW) #mW to dB
 
     # print('Wave: ', frequencys)
     # print('Pin: ', Pin)
@@ -95,11 +96,12 @@ def getOutputSpectrum (frequencys, Pin, Gset, tilt, PowerMask):
     # print('Tilt: ', tilt)
     # print(PowerMask[0])
     # return
+	
 
     # Calculates pout for each channel
     pouts = []
     for frequency in frequencys:
-        pouts.append(getPoutAnyTilt(frequency,Pin,Gset,tilt,PowerMask))
+        pouts.append(getPoutAnyPin(frequency,Pin,Gset,PowerMask))
     
     # Apply gain matching algorithm
     return applyGainMatching(Pin, Gset, pouts)
@@ -126,7 +128,26 @@ def applyGainMatching(Pin, Gset, pouts):
     
     return pouts
 
+def estimateOutputWithInterpolation(frequencys, pins, Gset):
+	#TODO: calcular tilt
+	tilt = estimateTilt(pins)
+	#TODO: escholher as melhores mascaras
+	masks, tiltMasks = chooseMasks(pins)
+	
+	factorX = (tilt - tiltMasks[0]) / (tiltMask2 - tiltMasks[1])
+	
+	pouts1 = getOutputSpectrum(frequencys,pins,Gset,masks[0])
+	pouts2 = getOutputSpectrum(frequencys,pins,Gset,masks[1])
+	pouts_final = []
+	
+	for pout1, pout2 in zip(pouts1,pouts2):
+		pouts_final.append((1-factorX)*pout1 + factorX*pout2)
+	
+	return pouts_final
+		
+	
 # Main
+#TODO: utilizar mascaras do tipo new-models
 input_fold_1 = "masks/mask-edfa1-padtec-icton17-fold-1.txt"
 input_fold_2 = "masks/mask-edfa1-padtec-icton17-fold-2.txt"
 input_fold_3 = "masks/mask-edfa1-padtec-icton17-fold-3.txt"

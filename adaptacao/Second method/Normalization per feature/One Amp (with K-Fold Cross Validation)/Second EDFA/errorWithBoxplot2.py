@@ -785,8 +785,8 @@ plt.boxplot([
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
 # plt.title('Absolute difference Pout')
-plt.xticks([1, 2, 3, 4], ['Modelo 1', 'Modelo 2', 'Modelo 3', 'Modelo 4'])
-plt.ylabel('(dB)')
+plt.xticks([1, 2, 3, 4], ['Model 1', 'Model 2', 'Model 3', 'Model 4'])
+plt.ylabel('MSE (dB)')
 
 plt.savefig('plots/ErroMedioBoxplot.pdf', dpi = 200)
 
@@ -798,8 +798,8 @@ plt.boxplot([
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
 # plt.title('Absolute difference Pout')
-plt.xticks([1, 2], ['Modelo 3', 'Modelo 4'])
-plt.ylabel('(dB)')
+plt.xticks([1, 2], ['Model 3', 'Model 4'])
+plt.ylabel('MSE (dB)')
 
 
 plt.savefig('plots/ZoomErroMedio.pdf', dpi = 200)
@@ -834,5 +834,5 @@ plt.tick_params(axis='y', which='both', right=False, left=False, labelleft=False
 for pos in ['right','top','bottom','left']:
     plt.gca().spines[pos].set_visible(False)
 
-plt.savefig('plots/TabelaErroMedio.pdf', dpi = 200)
+#plt.savefig('plots/TabelaErroMedio.pdf', dpi = 200)
 

@@ -1,10 +1,13 @@
 import numpy as np
 import keras
+import pickle
+import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense
 from keras import callbacks
 from keras.layers import Dropout
 from random import randint 
+from matplotlib.ticker import PercentFormatter
 
 def unnormalization(x, max, min, range_a, range_b):
     z = []
@@ -12,6 +15,17 @@ def unnormalization(x, max, min, range_a, range_b):
         j = ((float(x[i]) - float(range_a))*(float(max)-float(min)))/ (float(range_b) - float(range_a)) + float(min)
         z.append(j)
     return z
+
+smaller_size = 14
+medium_size = 20
+bigger_size = 26
+plt.rc('font', size=bigger_size)             # controls default text sizes
+plt.rc('axes', titlesize=medium_size)        # fontsize of the axes title
+plt.rc('axes', labelsize=medium_size)        # fontsize of the x and y labels
+plt.rc('xtick', labelsize=medium_size)      # fontsize of the tick labels
+plt.rc('ytick', labelsize=medium_size)      # fontsize of the tick labels
+plt.rc('legend', fontsize=medium_size)       # legend fontsize
+plt.rc('figure', titlesize=bigger_size)      # fontsize of the figure title
 
 
 ### Reading file and placing data in an matrix where each row is a channel of a input
@@ -161,5 +175,29 @@ for i in range(0, k):
 	models.append(model)
 	histories.append(history)
 
+array_epochs = []
+array_histories = [] 
+
+forms = ['--', '-^', '-*', '-s', '-']
+plt.figure()
+
+for i in range(0, len(histories)):
+    labelstr = 'Fold' + ' ' + str(i + 1)
+    plt.semilogy(histories[i].epoch, histories[i].history['val_loss'], forms[i],label= labelstr)
+    array_epochs.append(histories[i].epoch)
+    array_histories.append(histories[i].history['val_loss'])
+
+plt.ylabel('log(MSE)')
+plt.xlabel('EPOCHS')
+
+plt.legend()
+plt.tight_layout()
+plt.savefig('plots/TreinamentoICTON-O.pdf', dpi = 200)
+
+arrays = [array_epochs, array_histories]
+
+pickle_out = open("models/nn-icton-o-history.obj","wb")
+pickle.dump(arrays, pickle_out)
+pickle_out.close()
 
 print(models[0].summary())

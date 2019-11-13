@@ -171,7 +171,7 @@ for i in range(0, k):
 
 	history = model.fit(trainings_x[i], trainings_y[i], validation_data=(tests_x[i], tests_y[i]), epochs = num_epochs,callbacks=[cb])
 
-	model.save('nn-icon17v2' + str(i + 1) + '.h5')
+	model.save('models/nn-icon17v2' + str(i + 1) + '.h5')
 	models.append(model)
 	histories.append(history)
 

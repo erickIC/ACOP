@@ -249,7 +249,7 @@ plt.xlabel('EPOCHS')
 
 plt.legend()
 plt.tight_layout()
-plt.savefig('Treinamento41to40.pdf', dpi = 200)
+plt.savefig('plots/Treinamento41to40.pdf', dpi = 200)
 
 arrays = [array_epochs, array_histories]
 

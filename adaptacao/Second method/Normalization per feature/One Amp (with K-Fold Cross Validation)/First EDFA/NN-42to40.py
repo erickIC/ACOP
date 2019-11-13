@@ -233,7 +233,7 @@ for i in range(0, k):
 
 	history = model.fit(trainings_x[i], trainings_y[i], validation_data=(tests_x[i], tests_y[i]), epochs = num_epochs,callbacks=[cb])
 
-	model.save('nn-42to40v2' + str(i + 1) + '.h5')
+	model.save('models/nn-42to40v2' + str(i + 1) + '.h5')
 
 	models.append(model)
 	histories.append(history)
@@ -255,7 +255,7 @@ plt.xlabel('EPOCHS')
 
 plt.legend()
 plt.tight_layout()
-plt.savefig('Treinamento42to40.pdf', dpi = 200)
+plt.savefig('plots/Treinamento42to40.pdf', dpi = 200)
 
 arrays = [array_epochs, array_histories]
 

@@ -10,24 +10,7 @@ from keras import callbacks
 from keras.layers import Dropout
 from matplotlib.ticker import PercentFormatter
 import math
-
-def applyGainMatching(pins, Gset, pouts):
-    dB_to_mW = lambda Gset : pow(10, Gset/10)
-    mW_to_dB = lambda Gset : 10*math.log10(Gset)
-    
-    pins_mW = list(map(dB_to_mW,pins))
-    Pin_mW = sum(pins_mW)
-    Gset_mW = pow(10, Gset/10) #dB to mW
-    
-    pouts_mW = list(map(dB_to_mW,pouts))
-    Pout_mW = sum(pouts_mW)
-    
-    adj_factor = (Pout_mW / Pin_mW) / Gset_mW # Total Gain / Gain desired
-    gain_matching = lambda Gset : Gset*adj_factor
-    pouts_mW = list(map(gain_matching,pouts_mW))
-    pouts = list(map(mW_to_dB,pouts_mW))
-    
-    return pouts
+import pickle
 
 def unnormalization_in(data, min_gset, max_gset, min_pin, max_pin, range_a, range_b):
 	unnormalized_data = []
@@ -747,29 +730,31 @@ if DEBUG:
 
 plt.figure(figsize=(10,8))
 
-plt.subplot(211)
+
 plt.boxplot([
             np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_io[4]), axis = 0),
             np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0),         #icton17 with tilt 
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
-plt.title('Biggest error Pout')
-plt.xticks([1, 2, 3, 4], ['ICTONOriginal', 'ICTONWithTilt', '41-to-40', '42-to-40'])
-plt.ylabel('(dB)')
 
-plt.subplot(212)
+plt.xticks([1, 2, 3, 4], ['PerChannel', 'PerChannel-Tilt', 'Spectrum', 'Spectrum-Tilt'])
+plt.ylabel('MSE (dB)')
+
+plt.savefig('plots/BiggestErrorNNsBoxPlot.pdf', dpi = 200)
+
+plt.figure(figsize=(10,8))
 
 plt.boxplot([
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
-plt.title('Biggest error Pout')
-plt.xticks([1, 2], ['41-to-40', '42-to-40'])
-plt.ylabel('(dB)')
+
+plt.xticks([1, 2], ['Spectrum', 'Spectrum-Tilt'])
+plt.ylabel('MSE (dB)')
 
 
-plt.savefig('BiggestErrorNNsBoxPlot.png', dpi = 200)
+plt.savefig('plots/BiggestErrorNNsBoxPlotZoom.pdf', dpi = 200)
 
 plt.figure(figsize=(8,6))
 
@@ -777,6 +762,12 @@ io = np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_i
 ic = np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0)
 n4140 = np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0)
 n4240 = np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0)
+
+errors = [io, ic, n4140, n4240]
+
+pickle_out = open("errors/edfa1-biggest.obj","wb")
+pickle.dump(errors, pickle_out)
+pickle_out.close()
 
 
 col_labels = ['mean', 'std']

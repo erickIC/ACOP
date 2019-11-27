@@ -10,6 +10,7 @@ from keras import callbacks
 from keras.layers import Dropout
 from matplotlib.ticker import PercentFormatter
 import math
+import pickle
 
 def applyGainMatching(pins, Gset, pouts):
     dB_to_mW = lambda Gset : pow(10, Gset/10)
@@ -72,7 +73,7 @@ def unnormalizationicin(data, min_pinto, max_pinto, min_gain, max_gain, range_a,
 #Set the font sizes to the plots
 smaller_size = 12
 medium_size = 20
-bigger_size = 26
+bigger_size = 24
 plt.rc('font', size=bigger_size)             # controls default text sizes
 plt.rc('axes', titlesize=medium_size)        # fontsize of the axes title
 plt.rc('axes', labelsize=medium_size)        # fontsize of the x and y labels
@@ -788,10 +789,10 @@ plt.boxplot([
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
 # plt.title('Absolute difference Pout')
-plt.xticks([1, 2, 3, 4], ['Modelo 1', 'Modelo 2', 'Modelo 3', 'Modelo 4'])
-plt.ylabel('(dB)')
+plt.xticks([1, 2, 3, 4], ['PerChannel', 'PerChannel-Tilt', 'Spectrum', 'Spectrum-Tilt'])
+plt.ylabel('MSE (dB)')
 
-plt.savefig('ErroMedioBoxplot.pdf', dpi = 200)
+plt.savefig('plots/AverageErrorNNsBoxPlot.pdf', dpi = 200)
 
 plt.figure(figsize=(10,8))
 # plt.subplot(212)
@@ -801,11 +802,11 @@ plt.boxplot([
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
 # plt.title('Absolute difference Pout')
-plt.xticks([1, 2], ['Modelo 3', 'Modelo 4'])
-plt.ylabel('(dB)')
+plt.xticks([1, 2], ['Spectrum', 'Spectrum-Tilt'])
+plt.ylabel('MSE (dB)')
 
 
-plt.savefig('ZoomErroMedio.pdf', dpi = 200)
+plt.savefig('plots/AverageErrorNNsBoxPlotZoom.pdf', dpi = 200)
 
 plt.figure(figsize=(8,6))
 
@@ -814,9 +815,14 @@ ic = np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_i
 n4140 = np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0)
 n4240 = np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0)
 
+errors = [io, ic, n4140, n4240]
 
-col_labels = ['media', 'desvio padrao']
-row_labels = ['Modelo 1', 'Modelo 2', 'Modelo 3', 'Modelo 4']
+pickle_out = open("errors/edfa1-average-error.obj","wb")
+pickle.dump(errors, pickle_out)
+pickle_out.close()
+
+col_labels = ['mean', 'std']
+row_labels = ['ICTON', 'ICTONwT', '41-to-40', '42-to-40']
 
 table_vals = [[round(np.mean(io), 4), round(np.std(io), 4)], 
               [round(np.mean(ic), 4), round(np.std(ic), 4)], 
@@ -837,5 +843,5 @@ plt.tick_params(axis='y', which='both', right=False, left=False, labelleft=False
 for pos in ['right','top','bottom','left']:
     plt.gca().spines[pos].set_visible(False)
 
-plt.savefig('TabelaErroMedio.pdf', dpi = 200)
+plt.savefig('plots/AverageErrorTableNNsBoxPlot.pdf', dpi = 200)
 

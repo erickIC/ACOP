@@ -16,7 +16,6 @@ import br.upe.heuristics.maxGain.MaxGain;
 import br.upe.heuristics.uiara.AdGC;
 import br.upe.initializations.BruteForceInitialization;
 import br.upe.initializations.UniformInitializationVOA;
-import br.upe.metrics.GNLIMetric;
 import br.upe.objfunctions.linerInterpolation.LinearInterpolationFunction;
 import br.upe.selection.MaxGainSelection;
 import br.upe.selection.UiaraWeightSelection;
@@ -25,6 +24,7 @@ import br.upe.simulations.simPadTec19.SimSetPadTec;
 import br.upe.simulations.simsetups.SimulationSetup;
 import br.upe.util.DecibelConverter;
 import br.upe.util.LinearRegression;
+import br.upe.util.SignalFeatureCalculation;
 
 public class ACOP_MOOProblem {
 
@@ -62,6 +62,11 @@ public class ACOP_MOOProblem {
 	return evaluate(null, attenuations);
     }
 
+    /***
+     * 
+     * @param gains
+     * @return linear tilt, -osnr, ripple
+     */
     public double[] evaluateJustGains(float[] gains) {
 	return evaluate(gains, null);
     }
@@ -83,6 +88,9 @@ public class ACOP_MOOProblem {
 	float totalInputPower = inputSignal.getTotalPower();
 
 	Amplifier[] amplifiers;
+	double[] tilts = new double[1];
+	OpticalSignal[] outSignals = new OpticalSignal[1];
+
 	float voaAttenuation;
 	if(gains == null) {
 	    ACOPHeuristic heuristic = null;
@@ -121,8 +129,12 @@ public class ACOP_MOOProblem {
 	    initialization.setGains(gains);
 	    initialization.setAttenuations(attenuations);
 
+	    // System.out.println(inputSignal);
+
 	    amplifiers = initialization.initialize(simParams.getSimSet().getNumberOfAmplifiers(), totalInputPower, 0,
 		    simParams.getSimSet().getLINK_LOSSES(), function, inputSignal);
+	    tilts = initialization.getTiltsOut();
+	    outSignals = initialization.getSignalOut();
 
 	    if (amplifiers == null)
 		return null;
@@ -147,28 +159,51 @@ public class ACOP_MOOProblem {
 				+ simParams.getSimSet().getROADM_ATT())
 		&& voaAttenuation >= 0) {
 
-	    double[] result = new double[2];
+	    double[] result = new double[4];
 
-	    GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9, simParams.getNumberCh(), simParams.getInputPowerCh(),
-		    linkLength);
-	    gnliMetric.evaluate(amplifiers);
+	    // GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9,
+	    // simParams.getNumberCh(), simParams.getInputPowerCh(),linkLength);
+	    //gnliMetric.evaluate(amplifiers);
 
 	    // result[0] = calculateTilt(inputSignal); // minimizar
 
-	    result[1] = (1 / gnliMetric.worstOSNR_NLI()); // maximizar
+	    // result[1] = (1 / gnliMetric.worstOSNR_NLI()); // maximizar
 
-	    if (gnliMetric.worstOSNR_ASE() < 0)
-		// TODO: verificar casos com OSNR menor do que zero
-		System.out.println();
+	    result[0] = Math.abs(SignalFeatureCalculation.calculateTiltLinearReg(inputSignal));
 
-	    // result[1] = (1 / gnliMetric.worstOSNR_ASE()); // maximizar
+	    result[1] = -1 * SignalFeatureCalculation.calculateMinOSNR(inputSignal); // maximizar
 
-	    result[0] = gnliMetric.getTiltOSNR_NLI(); // minimizar
+	    result[2] = SignalFeatureCalculation.calculateRipple(inputSignal);
 
-	    // result[0] = Math.abs(calculateTiltLinearReg(inputSignal)); //
-	    // minimizar
+	    result[3] = 1.0 / SignalFeatureCalculation.calculateBitRate(inputSignal); // maximizar
 
-	    this.amplifiers = amplifiers;
+	    /*
+	    System.out.println("-------------------------------------------------------------");
+	    System.out.print("SOLUTION: ");
+	    for (int i = 0; i < gains.length; i++) {
+	    System.out.printf("%.1f\t", gains[i]);
+	    }
+	    
+	    System.out.printf("\nTilt: %.2f, BitRate: %.1f, Ripple: %.2f\n", result[0], 1.0 / result[3], result[2]);
+	    
+	    System.out.println("***** Potência (dBm) *****");
+	    for (int i = 0; i < outSignals.length; i++) {
+	    for(OpticalChannel ch : outSignals[i].getChannels()) {
+	        System.out.printf("%.2f\t", ch.getSignalPower());
+	    }
+	    System.out.println();
+	    }
+	    
+	    System.out.println("***** OSNR (dB) *****");
+	    for (int i = 0; i < outSignals.length; i++) {
+	    double[] osnr = SignalFeatureCalculation.calculateOSNR(outSignals[i]);
+	    for (int j = 0; j < osnr.length; j++) {
+	        System.out.printf("%.2f\t", osnr[j]);
+	    }
+	    System.out.println();
+	    }
+	    System.out.println("-------------------------------------------------------------");
+	    */
 
 	    return result;
 	} else {

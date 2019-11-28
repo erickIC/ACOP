@@ -1,5 +1,10 @@
 package br.upe.MOO.modeling;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
+
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.variable.BinaryIntegerVariable;
 import org.moeaframework.core.variable.EncodingUtils;
@@ -19,7 +24,6 @@ import br.upe.simulations.simsetups.SimulationSetup;
 public class ACOPProblem_JustGains extends AbstractProblem {
     private int numberOfAmplifiers;
     private AmplifierType ampType;
-    private static double MAX_VOA_ATT = 0.0f;
     private SimulationParameters simParams;
 
     /**
@@ -69,35 +73,78 @@ public class ACOPProblem_JustGains extends AbstractProblem {
 
 	double[] r = problem.evaluateJustGains(gains);
 
-	for (int i = 0; i < getNumberOfObjectives(); i++) {
-	    if (r != null)
-		f[i] = r[i];
-	    else
-		f[i] = Double.MAX_VALUE;
+	if (r == null) {
+	    f[0] = Double.MAX_VALUE;
+	    f[1] = Double.MAX_VALUE;
+	} else {
+	    f[0] = r[0]; // min ripple
+	    f[1] = r[3]; // total bit rate
+	}
+
+	if (r != null) {
+	    solution.setAttribute("tilt", r[0]);
+	    solution.setAttribute("minOSNR", -1 * r[1]);
+	    solution.setAttribute("ripple", r[2]);
+	    solution.setAttribute("bitrate", 1 / r[3]);
 	}
 
 	solution.setObjectives(f);
     }
 
     public static void main(String[] args) {
-	SimulationSetup simSet = new SimSetPadTec(40, -21, 20, 20);
-	
-	SimulationParameters simParams = new SimulationParameters(40, -21, 20, simSet);
+	float chPower = -20.0f; // -20 dBm/ch = -4 dBm ;; -19 dBm/ch = -3 dBm
+	int numberCh = 40;
+	int numberAmps = 20;
+	float loss = 20.0f;
 
-	ACOPProblem_JustGains problem = new ACOPProblem_JustGains(20, AmplifierType.EDFA_2_PadTec, simParams);
+	// Gerando as perdas de forma aleatória
+	// float[] losses = { 17f, 21f, 18f, 23f, 20f, 20f, 19f, 24f, 24f, 17f,
+	// 16f, 19f, 16f, 21f, 17f, 15f, 23f, 19f,
+	// 23f };
+	float[] losses = { 19f, 23f, 20f, 14f, 15f, 15f, 23f, 16f, 16f, 20f, 15f, 15f, 20f, 18f, 16f, 18f, 15f, 19f,
+		23f };
 
-	int[] values = { 23, 27, 27, 27, 15, 7, 9, 0 };
+	SimulationSetup simSet = new SimSetPadTec(numberCh, chPower, numberAmps, losses);
 
-	Solution solution = new Solution(8, 2);
-	for (int i = 0; i < values.length; i++) {
-	    if (i < 4) {
-		solution.setVariable(i, new BinaryIntegerVariable(values[i], 17, 27));
-	    } else {
-		solution.setVariable(i, new BinaryIntegerVariable(values[i], 0, (int) MAX_VOA_ATT));
+	SimulationParameters simParams = new SimulationParameters(numberCh, chPower, loss, simSet);
+
+	ACOPProblem_JustGains problem = new ACOPProblem_JustGains(simSet.getNumberOfAmplifiers(),
+		AmplifierType.EDFA_1_PadTec, simParams);
+
+	ArrayList<Integer[]> valuesMatrix = new ArrayList<>();
+	File file = new File("inputTemp.txt");
+	Scanner reader;
+	try {
+	    reader = new Scanner(file);
+	    while (reader.hasNextLine()) {
+		String[] line = reader.nextLine().split("\t");
+		Integer[] values = new Integer[line.length];
+
+		for (int i = 0; i < values.length; i++) {
+		    values[i] = Integer.parseInt(line[i]);
+		}
+
+		valuesMatrix.add(values);
 	    }
+
+	    reader.close();
+	} catch (FileNotFoundException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
 	}
-	
-	problem.evaluate(solution);
+
+	for (int i = 0; i < valuesMatrix.size(); i++) {
+
+	    Integer[] values = valuesMatrix.get(i);
+
+	    Solution solution = new Solution(20, 2);
+	    for (int j = 0; j < values.length; j++) {
+		solution.setVariable(j, new BinaryIntegerVariable(values[j], 14, 24));
+
+	    }
+
+	    problem.evaluate(solution);
+	}
     }
 
 }

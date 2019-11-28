@@ -3,7 +3,7 @@ This code transforms the data returned by the OptiSystem to be used by the Optic
 It selects just the important columns and adds the wavelength columns.
 '''
 
-tilt = "-12"
+tilt = "12"
 stringPath = "tilt"+ tilt +".txt" #Output file
 stringFile = "result_allMask_40channels_EDFA1STG_In_Tilt_"+ tilt +"dB.txt" #input file
 

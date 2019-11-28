@@ -30,43 +30,44 @@ import org.moeaframework.core.Solution;
 public class ParetoObjectiveComparator implements DominanceComparator,
 Serializable {
 
-	private static final long serialVersionUID = 5086102885918799148L;
+    private static final long serialVersionUID = 5086102885918799148L;
 
-	/**
-	 * Constructs a Pareto dominance comparator.
-	 */
-	public ParetoObjectiveComparator() {
-		super();
+    /**
+     * Constructs a Pareto dominance comparator.
+     */
+    public ParetoObjectiveComparator() {
+	super();
+    }
+
+    @Override
+    public int compare(Solution solution1, Solution solution2) {
+	boolean dominate1 = false;
+	boolean dominate2 = false;
+	double uncertainty = 0.1;
+
+	for (int i = 0; i < solution1.getNumberOfObjectives(); i++) {
+	    if (solution1.getObjective(i) < (solution2.getObjective(i) - uncertainty)) {
+		dominate1 = true;
+
+		if (dominate2) {
+		    return 0;
+		}
+	    } else if ((solution1.getObjective(i)) > (solution2.getObjective(i) + uncertainty)) {
+		dominate2 = true;
+
+		if (dominate1) {
+		    return 0;
+		}
+	    }
 	}
 
-	@Override
-	public int compare(Solution solution1, Solution solution2) {
-		boolean dominate1 = false;
-		boolean dominate2 = false;
-
-		for (int i = 0; i < solution1.getNumberOfObjectives(); i++) {
-			if (solution1.getObjective(i) < solution2.getObjective(i)) {
-				dominate1 = true;
-
-				if (dominate2) {
-					return 0;
-				}
-			} else if (solution1.getObjective(i) > solution2.getObjective(i)) {
-				dominate2 = true;
-
-				if (dominate1) {
-					return 0;
-				}
-			}
-		}
-
-		if (dominate1 == dominate2) {
-			return 0;
-		} else if (dominate1) {
-			return -1;
-		} else {
-			return 1;
-		}
+	if (dominate1 == dominate2) {
+	    return 0;
+	} else if (dominate1) {
+	    return -1;
+	} else {
+	    return 1;
 	}
+    }
 
 }

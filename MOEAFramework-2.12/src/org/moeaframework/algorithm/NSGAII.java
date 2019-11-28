@@ -52,110 +52,129 @@ import org.moeaframework.core.operator.TournamentSelection;
  * </ol>
  */
 public class NSGAII extends AbstractEvolutionaryAlgorithm implements
-		EpsilonBoxEvolutionaryAlgorithm {
+	EpsilonBoxEvolutionaryAlgorithm {
 
-	/**
-	 * The selection operator.  If {@code null}, this algorithm uses binary
-	 * tournament selection without replacement, replicating the behavior of the
-	 * original NSGA-II implementation.
-	 */
-	private final Selection selection;
+    /**
+     * The selection operator. If {@code null}, this algorithm uses binary
+     * tournament selection without replacement, replicating the behavior of the
+     * original NSGA-II implementation.
+     */
+    private final Selection selection;
 
-	/**
-	 * The variation operator.
-	 */
-	private final Variation variation;
+    /**
+     * The variation operator.
+     */
+    private final Variation variation;
 
-	/**
-	 * Constructs the NSGA-II algorithm with the specified components.
-	 * 
-	 * @param problem the problem being solved
-	 * @param population the population used to store solutions
-	 * @param archive the archive used to store the result; can be {@code null}
-	 * @param selection the selection operator
-	 * @param variation the variation operator
-	 * @param initialization the initialization method
-	 */
-	public NSGAII(Problem problem, NondominatedSortingPopulation population,
-			EpsilonBoxDominanceArchive archive, Selection selection,
-			Variation variation, Initialization initialization) {
-		super(problem, population, archive, initialization);
-		this.selection = selection;
-		this.variation = variation;
-	}
+    /**
+     * Constructs the NSGA-II algorithm with the specified components.
+     * 
+     * @param problem
+     *            the problem being solved
+     * @param population
+     *            the population used to store solutions
+     * @param archive
+     *            the archive used to store the result; can be {@code null}
+     * @param selection
+     *            the selection operator
+     * @param variation
+     *            the variation operator
+     * @param initialization
+     *            the initialization method
+     */
+    public NSGAII(Problem problem, NondominatedSortingPopulation population, EpsilonBoxDominanceArchive archive,
+	    Selection selection, Variation variation, Initialization initialization) {
+	super(problem, population, archive, initialization);
+	this.selection = selection;
+	this.variation = variation;
+    }
 
-	@Override
-	public void iterate() {
-		NondominatedSortingPopulation population = getPopulation();
-		EpsilonBoxDominanceArchive archive = getArchive();
-		Population offspring = new Population();
-		int populationSize = population.size();
+    private int count = 0;
 
-		if (selection == null) {
-			// recreate the original NSGA-II implementation using binary
-			// tournament selection without replacement; this version works by
-			// maintaining a pool of candidate parents.
-			LinkedList<Solution> pool = new LinkedList<Solution>();
-			
-			DominanceComparator comparator = new ChainedComparator(
-					new ParetoDominanceComparator(),
-					new CrowdingComparator());
-			
-			while (offspring.size() < populationSize) {
-				// ensure the pool has enough solutions
-				while (pool.size() < 2*variation.getArity()) {
-					List<Solution> poolAdditions = new ArrayList<Solution>();
-					
-					for (Solution solution : population) {
-						poolAdditions.add(solution);
-					}
-					
-					PRNG.shuffle(poolAdditions);
-					pool.addAll(poolAdditions);
-				}
-				
-				// select the parents using a binary tournament
-				Solution[] parents = new Solution[variation.getArity()];
-				
-				for (int i = 0; i < parents.length; i++) {
-					parents[i] = TournamentSelection.binaryTournament(
-							pool.removeFirst(),
-							pool.removeFirst(),
-							comparator);
-				}
-				
-				// evolve the children
-				offspring.addAll(variation.evolve(parents));
-			}
-		} else {
-			// run NSGA-II using selection with replacement; this version allows
-			// using custom selection operators
-			while (offspring.size() < populationSize) {
-				Solution[] parents = selection.select(variation.getArity(),
-						population);
+    @Override
+    public void iterate() {
+	NondominatedSortingPopulation population = getPopulation();
+	EpsilonBoxDominanceArchive archive = getArchive();
+	Population offspring = new Population();
+	int populationSize = population.size();
 
-				offspring.addAll(variation.evolve(parents));
-			}
+	if (selection == null) {
+	    // recreate the original NSGA-II implementation using binary
+	    // tournament selection without replacement; this version works by
+	    // maintaining a pool of candidate parents.
+	    LinkedList<Solution> pool = new LinkedList<Solution>();
+
+	    DominanceComparator comparator = new ChainedComparator(new ParetoDominanceComparator(),
+		    new CrowdingComparator());
+
+	    while (offspring.size() < populationSize) {
+		// ensure the pool has enough solutions
+		while (pool.size() < 2 * variation.getArity()) {
+		    List<Solution> poolAdditions = new ArrayList<Solution>();
+
+		    for (Solution solution : population) {
+			poolAdditions.add(solution);
+		    }
+
+		    PRNG.shuffle(poolAdditions);
+		    pool.addAll(poolAdditions);
 		}
 
-		evaluateAll(offspring);
+		// select the parents using a binary tournament
+		Solution[] parents = new Solution[variation.getArity()];
 
-		if (archive != null) {
-			archive.addAll(offspring);
+		for (int i = 0; i < parents.length; i++) {
+		    parents[i] = TournamentSelection.binaryTournament(pool.removeFirst(), pool.removeFirst(),
+			    comparator);
 		}
 
-		population.addAll(offspring);
-		population.truncate(populationSize);
+		// evolve the children
+		offspring.addAll(variation.evolve(parents));
+	    }
+	} else {
+	    // run NSGA-II using selection with replacement; this version allows
+	    // using custom selection operators
+	    while (offspring.size() < populationSize) {
+		Solution[] parents = selection.select(variation.getArity(), population);
+
+		offspring.addAll(variation.evolve(parents));
+	    }
 	}
 
-	@Override
-	public EpsilonBoxDominanceArchive getArchive() {
-		return (EpsilonBoxDominanceArchive)super.getArchive();
+	evaluateAll(offspring);
+
+	if (archive != null) {
+	    archive.addAll(offspring);
 	}
 
-	@Override
-	public NondominatedSortingPopulation getPopulation() {
-		return (NondominatedSortingPopulation)super.getPopulation();
-	}
+	population.addAll(offspring);
+	population.truncate(populationSize);
+
+	// if (count % 100 == 0) {
+	// for (Solution solution : population) {
+	// System.out.format("%.4f\t%.4f\t|\t", solution.getObjective(0), (-1 *
+	// solution.getObjective(1)));
+	//
+	// int[] x = EncodingUtils.getInt(solution);
+	// for (int i = 0; i < solution.getNumberOfVariables(); i++) {
+	// System.out.print(x[i] + "\t");
+	// }
+	// System.out.println();
+	// }
+	// System.out.println();
+	// }
+
+	count++;
+    }
+
+    @Override
+    public EpsilonBoxDominanceArchive getArchive() {
+	return (EpsilonBoxDominanceArchive) super.getArchive();
+    }
+
+    @Override
+    public NondominatedSortingPopulation getPopulation() {
+	return (NondominatedSortingPopulation) super.getPopulation();
+    }
 
 }

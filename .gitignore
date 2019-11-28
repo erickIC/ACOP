@@ -6,3 +6,8 @@ Experimentos/01_Técnica MOO/.idea/modules.xml
 Experimentos/01_Técnica MOO/.idea/vcs.xml
 Experimentos/01_Técnica MOO/.idea/workspace.xml
 *.class
+OpticalSimulator/bin/br/upe/base/OpticalChannel.class
+OpticalSimulator/bin/br/upe/initializations/BruteForceInitialization.class
+OpticalSimulator/bin/br/upe/optimizationUtil/ACOP_MOOProblem.class
+OpticalSimulator/bin/br/upe/util/SignalFeatureCalculation.class
+*.class

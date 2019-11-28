@@ -1,10 +1,5 @@
 package br.upe.MOO.modeling;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Scanner;
-
 import org.moeaframework.core.Solution;
 import org.moeaframework.core.variable.BinaryIntegerVariable;
 import org.moeaframework.core.variable.EncodingUtils;
@@ -21,7 +16,7 @@ import br.upe.simulations.simsetups.SimulationSetup;
 /**
  * Implementation of the ACOP function.
  */
-public class ACOPProblem_GainsTilt extends AbstractProblem {
+public class ACOPProblem_MaxOSNR extends AbstractProblem {
     private int numberOfAmplifiers;
     private AmplifierType ampType;
     private static double MAX_VOA_ATT = 0.0f;
@@ -31,8 +26,8 @@ public class ACOPProblem_GainsTilt extends AbstractProblem {
      * Constructs a new instance of the ACOPProblem function, defining it to
      * include number of amplifier decision variables and 2 objectives.
      */
-    public ACOPProblem_GainsTilt(int numberOfAmplifiers, AmplifierType type, SimulationParameters parameters) {
-	super(numberOfAmplifiers + 1, 2);
+    public ACOPProblem_MaxOSNR(int numberOfAmplifiers, AmplifierType type, SimulationParameters parameters) {
+	super(numberOfAmplifiers + 1, 1);
 	this.numberOfAmplifiers = numberOfAmplifiers;
 	this.ampType = type;
 	this.simParams = parameters;
@@ -74,26 +69,25 @@ public class ACOPProblem_GainsTilt extends AbstractProblem {
 
 	double[] r = problem.evaluateJustGains(gains);
 
-	// System.out.printf("%.4f\t%.4f\t%.1f\n", r[0], -1 * r[1], 1.0 / r[3]);
-
 	if (r == null)
-	    f[0] = f[1] = Double.MAX_VALUE;
-	else {
-	    f[0] = r[0];
-	    f[1] = r[3];
-	}
+	    f[0] = Double.MAX_VALUE;
+	else if (r[2] > 20) // Se ripple maior que 20 dB
+	    f[0] = r[1] + r[2]; // Piora a OSNR (minimização)
+	else
+	    f[0] = r[1];
+
+	System.out.format("%.4f\n", r[2]);
 
 	solution.setObjectives(f);
     }
 
     public static void main(String[] args) {
-	float chPower = -20.0f; // -20 dBm/ch = -4 dBm ;; -19 dBm/ch = -3 dBm
+	float chPower = -19.0f; // -20 dBm/ch = -4 dBm ;; -19 dBm/ch = -3 dBm
 	int numberCh = 40;
 	int numberAmps = 20;
 	float loss = 20.0f;
 
 	// Gerando as perdas de forma aleatória
-	// -4
 	// float[] losses = { 17f, 21f, 18f, 23f, 20f, 20f, 19f, 24f, 24f, 17f,
 	// 16f, 19f, 16f, 21f, 17f, 15f, 23f, 19f,
 	// 23f };
@@ -104,37 +98,35 @@ public class ACOPProblem_GainsTilt extends AbstractProblem {
 
 	SimulationParameters simParams = new SimulationParameters(numberCh, chPower, loss, simSet);
 
-	ACOPProblem_GainsTilt problem = new ACOPProblem_GainsTilt(simSet.getNumberOfAmplifiers(),
+	ACOPProblem_MaxOSNR problem = new ACOPProblem_MaxOSNR(simSet.getNumberOfAmplifiers(),
 		AmplifierType.EDFA_1_PadTec, simParams);
 
-	ArrayList<Integer[]> valuesMatrix = new ArrayList<>();
-	File file = new File("inputTemp.txt");
-	Scanner reader;
-	try {
-	    reader = new Scanner(file);
-	    while (reader.hasNextLine()) {
-		String[] line = reader.nextLine().split("\t");
-		Integer[] values = new Integer[line.length];
-
-		for (int i = 0; i < values.length; i++) {
-		    values[i] = Integer.parseInt(line[i]);
-		}
-
-		valuesMatrix.add(values);
-	    }
-
-	    reader.close();
-	} catch (FileNotFoundException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
+	// - 4 = 0,0001 24,6527 | 20, 24, 23, 21, 23, 20, 20, 20, 20, 20, 20,
+	// 16, 23, 20, 20, 20, 21, 20, 20, 15, 15
+	// -3 = 0,0000 24,3527 | 11 23 22 21 14 19 20 19 20 19 17 20 18 20 18 19
+	// 19 20 19 22 20
+	int[][] valuesMatrix = {
+		{ -2, 18, 23, 21, 16, 20, 15, 17, 18, 17, 21, 17, 16, 17, 20, 17, 17, 17, 16, 19, 21 },
+		{ -3, 23, 20, 22, 19, 18, 14, 16, 21, 18, 16, 17, 16, 16, 21, 18, 16, 14, 17, 20, 20 },
+		{ -3, 21, 23, 16, 21, 17, 17, 16, 17, 16, 22, 16, 16, 17, 21, 17, 16, 17, 16, 20, 23 },
+		{ -4, 24, 20, 23, 17, 15, 16, 16, 20, 17, 16, 21, 15, 16, 17, 19, 17, 17, 18, 18, 19 },
+		{ -3, 22, 21, 23, 16, 17, 16, 16, 22, 16, 16, 16, 17, 19, 19, 16, 17, 17, 17, 19, 14 },
+		{ -3, 24, 20, 22, 17, 16, 17, 14, 22, 16, 17, 17, 19, 16, 20, 17, 17, 17, 15, 19, 21 },
+		{ -3, 23, 21, 22, 16, 16, 17, 16, 23, 16, 16, 19, 17, 15, 19, 19, 15, 19, 14, 19, 23 },
+		{ -4, 23, 22, 21, 18, 16, 15, 17, 18, 17, 19, 19, 16, 16, 16, 19, 19, 16, 17, 19, 23 },
+		{ -4, 23, 21, 22, 16, 15, 19, 16, 16, 18, 18, 18, 16, 19, 19, 15, 18, 15, 16, 23, 22 },
+		{ -4, 21, 23, 19, 18, 18, 15, 18, 19, 16, 20, 16, 15, 18, 19, 19, 16, 16, 17, 20, 22 },
+		{ -4, 21, 23, 18, 19, 16, 16, 19, 19, 18, 17, 17, 18, 16, 17, 18, 16, 19, 16, 19, 24 },
+		{ -5, 23, 22, 23, 17, 16, 14, 17, 20, 19, 17, 18, 15, 16, 20, 17, 16, 16, 17, 20, 19 },
+		{ -4, 22, 23, 20, 19, 16, 16, 15, 23, 16, 16, 16, 17, 17, 16, 18, 20, 15, 17, 21, 20 },
+		{ -4, 24, 21, 23, 15, 17, 16, 16, 17, 17, 19, 18, 14, 18, 19, 19, 18, 18, 14, 20, 15 } };
 
 
-	for (int i = 0; i < valuesMatrix.size(); i++) {
+	for (int i = 0; i < valuesMatrix.length; i++) {
 
-	    Integer[] values = valuesMatrix.get(i);
+	    int[] values = valuesMatrix[i];
 
-	    Solution solution = new Solution(21, 2);
+	    Solution solution = new Solution(21, 1);
 	    solution.setVariable(0, new BinaryIntegerVariable(values[0], -20, 20));
 	    for (int j = 1; j < values.length; j++) {
 		solution.setVariable(j, new BinaryIntegerVariable(values[j], 14, 24));

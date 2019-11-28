@@ -84,7 +84,7 @@ public class SignalFeatureCalculation {
      * @param signal
      * @return
      */
-    public static double calculateTiltFree(OpticalSignal signal) {
+    public static double calculateRipple(OpticalSignal signal) {
 	double maxPeak = Double.MIN_VALUE;
 	double minPeak = Double.MAX_VALUE;
 
@@ -129,7 +129,7 @@ public class SignalFeatureCalculation {
 
 	LinearRegression lr = new LinearRegression(frequencies, power);
 
-	return -1.0 * lr.slope();
+	return lr.Tilt();
     }
 
     public static double calculateTiltNonLinearReg(OpticalSignal signal) {
@@ -158,7 +158,7 @@ public class SignalFeatureCalculation {
 
 	Function exponential = new ExponentialFunction();
 	NonLinearSolver non_linear = new NonLinearSolver(exponential);
-	non_linear.setStepSize(0.5);
+	non_linear.setStepSize(0.05);
 	double[][] x = new double[frequencies.length][1];
 	for (int i = 0; i < frequencies.length; i++) {
 	    x[i][0] = frequencies[i];
@@ -217,6 +217,21 @@ public class SignalFeatureCalculation {
 	return DecibelConverter.toDecibelScale(minOSNR);
     }
 
+    public static double calculateMaxOSNR(OpticalSignal signal) {
+	double maxOSNR = Double.MIN_VALUE;
+	for (OpticalChannel c : signal.getChannels()) {
+	    double signalLin = DecibelConverter.toLinearScale(c.getSignalPower());
+	    double noiseLin = DecibelConverter.toLinearScale(c.getNoisePower());
+	    double OSNR = signalLin / noiseLin;
+
+	    if (OSNR > maxOSNR) {
+		maxOSNR = OSNR;
+	    }
+	}
+
+	return DecibelConverter.toDecibelScale(maxOSNR);
+    }
+
     public static void linkTrasferFunction(float linkLoss, OpticalSignal signal) {
 	for (OpticalChannel c : signal.getChannels()) {
 	    // Signal Total Gain
@@ -244,6 +259,35 @@ public class SignalFeatureCalculation {
 	OSNR /= (signalLin / noiseLin);
 
 	return DecibelConverter.toDecibelScale(OSNR);
+    }
+
+    public static double calculateBitRate(OpticalSignal inputSignal) {
+	double[] chBitRate = calculateChannelBitRate(inputSignal);
+	double totalBitRate = 0;
+	for (int i = 0; i < chBitRate.length; i++) {
+	    totalBitRate += chBitRate[i];
+	}
+
+	return totalBitRate;
+    }
+
+    public static double[] calculateChannelBitRate(OpticalSignal inputSignal) {
+	double[] chOSNR = calculateOSNR(inputSignal);
+	double[] chBitRate = new double[chOSNR.length];
+	for (int i = 0; i < chOSNR.length; i++) {
+	    if (chOSNR[i] >= 23.0)
+		chBitRate[i] = 400;
+	    else if (chOSNR[i] >= 18.0)
+		chBitRate[i] = 200; // 200Gb
+	    else if (chOSNR[i] >= 15)
+		chBitRate[i] = 150;
+	    else if (chOSNR[i] >= 11.3)
+		chBitRate[i] = 100;
+	    else
+		chBitRate[i] = 0;
+	}
+
+	return chBitRate;
     }
 
 }

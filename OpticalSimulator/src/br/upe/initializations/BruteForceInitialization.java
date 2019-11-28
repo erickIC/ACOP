@@ -23,6 +23,8 @@ public class BruteForceInitialization implements InitializationStrategy {
     private OpticalSignal signal;
     private boolean hasVOA;
     private float maxOutPower;
+    private double[] tiltOut;
+    private OpticalSignal[] signalOut;
 
     public BruteForceInitialization(AmplifierType type, boolean hasVOA, float maxOutPower) {
 	this.type = type;
@@ -34,17 +36,19 @@ public class BruteForceInitialization implements InitializationStrategy {
     public Amplifier[] initialize(int numberOfAmplifiers, float linkInputPower, float linkOutputPower,
 	    float[] linkLosses, ObjectiveFunction function, OpticalSignal inputSignal) {
 	Amplifier[] amplifiers = new Amplifier[numberOfAmplifiers];
+	tiltOut = new double[numberOfAmplifiers];
 	if (attenuations == null) {
 	    attenuations = new float[numberOfAmplifiers];
 	}
 
 	this.signal = inputSignal;
+	signalOut = new OpticalSignal[numberOfAmplifiers];
 
 	for (int i = 0; i < numberOfAmplifiers; i++) {
 	    // calculate the signal tilt
 	    double tilt = SignalFeatureCalculation.calculateTiltNonLinearReg(signal);
 	    // select the best mask considering the signal tilt
-	    // TODO: type = getAmplifierType(tilt);
+	    type = getAmplifierType(tilt);
 
 	    // The first amplifier
 	    if (i == 0) {
@@ -83,6 +87,9 @@ public class BruteForceInitialization implements InitializationStrategy {
 
 		// Use the amplifier to transform the signal
 		signal = amplifiers[i].transferFunction(signal);
+
+		signalOut[i] = signal.clone();
+		tiltOut[i] = SignalFeatureCalculation.calculateTiltLinearReg(signal);
 
 		if (i + 1 < numberOfAmplifiers) {
 		    // updating the input power of the next amplifier
@@ -124,6 +131,10 @@ public class BruteForceInitialization implements InitializationStrategy {
 	return attenuations;
     }
 
+    public double[] getTiltsOut() {
+	return tiltOut;
+    }
+
     public void setAttenuations(float[] attenuations) {
 	this.attenuations = attenuations;
     }
@@ -153,7 +164,7 @@ public class BruteForceInitialization implements InitializationStrategy {
 	} // Restricao para manter pontos dentro da mascara.
 	else {
 	    int gain = (int) amplifier.getGain();
-	    float relax = 0.0f;
+	    float relax = 0.5f;
 
 	    // Se o Pin é maior do que o maximo ou menor que o mínimo.
 	    if (amplifier.getInputPower() > (pm.getMaxTotalInputPower(gain) + relax)
@@ -182,27 +193,43 @@ public class BruteForceInitialization implements InitializationStrategy {
 	this.hasVOA = hasVOA;
     }
 
-    private static AmplifierType getAmplifierType(double tilt) {
+    private AmplifierType getAmplifierType(double tilt) {
 	if (tilt < 0) {
 	    tilt *= -1;
-	    if (tilt < 2)
+	    if (tilt < 1)
 		return AmplifierType.EDFA_1_PadTec;
-	    else if (tilt >= 2 && tilt < 6)
+	    else if (tilt >= 1 && tilt < 3)
+		return AmplifierType.EDFA_1_Tm2_PadTec;
+	    else if (tilt >= 3 && tilt < 5)
 		return AmplifierType.EDFA_1_Tm4_PadTec;
-	    else if (tilt >= 6 && tilt < 8)
+	    else if (tilt >= 5 && tilt < 7)
+		return AmplifierType.EDFA_1_Tm6_PadTec;
+	    else if (tilt >= 7 && tilt < 9)
 		return AmplifierType.EDFA_1_Tm8_PadTec;
+	    else if (tilt >= 9 && tilt < 11)
+		return AmplifierType.EDFA_1_Tm10_PadTec;
 	    else
 		return AmplifierType.EDFA_1_Tm12_PadTec;
 	} else {
-	    if (tilt < 2)
+	    if (tilt < 1)
 		return AmplifierType.EDFA_1_PadTec;
-	    else if (tilt >= 2 && tilt < 6)
+	    else if (tilt >= 1 && tilt < 3)
+		return AmplifierType.EDFA_1_T2_PadTec;
+	    else if (tilt >= 3 && tilt < 5)
 		return AmplifierType.EDFA_1_T4_PadTec;
-	    else if (tilt >= 6 && tilt < 8)
+	    else if (tilt >= 5 && tilt < 7)
+		return AmplifierType.EDFA_1_T6_PadTec;
+	    else if (tilt >= 7 && tilt < 9)
 		return AmplifierType.EDFA_1_T8_PadTec;
+	    else if (tilt >= 9 && tilt < 11)
+		return AmplifierType.EDFA_1_T10_PadTec;
 	    else
 		return AmplifierType.EDFA_1_T12_PadTec;
 	}
+    }
+
+    public OpticalSignal[] getSignalOut() {
+	return signalOut;
     }
 
     public static void main(String[] args0) {

@@ -9,7 +9,7 @@ public class TransformCompletePMFile {
 
     public static void main(String[] args) {
 	try {
-	    String tiltVal = "12";
+	    String tiltVal = "0";
 	    String path = "./masks/05_Com Tilt/EDFA_1_PadTec_Tilt" + tiltVal + "/";
 	    // String path = "./masks/05_Com Tilt/EDFA_1_PadTec/";
 	    File file = new File("./masks/tilt" + tiltVal + ".txt");

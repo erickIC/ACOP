@@ -10,10 +10,11 @@ import br.upe.initializations.UniformInitialization;
 import br.upe.mascara.PowerMask;
 import br.upe.mascara.PowerMaskFactory;
 import br.upe.objfunctions.linerInterpolation.LinearInterpolationFunction;
-import br.upe.signal.factory.ITUGridUniformSignal;
+import br.upe.signal.factory.PowerMaskSignal;
 import br.upe.signal.tracker.AmplifierSignalMonitor;
-import br.upe.simulations.simsetups.SimSetAMPVOA;
+import br.upe.simulations.simPadTec19.SimSetPadTec;
 import br.upe.simulations.simsetups.SimulationSetup;
+import br.upe.util.SignalFeatureCalculation;
 
 public class LossComp extends ACOPHeuristic {	
 
@@ -116,31 +117,42 @@ public class LossComp extends ACOPHeuristic {
 	ACOPHeuristic heuristic;
 	ObjectiveFunction function = new LinearInterpolationFunction();
 
+	float chPower = -20.0f; // -20 dBm/ch = -4 dBm ;; -19 dBm/ch = -3 dBm
 	int numberCh = 40;
-	SimulationSetup simSet = new SimSetAMPVOA(numberCh, -26.3f, 4.0f);
-	float[] linLosses = simSet.getLINK_LOSSES();
+	int numberAmps = 20;
+	float loss = 19.0f;
+
+	float[] linLosses = { 17f, 21f, 18f, 23f, 20f, 20f, 19f, 24f, 24f, 17f, 16f, 19f, 16f, 21f, 17f, 15f, 23f, 19f,
+		23f };
+
+	SimulationSetup simSet = new SimSetPadTec(numberCh, chPower, numberAmps, linLosses);
+
 	int numberAmplifiers = simSet.getNumberOfAmplifiers();
 
 	// Definindo ganho máximo
 	float maxPout = simSet.getMaxOutputPower();
 	System.out.println(maxPout);
 
-	ITUGridUniformSignal signal = new ITUGridUniformSignal(simSet.getCHANNELS(), 1.921e14, 100e9,
-		simSet.getCHANNEL_POWER(), 30);
+	PowerMaskSignal signal = new PowerMaskSignal(numberCh, AmplifierType.EDFA_1_PadTec,
+		simSet.getCHANNEL_POWER(), 40);
 	OpticalSignal inputSignal = signal.createSignal();
 
 	long t1 = System.currentTimeMillis();
 	heuristic = new LossComp(numberAmplifiers, linLosses, inputSignal, function);
-	heuristic.setInitialization(new UniformInitialization(AmplifierType.EDFA_1_STG));
+	heuristic.setInitialization(new UniformInitialization(AmplifierType.EDFA_1_PadTec));
 	heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
 	heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
 	heuristic.setMaxOutputPower(maxPout);
 	Amplifier[] amplifiers = heuristic.execute();
-	System.out.printf("OSNR_h = %2.3f\t",
-		heuristic.calculateOSNR(heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal()));
-	System.out.printf("Tilt_h = %2.3f\n",
-		heuristic.calculateTilt(heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal()));
 
+	OpticalSignal outputSignal = heuristic.getMonitors()[numberAmplifiers - 1].getOutputSignal();
+	double tilt = Math.abs(SignalFeatureCalculation.calculateTiltLinearReg(outputSignal));
+	double ripple = SignalFeatureCalculation.calculateRipple(outputSignal);
+	double bitrate = SignalFeatureCalculation.calculateBitRate(outputSignal);
+
+	System.out.format("%.4f\t%.4f\t%.4f\t|\t", tilt, bitrate, ripple);
+
+	System.out.println();
 	for (int i = 0; i < amplifiers.length; i++) {
 	    System.out.println(amplifiers[i]);
 	}

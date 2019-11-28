@@ -211,6 +211,8 @@ public class Amplifier implements IOpticalDevice {
      */
     public OpticalSignal transferFunction(OpticalSignal signal) {
 	OpticalSignal result = signal.clone();
+	Collections.sort(result.getChannels());
+
 	for (OpticalChannel c : result.getChannels()) {
 	    // Signal Gain
 	    double channelGain = calculateChannelFeature(c.getFrequency(), gainPerChannel);

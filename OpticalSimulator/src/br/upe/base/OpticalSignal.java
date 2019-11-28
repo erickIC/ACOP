@@ -9,6 +9,11 @@ public class OpticalSignal{
     private ArrayList<OpticalChannel> channels;
 
     /**
+     * Largura de banda óptica que será considerada no projeto.
+     */
+    public static final double B0 = 1.25e10;
+
+    /**
      * 
      * @param channels
      * @param spacing
@@ -37,8 +42,21 @@ public class OpticalSignal{
 
     public float getTotalPower() {
 	double totalInputPower = 0;
+	int j = 0;
 	for (OpticalChannel ch : channels) {
 	    totalInputPower += DecibelConverter.toLinearScale(ch.getSignalPower());
+	    double noiseLin = DecibelConverter.toLinearScale(ch.getNoisePower());
+	    totalInputPower += noiseLin;
+	    
+	    // ASE between channels
+	    /*if(j>0){
+	    OpticalChannel previousCh = channels.get(j - 1);
+	    double noiseLinPrevCh = DecibelConverter.toLinearScale(previousCh.getNoisePower());
+	    double delta_f = ch.getFrequency() - previousCh.getFrequency();
+	    totalInputPower += (noiseLin + noiseLinPrevCh) * delta_f / (2 * B0);
+	    }*/
+
+	    j++;
 	}
 	return (float) DecibelConverter.toDecibelScale(totalInputPower);
     }

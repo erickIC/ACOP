@@ -73,7 +73,7 @@ def unnormalizationicin(data, min_pinto, max_pinto, min_gain, max_gain, range_a,
 #Set the font sizes to the plots
 smaller_size = 12
 medium_size = 20
-bigger_size = 24
+bigger_size = 26
 plt.rc('font', size=bigger_size)             # controls default text sizes
 plt.rc('axes', titlesize=medium_size)        # fontsize of the axes title
 plt.rc('axes', labelsize=medium_size)        # fontsize of the x and y labels

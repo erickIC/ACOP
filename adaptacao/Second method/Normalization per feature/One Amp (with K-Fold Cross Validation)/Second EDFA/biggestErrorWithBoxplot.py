@@ -12,24 +12,6 @@ from matplotlib.ticker import PercentFormatter
 import math
 import pickle
 
-def applyGainMatching(pins, Gset, pouts):
-    dB_to_mW = lambda Gset : pow(10, Gset/10)
-    mW_to_dB = lambda Gset : 10*math.log10(Gset)
-    
-    pins_mW = list(map(dB_to_mW,pins))
-    Pin_mW = sum(pins_mW)
-    Gset_mW = pow(10, Gset/10) #dB to mW
-    
-    pouts_mW = list(map(dB_to_mW,pouts))
-    Pout_mW = sum(pouts_mW)
-    
-    adj_factor = (Pout_mW / Pin_mW) / Gset_mW # Total Gain / Gain desired
-    gain_matching = lambda Gset : Gset*adj_factor
-    pouts_mW = list(map(gain_matching,pouts_mW))
-    pouts = list(map(mW_to_dB,pouts_mW))
-    
-    return pouts
-
 def unnormalization_in(data, min_gset, max_gset, min_pin, max_pin, range_a, range_b):
 	unnormalized_data = []
 	for i in range(0, data.shape[0]):
@@ -41,7 +23,6 @@ def unnormalization_in(data, min_gset, max_gset, min_pin, max_pin, range_a, rang
 			    values.append(((float(data[i][j]) - float(range_a)) * (float(max_pin)-float(min_pin))) / (float(range_b) - float(range_a)) + float(min_pin))
 		unnormalized_data.append(values)
 	return np.array(unnormalized_data)
-
 
 def unnormalization(data, min, max, range_a, range_b):
 	unnormalized_data = []
@@ -398,19 +379,15 @@ for i in range(0, len(data1)):
 	fold_x1.append([data1[i][0], data1[i][1], data1[i][2], data1[i][3]])
 	fold_y1.append([data1[i][4], data1[i][5]])
 
-for i in range(0, len(data2)):
 	fold_x2.append([data2[i][0], data2[i][1], data2[i][2], data2[i][3]])
 	fold_y2.append([data2[i][4], data2[i][5]])
-    
-for i in range(0, len(data3)):
+
 	fold_x3.append([data3[i][0], data3[i][1], data3[i][2], data3[i][3]])
 	fold_y3.append([data3[i][4], data3[i][5]])
-    
-for i in range(0, len(data4)):
+
 	fold_x4.append([data4[i][0], data4[i][1], data4[i][2], data4[i][3]])
 	fold_y4.append([data4[i][4], data4[i][5]])
-    
-for i in range(0, len(data5)):
+
 	fold_x5.append([data5[i][0], data5[i][1], data5[i][2], data5[i][3]])
 	fold_y5.append([data5[i][4], data5[i][5]])
 
@@ -456,19 +433,15 @@ for i in range(0, len(data1)):
 	fold_x1.append([data1[i][0], data1[i][1], data1[i][2]])
 	fold_y1.append([data1[i][4], data1[i][5]])
 
-for i in range(0, len(data2)):
 	fold_x2.append([data2[i][0], data2[i][1], data2[i][2]])
 	fold_y2.append([data2[i][4], data2[i][5]])
 
-for i in range(0, len(data3)):
 	fold_x3.append([data3[i][0], data3[i][1], data3[i][2]])
 	fold_y3.append([data3[i][4], data3[i][5]])
-    
-for i in range(0, len(data4)):
+
 	fold_x4.append([data4[i][0], data4[i][1], data4[i][2]])
 	fold_y4.append([data4[i][4], data4[i][5]])
 
-for i in range(0, len(data5)):
 	fold_x5.append([data5[i][0], data5[i][1], data5[i][2]])
 	fold_y5.append([data5[i][4], data5[i][5]])
 
@@ -520,6 +493,9 @@ for i in range(0, k):
     model_name = 'models/nn-42to40' + str(i + 1) + '.h5'
     model_current = load_model(model_name)
     models42to40.append(model_current)
+
+   
+
 
 
 
@@ -646,49 +622,21 @@ diffs_io = []
 for i in range(0 , len(pred_y41)):
     diff_current = []
     for j in range(0, len(pred_y41[i])):
-        if (i == 2):
-            if j == 1:
-                plt.figure(figsize=(10,8))
-                plt.subplot(321)
-                plt.title('Comparation gain matching 2')
-            if j == int(len(pred_y41[i])/2):
-                plt.subplot(323)
-            if j == int(len(pred_y41[i])*(2/3)):
-                plt.subplot(325)
-        if (i == 4):
-            if j == 1:
-                plt.subplot(324)
-            if j == int(len(pred_y41[i])/2):
-                plt.subplot(322)
-            if j == int(len(pred_y41[i])*(2/3)):
-                plt.subplot(326)
-
         current = pred_y41[i][j]
-        if (i == 2) or (i == 4):
-            if j == 1 or j == int(len(pred_y41[i])/2) or j == int(len(pred_y41[i])*(2/3)):
-                plt.plot(wavelength, current, label='original')
-        
 
         current_in = pred_x41[i][j]
-        #current = applyGainMatching(current_in[1:], int(current_in[0]), current)
-        if (i == 2) or (i == 4):
-            if j == 1 or j == int(len(pred_y41[i])/2) or j == int(len(pred_y41[i])*(2/3)):
-                plt.plot(wavelength, current, label='Gain matching')
-                plt.plot(wavelength, test_y41[i][j],'--' ,label='Expected')
-                if i == 2:
-                    plt.ylabel('Pout (db)')
-                plt.legend()
-
+        biggest_current = 0
         diff = int(0)
         for k in range(0, len(current)):
-            diff += abs(current[k] - test_y41[i][j][k])
+            diff = abs(current[k] - test_y41[i][j][k])
+            if diff > biggest_current:
+                biggest_current = diff
             if DEBUG:
                 print(current[k], test_y41[i][j][k])
-        diff_current.append(diff/len(current))
+        diff_current.append(biggest_current)
     diffs_41.append(diff_current)
 
 
-# plt.savefig('Comparation gain matching 2.png', dpi = 200)
 
 if DEBUG:
     print(len(diffs_41))
@@ -698,13 +646,15 @@ for i in range(0 , len(pred_y42)):
     for j in range(0, len(pred_y42[i])):
         current = pred_y42[i][j]
         current_in = pred_x42[i][j]
-        #current = applyGainMatching(current_in[1:len(current_in)-2], int(current_in[0]), current)
+        biggest_current = 0
         diff = int(0)
         for k in range(0, len(current)):
-            diff += abs(current[k] - test_y42[i][j][k])
+            diff = abs(current[k] - test_y42[i][j][k])
+            if diff > biggest_current:
+                biggest_current = diff
             if DEBUG:
                 print(current[k], test_y42[i][j][k])
-        diff_current.append(diff/len(current))
+        diff_current.append(biggest_current)
     diffs_42.append(diff_current)
 
 if DEBUG:
@@ -729,13 +679,14 @@ for i in range(0 , len(pred_yic)):
         
         j += step + 1
         
-        #current = applyGainMatching(np.array(current_in[0]), int(current_in[1]), current)
-        
+        biggest_current = 0
         diff = int(0)
         for p in range(0, len(current)):
-            diff += abs(current[p] - current_t[p])
+            diff = abs(current[p] - current_t[p])
+            if diff > biggest_current:
+                biggest_current = diff
 
-        diff_current.append(diff/number_channels)
+        diff_current.append(biggest_current)
     diffs_ic.append(diff_current)
     diffs_nf.append(diff_current2)
 
@@ -760,13 +711,14 @@ for i in range(0 , len(pred_yio)):
         
         j += step + 1
         
-        #current = applyGainMatching(np.array(current_in[0]), int(current_in[1]), current)
-        
+        biggest_current = 0
         diff = int(0)
         for p in range(0, len(current)):
-            diff += abs(current[p] - current_t[p])
+            diff = abs(current[p] - current_t[p])
+            if diff > biggest_current:
+                biggest_current = diff
 
-        diff_current.append(diff/number_channels)
+        diff_current.append(biggest_current)
     diffs_io.append(diff_current)
     diffs_nf2.append(diff_current2)
 
@@ -778,32 +730,31 @@ if DEBUG:
 
 plt.figure(figsize=(10,8))
 
-# plt.subplot(211)
+
 plt.boxplot([
             np.concatenate((diffs_io[0], diffs_io[1], diffs_io[2], diffs_io[3], diffs_io[4]), axis = 0),
             np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0),         #icton17 with tilt 
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
-# plt.title('Absolute difference Pout')
+
 plt.xticks([1, 2, 3, 4], ['PerChannel', 'PerChannel-Tilt', 'Spectrum', 'Spectrum-Tilt'])
 plt.ylabel('MSE (dB)')
 
-plt.savefig('plots/AverageErrorNNsBoxPlotEDFA2.pdf', dpi = 200)
+plt.savefig('plots/BiggestErrorNNsBoxPlotEDFA2.pdf', dpi = 200)
 
 plt.figure(figsize=(10,8))
-# plt.subplot(212)
 
 plt.boxplot([
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
-# plt.title('Absolute difference Pout')
+
 plt.xticks([1, 2], ['Spectrum', 'Spectrum-Tilt'])
 plt.ylabel('MSE (dB)')
 
 
-plt.savefig('plots/AverageErrorNNsBoxPlotZoomEDFA2.pdf', dpi = 200)
+plt.savefig('plots/BiggestErrorNNsBoxPlotZoomEDFA2.pdf', dpi = 200)
 
 plt.figure(figsize=(8,6))
 
@@ -814,9 +765,10 @@ n4240 = np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diff
 
 errors = [io, ic, n4140, n4240]
 
-pickle_out = open("errors/edfa2-average-error.obj","wb")
+pickle_out = open("errors/edfa2-biggest.obj","wb")
 pickle.dump(errors, pickle_out)
 pickle_out.close()
+
 
 col_labels = ['mean', 'std']
 row_labels = ['ICTON', 'ICTONwT', '41-to-40', '42-to-40']
@@ -840,5 +792,5 @@ plt.tick_params(axis='y', which='both', right=False, left=False, labelleft=False
 for pos in ['right','top','bottom','left']:
     plt.gca().spines[pos].set_visible(False)
 
-plt.savefig('plots/AverageErrorTableNNsBoxPlotEDFA2.pdf', dpi = 200)
+plt.savefig('plots/BiggestErrorTableNNsBoxPlotEDFA2.pdf', dpi = 200)
 

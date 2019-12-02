@@ -91,7 +91,9 @@ def getOutputSpectrum (Gset, Pins, Frequencies, PowerMask):
 		p_outs.append(getPoutAnyPin(Gset, Pin, Channel, PowerMask))
 
 	# Apply Gain Matching Algorithm and return Pout for each channel of the input signal
-	return applyGainMatching(Gset, Pin, p_outs)
+	# p_outs = applyGainMatching(Gset, Pin, p_outs)
+	
+	return p_outs
 
 '''
 	This method apply the Gain Matching Algorthm to correct the estimated gain computed

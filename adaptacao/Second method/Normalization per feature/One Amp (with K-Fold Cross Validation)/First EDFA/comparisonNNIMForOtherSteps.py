@@ -68,7 +68,7 @@ for step in dB_steps:
 		nn_error.append(nn_signal_error)
 	
 	# Savings results for each step
-	im_output_file = "im-error-for-" + str(step) + "dB-step.txt"
+	im_output_file = "im-error-for-" + str(step) + "dB-step-without-gm.txt"
 	nn_output_file = "nn-error-for-" + str(step) + "dB-step.txt"
 
 	with open(im_output_file, 'w') as im_f_out:

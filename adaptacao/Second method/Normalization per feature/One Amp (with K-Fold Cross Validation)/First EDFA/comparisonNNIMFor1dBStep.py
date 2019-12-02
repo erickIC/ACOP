@@ -58,7 +58,7 @@ for fold, training_group in zip(folds, training_groups):
 		nn_error.append(nn_signal_error)
 
 # Saving results
-im_output_file = "im-error-for-1dB-step.txt"
+im_output_file = "im-error-for-1dB-step-without-gm.txt"
 nn_output_file = "nn-error-for-1dB-step.txt"
 
 with open(im_output_file, 'w') as im_f_out:

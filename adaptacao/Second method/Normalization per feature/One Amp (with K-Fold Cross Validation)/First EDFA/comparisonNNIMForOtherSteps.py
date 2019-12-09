@@ -8,6 +8,7 @@ import numpy as np
 from collections import defaultdict
 import interpolationMethod as IM
 import neuralNetworkMethod as NN
+import pickle
 
 input_file = "masks/mask-edfa1-padtec-new-models-with-tilt.txt"
 data = []
@@ -52,7 +53,7 @@ for step in dB_steps:
 	
 	# Testing both techniques
 	p_out_im = IM.interpolationMethod(training_data, test_data)
-	p_out_nn = NN.neuralNetworkMethod(training_data, test_data)
+	p_out_nn, model, history = NN.neuralNetworkMethod(training_data, test_data)
 
 	# Calculating prediction error for each model
 	im_error = []
@@ -66,6 +67,12 @@ for step in dB_steps:
 			nn_signal_error.append(np.abs(test_data[i][j] - p_out_nn[i][j-42]))
 		im_error.append(im_signal_error)
 		nn_error.append(nn_signal_error)
+	
+	# Saving NN model and history for current step
+	model.save('nn-model-for-' + str(step) + 'dB-step.h5')
+	history_data = [history.epoch, history.history['val_loss']]
+	with open('nn-history-for-' + str(step) + 'dB-step.obj', 'wb') as pickle_out:
+		pickle.dump(history_data, pickle_out)
 	
 	# Savings results for each step
 	im_output_file = "im-error-for-" + str(step) + "dB-step-without-gm.txt"

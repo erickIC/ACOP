@@ -7,6 +7,7 @@
 import numpy as np
 import interpolationMethod as IM
 import neuralNetworkMethod as NN
+import pickle
 
 input_file = "masks/mask-edfa1-padtec-new-models-with-tilt.txt"
 data = []
@@ -43,9 +44,11 @@ training_groups = [training_group_1, training_group_2, training_group_3, trainin
 im_error = []
 nn_error = []
 
+fold_count = 1	# for model saving purpose
+
 for fold, training_group in zip(folds, training_groups):
 	p_out_im = IM.interpolationMethod(training_group, fold)
-	p_out_nn = NN.neuralNetworkMethod(training_group, fold)
+	p_out_nn, model, history = NN.neuralNetworkMethod(training_group, fold)
 
 	# Calculating prediction error for each model
 	for i in range(0, fold.shape[0]):
@@ -56,6 +59,14 @@ for fold, training_group in zip(folds, training_groups):
 			nn_signal_error.append(np.abs(fold[i][j] - p_out_nn[i][j-42]))
 		im_error.append(im_signal_error)
 		nn_error.append(nn_signal_error)
+	
+	# Saving NN model and history for current fold
+	model.save('nn-model-for-1dB-step-fold-' + str(fold_count) + '.h5')
+	history_data = [history.epoch, history.history['val_loss']]
+	with open('nn-history-for-1dB-step-fold-' + str(fold_count) + '.obj', 'wb') as pickle_out:
+		pickle.dump(history_data, pickle_out)
+	
+	fold_count += 1
 
 # Saving results
 im_output_file = "im-error-for-1dB-step-without-gm.txt"

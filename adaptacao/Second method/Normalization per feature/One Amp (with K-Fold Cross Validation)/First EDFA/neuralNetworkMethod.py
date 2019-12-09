@@ -136,7 +136,7 @@ def neuralNetworkMethod(training_data, test_data):
 
 	cb = ks.callbacks.EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 120, verbose = 0, mode='auto')
 
-	model.fit(training_input, training_output, validation_data=(test_input, test_output), epochs = num_epochs, callbacks=[cb])
+	history = model.fit(training_input, training_output, validation_data=(test_input, test_output), epochs = num_epochs, callbacks=[cb])
 
 	# Executing prediction
 	normalized_p_out = model.predict(test_input)
@@ -145,4 +145,4 @@ def neuralNetworkMethod(training_data, test_data):
 	p_out = unnormalization(normalized_p_out, min_pout, max_pout, range_a, range_b)
 
 	# Returning P_out prediction
-	return p_out
+	return p_out, model, history

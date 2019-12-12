@@ -5,7 +5,6 @@
 '''
 
 import numpy as np
-from collections import defaultdict
 import interpolationMethod as IM
 import neuralNetworkMethod as NN
 import pickle
@@ -69,14 +68,14 @@ for step in dB_steps:
 		nn_error.append(nn_signal_error)
 	
 	# Saving NN model and history for current step
-	model.save('nn-model-for-' + str(step) + 'dB-step.h5')
+	model.save('models/nn-model-for-' + str(step) + 'dB-step.h5')
 	history_data = [history.epoch, history.history['val_loss']]
-	with open('nn-history-for-' + str(step) + 'dB-step.obj', 'wb') as pickle_out:
+	with open('models/nn-history-for-' + str(step) + 'dB-step.obj', 'wb') as pickle_out:
 		pickle.dump(history_data, pickle_out)
 	
 	# Savings results for each step
-	im_output_file = "im-error-for-" + str(step) + "dB-step-without-gm.txt"
-	nn_output_file = "nn-error-for-" + str(step) + "dB-step.txt"
+	im_output_file = "errors/im-error-for-" + str(step) + "dB-step-without-gm.txt"
+	nn_output_file = "errors/nn-error-for-" + str(step) + "dB-step.txt"
 
 	with open(im_output_file, 'w') as im_f_out:
 		for signal in im_error:

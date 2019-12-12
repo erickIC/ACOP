@@ -7,8 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 ## 1dB Step
-im_input_file = "im-error-for-1dB-step-without-gm.txt"
-nn_input_file = "nn-error-for-1dB-step.txt"
+im_input_file = "errors/im-error-for-1dB-step-without-gm.txt"
+nn_input_file = "errors/nn-error-for-1dB-step.txt"
 im_data = []
 nn_data = []
 
@@ -47,7 +47,7 @@ plt.title("Mean error per signal for Interpolation Method (29 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
 bottom_mean_1dB, top_mean_1dB = plt.ylim()
-plt.savefig("ResultMeanErrorPerFold-IM-1dB.pdf", dpi=200)
+plt.savefig("plots/ResultMeanErrorPerFold-IM-1dB.pdf", dpi=200)
 
 plt.clf()
 
@@ -60,7 +60,7 @@ plt.title("Maximum error per signal for Interpolation Method (29 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
 bottom_max_1dB, top_max_1dB = plt.ylim()
-plt.savefig("ResultMaxErrorPerFold-IM-1dB.pdf", dpi=200)
+plt.savefig("plots/ResultMaxErrorPerFold-IM-1dB.pdf", dpi=200)
 
 plt.clf()
 
@@ -72,7 +72,7 @@ plt.boxplot([nn_mean_error[0:fold_size],
 plt.title("Mean error per signal for Neural Network (29 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
-plt.savefig("ResultMeanErrorPerFold-NN-1dB.pdf", dpi=200)
+plt.savefig("plots/ResultMeanErrorPerFold-NN-1dB.pdf", dpi=200)
 
 plt.clf()
 
@@ -84,7 +84,7 @@ plt.boxplot([nn_max_error[0:fold_size],
 plt.title("Maximum error per signal for Neural Network (29 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
-plt.savefig("ResultMaxErrorPerFold-NN-1dB.pdf", dpi=200)
+plt.savefig("plots/ResultMaxErrorPerFold-NN-1dB.pdf", dpi=200)
 
 plt.clf()
 
@@ -98,7 +98,7 @@ plt.title("Mean error per signal for Neural Network (29 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
 plt.ylim(bottom_mean_1dB, top_mean_1dB)
-plt.savefig("ResultMeanErrorPerFold-NN-1dB-without-zoom.pdf", dpi=200)
+plt.savefig("plots/ResultMeanErrorPerFold-NN-1dB-without-zoom.pdf", dpi=200)
 
 plt.clf()
 
@@ -111,7 +111,7 @@ plt.title("Maximum error per signal for Neural Network (29 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
 plt.ylim(bottom_max_1dB, top_max_1dB)
-plt.savefig("ResultMaxErrorPerFold-NN-1dB-without-zoom.pdf", dpi=200)
+plt.savefig("plots/ResultMaxErrorPerFold-NN-1dB-without-zoom.pdf", dpi=200)
 
 plt.clf()
 
@@ -123,8 +123,8 @@ im_general_error = []
 nn_general_error = []
 
 for step in steps:
-	im_input_file = "im-error-for-" + str(step) + "dB-step-without-gm.txt"
-	nn_input_file = "nn-error-for-" + str(step) + "dB-step.txt"
+	im_input_file = "errors/im-error-for-" + str(step) + "dB-step-without-gm.txt"
+	nn_input_file = "errors/nn-error-for-" + str(step) + "dB-step.txt"
 
 	im_data = []
 	nn_data = []
@@ -167,7 +167,7 @@ plt.title("Mean error for Interpolation Method")
 plt.xticks(np.arange(1, 6), ["29 masks", "15 masks", "7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
 bottom_mean_other_steps, top_mean_other_steps = plt.ylim()
-plt.savefig("ResultMeanErrorPerStep-IM.pdf", dpi=200)
+plt.savefig("plots/ResultMeanErrorPerStep-IM.pdf", dpi=200)
 
 plt.clf()
 
@@ -176,7 +176,7 @@ plt.title("Maximum error for Interpolation Method")
 plt.xticks(np.arange(1, 6), ["29 masks", "15 masks", "7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
 bottom_max_other_steps, top_max_other_steps = plt.ylim()
-plt.savefig("ResultMaxErrorPerStep-IM.pdf", dpi=200)
+plt.savefig("plots/ResultMaxErrorPerStep-IM.pdf", dpi=200)
 
 plt.clf()
 
@@ -184,7 +184,7 @@ plt.boxplot([nn_mean_error[0], nn_mean_error[1], nn_mean_error[2], nn_mean_error
 plt.title("Mean error for Neural Network")
 plt.xticks(np.arange(1, 6), ["29 masks", "15 masks", "7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
-plt.savefig("ResultMeanErrorPerStep-NN.pdf", dpi=200)
+plt.savefig("plots/ResultMeanErrorPerStep-NN.pdf", dpi=200)
 
 plt.clf()
 
@@ -192,7 +192,7 @@ plt.boxplot([nn_max_error[0], nn_max_error[1], nn_max_error[2], nn_max_error[3],
 plt.title("Maximum error for Neural Network")
 plt.xticks(np.arange(1, 6), ["29 masks", "15 masks", "7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
-plt.savefig("ResultMaxErrorPerStep-NN.pdf", dpi=200)
+plt.savefig("plots/ResultMaxErrorPerStep-NN.pdf", dpi=200)
 
 plt.clf()
 
@@ -202,7 +202,7 @@ plt.title("Mean error for Neural Network")
 plt.xticks(np.arange(1, 6), ["29 masks", "15 masks", "7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
 plt.ylim(bottom_mean_other_steps, top_mean_other_steps)
-plt.savefig("ResultMeanErrorPerStep-NN-without-zoom.pdf", dpi=200)
+plt.savefig("plots/ResultMeanErrorPerStep-NN-without-zoom.pdf", dpi=200)
 
 plt.clf()
 
@@ -211,4 +211,4 @@ plt.title("Maximum error for Neural Network")
 plt.xticks(np.arange(1, 6), ["29 masks", "15 masks", "7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
 plt.ylim(bottom_max_other_steps, top_max_other_steps)
-plt.savefig("ResultMaxErrorPerStep-NN-without-zoom.pdf", dpi=200)
+plt.savefig("plots/ResultMaxErrorPerStep-NN-without-zoom.pdf", dpi=200)

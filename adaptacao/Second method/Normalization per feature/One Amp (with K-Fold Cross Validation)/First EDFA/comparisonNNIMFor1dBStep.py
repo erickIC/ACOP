@@ -61,16 +61,16 @@ for fold, training_group in zip(folds, training_groups):
 		nn_error.append(nn_signal_error)
 	
 	# Saving NN model and history for current fold
-	model.save('nn-model-for-1dB-step-fold-' + str(fold_count) + '.h5')
+	model.save('models/nn-model-for-1dB-step-fold-' + str(fold_count) + '.h5')
 	history_data = [history.epoch, history.history['val_loss']]
-	with open('nn-history-for-1dB-step-fold-' + str(fold_count) + '.obj', 'wb') as pickle_out:
+	with open('models/nn-history-for-1dB-step-fold-' + str(fold_count) + '.obj', 'wb') as pickle_out:
 		pickle.dump(history_data, pickle_out)
 	
 	fold_count += 1
 
 # Saving results
-im_output_file = "im-error-for-1dB-step-without-gm.txt"
-nn_output_file = "nn-error-for-1dB-step.txt"
+im_output_file = "errors/im-error-for-1dB-step-without-gm.txt"
+nn_output_file = "errors/nn-error-for-1dB-step.txt"
 
 with open(im_output_file, 'w') as im_f_out:
 	for signal in im_error:

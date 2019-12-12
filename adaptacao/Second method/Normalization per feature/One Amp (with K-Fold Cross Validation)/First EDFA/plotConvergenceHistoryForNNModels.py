@@ -12,7 +12,7 @@ histories = []
 
 # Loading each step convergence history
 for step in dB_steps:
-	input_object = 'nn-history-for-' + str(step) + 'dB-step.obj'
+	input_object = 'models/nn-history-for-' + str(step) + 'dB-step.obj'
 	with open(input_object, 'rb') as history_obj:
 		histories.append(pickle.load(history_obj))
 
@@ -32,4 +32,4 @@ plt.xlabel('Epochs')
 
 plt.legend()
 plt.tight_layout()
-plt.savefig('ResultNNConvergenceHistoryPerStep.pdf', dpi=200)
+plt.savefig('plots/ResultNNConvergenceHistoryPerStep.pdf', dpi=200)

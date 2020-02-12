@@ -6,6 +6,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+font = {'size' : 14}
+plt.rc('font', **font)
+'''
 ## Group 1
 im_input_file = "errors/im-error-for-group-1-without-gm.txt"
 nn_input_file = "errors/nn-error-for-group-1.txt"
@@ -36,8 +39,9 @@ nn_max_error = np.amax(nn_data, axis=1)
 
 # Plotting results per fold (only used for 1dB step)
 fold_size = int(len(im_mean_error) / 5)
-
+'''
 plt.figure(1)
+'''
 plt.boxplot([im_mean_error[0:fold_size],
 			 im_mean_error[fold_size:fold_size*2],
 			 im_mean_error[fold_size*2:fold_size*3],
@@ -114,7 +118,7 @@ plt.ylim(bottom_max_group_1, top_max_group_1)
 plt.savefig("plots/ResultMaxErrorPerFold-NN-group-1-without-zoom.pdf", dpi=200)
 
 plt.clf()
-
+'''
 ## Groups 2 and 3
 # Reading and plotting general results for both techniques
 groups = [1, 2, 3]
@@ -181,7 +185,7 @@ plt.savefig("plots/ResultMaxErrorPerGroup-IM.pdf", dpi=200)
 plt.clf()
 
 plt.boxplot([nn_mean_error[0], nn_mean_error[1], nn_mean_error[2]])
-plt.title("Mean error for Neural Network")
+plt.title("Mean error for Spectrum-Tilt")
 plt.xticks(np.arange(1, 4), ["7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
 plt.savefig("plots/ResultMeanErrorPerGroup-NN.pdf", dpi=200)
@@ -189,7 +193,7 @@ plt.savefig("plots/ResultMeanErrorPerGroup-NN.pdf", dpi=200)
 plt.clf()
 
 plt.boxplot([nn_max_error[0], nn_max_error[1], nn_max_error[2]])
-plt.title("Maximum error for Neural Network")
+plt.title("Maximum error for Spectrum-Tilt")
 plt.xticks(np.arange(1, 4), ["7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
 plt.savefig("plots/ResultMaxErrorPerGroup-NN.pdf", dpi=200)
@@ -198,7 +202,7 @@ plt.clf()
 
 # Plotting NN results without 'zoom'
 plt.boxplot([nn_mean_error[0], nn_mean_error[1], nn_mean_error[2]])
-plt.title("Mean error for Neural Network")
+plt.title("Mean error for Spectrum-Tilt")
 plt.xticks(np.arange(1, 4), ["7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
 plt.ylim(bottom_mean_other_groups, top_mean_other_groups)
@@ -207,7 +211,7 @@ plt.savefig("plots/ResultMeanErrorPerGroup-NN-without-zoom.pdf", dpi=200)
 plt.clf()
 
 plt.boxplot([nn_max_error[0], nn_max_error[1], nn_max_error[2]])
-plt.title("Maximum error for Neural Network")
+plt.title("Maximum error for Spectrum-Tilt")
 plt.xticks(np.arange(1, 4), ["7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
 plt.ylim(bottom_max_other_groups, top_max_other_groups)

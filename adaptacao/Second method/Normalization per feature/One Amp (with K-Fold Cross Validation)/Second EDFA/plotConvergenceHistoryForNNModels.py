@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 groups = [2, 3]
+mask_quantities = [5, 3]
 histories = []
 
 # Loading each step convergence history
@@ -20,11 +21,13 @@ for group in groups:
 forms = ['--', '-^']
 indexes = np.arange(0, len(histories))
 
+font = {'size' : 24}
+plt.rc('font', **font)
 plt.figure()
 
-for i, group in zip(indexes, groups):
+for i, mask_quantity in zip(indexes, mask_quantities):
 	history_epochs, history_data = histories[i][0], histories[i][1]
-	label = 'Group ' + str(group)
+	label = str(mask_quantity) + ' masks'
 	plt.semilogy(history_epochs, history_data, forms[i], label = label)
 
 plt.ylabel('Log(MSE)')

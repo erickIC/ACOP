@@ -69,6 +69,10 @@ public class AdGC extends ACOPHeuristic {
 
 	    // There is no operating point for the given input power
 	    if (candidates.length == 0) {
+		if (amplifiers[i] instanceof AmplifierVOA) {
+		    if (((AmplifierVOA) amplifiers[i]).isAttenuationsSetted())
+			return null;
+		}
 
 		PowerMask pm = PowerMaskFactory.getInstance().fabricatePowerMask(amplifiers[i].getType());
 
@@ -89,6 +93,9 @@ public class AdGC extends ACOPHeuristic {
 		if (amplifiers[i - 1] instanceof AmplifierVOA) {
 		    // Increase the voa attenuation of the previous amplifier
 		    ((AmplifierVOA) amplifiers[i - 1]).increaseVoaOutAttenuation(difference);
+
+		    if (((AmplifierVOA) amplifiers[i - 1]).getVoaOutAttenuation() > voaMaxAttenuation)
+			return null;
 
 		    // Use the amplifier to transform the signal
 		    // Save the output power of this amplifier

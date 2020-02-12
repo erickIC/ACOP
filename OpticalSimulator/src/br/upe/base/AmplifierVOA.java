@@ -8,6 +8,7 @@ public class AmplifierVOA extends Amplifier {
 
     private float voaOutAttenuation;
     private float voaInAttenuation;
+    private boolean attenuationsSetted;
 
     public AmplifierVOA(float inputPower, AmplifierType type) {
 	super(inputPower, type);
@@ -38,6 +39,7 @@ public class AmplifierVOA extends Amplifier {
 
     public void setVoaOutAttenuation(float voaAttenuation) {
 	this.voaOutAttenuation = voaAttenuation;
+	this.attenuationsSetted = true;
     }
 
     public void setVoaInAttenuation(float voaInAttenuation) {
@@ -96,6 +98,14 @@ public class AmplifierVOA extends Amplifier {
 	}
 
 	return result;
+    }
+
+    public boolean isAttenuationsSetted() {
+	return attenuationsSetted;
+    }
+
+    public void setAttenuationsSetted(boolean attenuationsSetted) {
+	this.attenuationsSetted = attenuationsSetted;
     }
 
 }

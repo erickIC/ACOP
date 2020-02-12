@@ -1,3 +1,4 @@
+
 package br.upe.optimizationUtil;
 
 import br.upe.base.ACOPHeuristic;
@@ -10,7 +11,7 @@ import br.upe.base.OpticalSignal;
 import br.upe.heuristics.maxGain.MaxGain;
 import br.upe.heuristics.uiara.AdGC;
 import br.upe.initializations.BruteForceInitialization;
-import br.upe.initializations.UniformInitialization;
+import br.upe.initializations.UniformInitializationVOA;
 import br.upe.metrics.GNLIMetric;
 import br.upe.objfunctions.linerInterpolation.LinearInterpolationFunction;
 import br.upe.selection.MaxGainSelection;
@@ -60,7 +61,8 @@ public class ACOP_MOOProblem {
 
 	float totalInputPower = inputSignal.getTotalPower();
 
-
+	Amplifier[] amplifiers;
+	float voaAttenuation;
 	if(gains == null) {
 	    ACOPHeuristic heuristic = null;
 
@@ -77,29 +79,35 @@ public class ACOP_MOOProblem {
 		heuristic = new AdGC(numAmps, simSet.getLINK_LOSSES(), inputSignal, function);
 	    }
 
-	    heuristic.setInitialization(new UniformInitialization(type));
+	    heuristic.setInitialization(new UniformInitializationVOA(type, attenuations));
 	    heuristic.setVoaMaxAttenuation(simSet.getVOA_MAX_ATT());
 	    heuristic.setRoadmAttenuation(simSet.getROADM_ATT());
 	    heuristic.setMaxOutputPower(simSet.getMaxOutputPower());
-	    heuristic.execute();
-	    gains = heuristic.getGains();
+	    amplifiers = heuristic.execute();
+
+	    if (amplifiers == null)
+		return null;
+
+	    voaAttenuation = ((AmplifierVOA) amplifiers[amplifiers.length - 1]).getVoaOutAttenuation();
+	} else {
+
+	    BruteForceInitialization initialization = new BruteForceInitialization(type, true,
+		    simSet.getMaxOutputPower());
+	    initialization.setGains(gains);
+	    initialization.setAttenuations(attenuations);
+
+	    amplifiers = initialization.initialize(simSet.getNumberOfAmplifiers(), totalInputPower, 0,
+		    simSet.getLINK_LOSSES(), function, inputSignal);
+
+	    if (amplifiers == null)
+		return null;
+
+	    float ampVoaAtt = ((AmplifierVOA) amplifiers[amplifiers.length - 1]).getVoaOutAttenuation();
+	    voaAttenuation = (float) (amplifiers[amplifiers.length - 1].getOutputPower() - ampVoaAtt
+		    - totalInputPower - simSet.getROADM_ATT());
+	    ((AmplifierVOA) amplifiers[amplifiers.length - 1]).increaseVoaOutAttenuation(voaAttenuation);
+
 	}
-
-	BruteForceInitialization initialization = new BruteForceInitialization(type, true, simSet.getMaxOutputPower());
-	initialization.setGains(gains);
-	initialization.setAttenuations(attenuations);
-
-	Amplifier[] amplifiers = initialization.initialize(simSet.getNumberOfAmplifiers(), totalInputPower, 0,
-		simSet.getLINK_LOSSES(), function, inputSignal);
-
-	if (amplifiers == null)
-	    return null;
-
-	float ampVoaAtt = ((AmplifierVOA) amplifiers[amplifiers.length - 1]).getVoaOutAttenuation();
-	float voaAttenuation = (float) (amplifiers[amplifiers.length - 1].getOutputPower() - ampVoaAtt - totalInputPower
-		- simSet.getROADM_ATT());
-	((AmplifierVOA) amplifiers[amplifiers.length - 1]).increaseVoaOutAttenuation(voaAttenuation);
-	inputSignal = inputSignal.adjustByFactor(-voaAttenuation);
 
 	// If the output power of the link is less than the
 	// input power, then the solution isn't desirable.
@@ -118,7 +126,6 @@ public class ACOP_MOOProblem {
 	    GNLIMetric gnliMetric = new GNLIMetric(28e9, 100e9, numberCh, inputPowerCh, linkLength);
 	    gnliMetric.evaluate(amplifiers);
 
-	    inputSignal = inputSignal.adjustByFactor(-simSet.getROADM_ATT());
 	    // result[0] = calculateTilt(inputSignal); // minimizar
 
 	    result[1] = (1 / gnliMetric.worstOSNR_NLI()); // maximizar

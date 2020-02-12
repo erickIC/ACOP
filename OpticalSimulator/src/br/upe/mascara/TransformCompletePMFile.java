@@ -12,8 +12,8 @@ public class TransformCompletePMFile {
 	    String tiltVal = "-4";
 	    // String path = "./masks/05_Com Tilt/EDFA_1_Tilt" + tiltVal +
 	    // "_PadTec/";
-	    String path = "./masks/05_Com Tilt/EDFA_1_PadTec/";
-	    File file = new File("result_allMask_40channels_EDFA1STG_In_Tilt_Flat.txt");
+	    String path = "./masks/05_Com Tilt/EDFA_2_PadTec/";
+	    File file = new File("mask-edfa2-padtec.txt");
 	    File fileTotal = new File(path + "TotalInfo.txt");
 
 	    Scanner reader = new Scanner(file);

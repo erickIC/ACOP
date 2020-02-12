@@ -174,8 +174,29 @@ public abstract class ACOPHeuristic {
 	return voaLosses;
     }
 
+    /**
+     * Define the losses in each VOA of the cascade for each channel considered
+     * 
+     * @param voaLosses
+     *            [#span][#channels]
+     */
     public void setVoaLosses(double[][] voaLosses) {
 	this.voaLosses = voaLosses;
+    }
+
+    /**
+     * Define the losses in each VOA of the cascade. The same loss is applied
+     * for all the channels
+     * 
+     * @param voaLosses[#spans]:
+     *            The losses, for each span, that will be applied in all
+     *            channels
+     */
+    public void setVoaLosses(double[] voaLosses) {
+	this.voaLosses = new double[voaLosses.length][1];
+	for (int i = 0; i < voaLosses.length; i++) {
+	    this.voaLosses[i][0] = voaLosses[i];
+	}
     }
 
     protected OpticalSignal linkTrasferFunction(OpticalSignal signal, float linkLoss) {
@@ -244,11 +265,19 @@ public abstract class ACOPHeuristic {
 
     private OpticalSignal applyVoaLosses(double[] voaLossPerChannel, OpticalSignal inputSignal) {
 	OpticalSignal result = inputSignal.clone();
-
+	
 	int index = 0;
 	for (OpticalChannel c : result.getChannels()) {
-	    double newSignalPower = c.getSignalPower() - voaLossPerChannel[index];
-	    double newNoisePower = c.getNoisePower() - voaLossPerChannel[index++];
+	    double voaLoss = 0.0;
+	    
+	    // If all the channels suffer the same loss
+	    if (voaLossPerChannel.length == 1)
+		voaLoss = voaLossPerChannel[0];
+	    else
+		voaLoss = voaLossPerChannel[index++];
+
+	    double newSignalPower = c.getSignalPower() - voaLoss;
+	    double newNoisePower = c.getNoisePower() - voaLoss;
 
 	    c.setNoisePower(newNoisePower);
 	    c.setSignalPower(newSignalPower);
@@ -262,29 +291,32 @@ public abstract class ACOPHeuristic {
 	int maxGain = pm.getMaxGain();
 	int minGain = pm.getMinGain();
 
-	if(gain == 30)
-	    System.out.println();
+	int intGain = (int) gain;
 	
-	if (gain < minGain)
-	    gain = minGain;	
-	else if (gain > maxGain)
-	    gain = maxGain;
+	if (intGain < minGain)
+	    intGain = minGain;
+	else if (intGain > maxGain)
+	    intGain = maxGain;
 	
-	float maxInputPower = pm.getMaxTotalInputPower((int) gain);
+	float maxInputPower = pm.getMaxTotalInputPower(intGain);
 
 	while (amplifier.getInputPower() > maxInputPower + 0.5) {
-	    gain -= 1f;
-	    maxInputPower = pm.getMaxTotalInputPower((int) gain);
+	    if (intGain <= minGain)
+		break;
+	    intGain -= 1f;
+	    maxInputPower = pm.getMaxTotalInputPower(intGain);
 	}
 
 	
-	float minInputPower = pm.getMinTotalInputPower((int) gain);
+	float minInputPower = pm.getMinTotalInputPower(intGain);
 	while (amplifier.getInputPower() < minInputPower - 0.5) {
-	    gain += 1f;
-	    minInputPower = pm.getMinTotalInputPower((int) gain);
+	    if (intGain >= minGain)
+		break;
+	    intGain += 1f;
+	    minInputPower = pm.getMinTotalInputPower(intGain);
 	}
 
-	amplifier.setGain(gain);
+	amplifier.setGain(intGain);
 	
     }
 

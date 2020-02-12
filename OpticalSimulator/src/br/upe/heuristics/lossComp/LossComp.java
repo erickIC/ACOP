@@ -17,10 +17,16 @@ import br.upe.simulations.simsetups.SimulationSetup;
 
 public class LossComp extends ACOPHeuristic {	
 
+    private float firstAmplifierTargerGain = 0.0f;
+
     public LossComp(int numberOfAmplifiers, float[] linkLosses, OpticalSignal inputSignal, ObjectiveFunction function) {
 	super(numberOfAmplifiers, linkLosses, inputSignal, function);
 	monitors[0] = new AmplifierSignalMonitor();
 	monitors[0].setInputSignal(inputSignal);
+    }
+
+    public void setFirstAmplifierTargetGain(float gain) {
+	firstAmplifierTargerGain = gain;
     }
 
     @Override
@@ -32,11 +38,15 @@ public class LossComp extends ACOPHeuristic {
 	    float targetGain = 0;
 	    // First amplifier
 	    // The gain is equal to the ROADM loss
-	    if (i == 0) {
+	    if (i == 0 && firstAmplifierTargerGain == 0) {
 		float channelPower = (float) monitors[0].getInputSignal().getChannels().get(0).getSignalPower();
 		targetGain = -3.0f - channelPower; // getRoadmAttenuation();
 		
 		targetGain = applyRestriction(targetGain, amplifiers[0]);
+	    }
+	    // First amplifier, gain defined a priori
+	    else if (i == 0) {
+		targetGain = firstAmplifierTargerGain;
 	    }
 	    // Other amplifier
 	    // The gain is equal to the previous loss

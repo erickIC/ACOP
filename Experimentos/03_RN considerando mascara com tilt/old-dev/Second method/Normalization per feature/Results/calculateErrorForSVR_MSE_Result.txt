@@ -1,0 +1,3 @@
+Mean Squared Error Regression Loss:
+Pout: 0.001774126128488173
+NF: 0.002497126051112422

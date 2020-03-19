@@ -1,7 +1,7 @@
 # RN considerando mascara com tilt
 Treinamento e analise da técnica de Rede Neural considerando uma entrada com Tilt em dois aplificadores diferentes.
 
-##Passo a Passo
+## Passo a Passo
 
 Siga as instruções a seguir para chegar até os resultados com cada pasta possuindo os scripts espelhados, quando não será comentado.
 

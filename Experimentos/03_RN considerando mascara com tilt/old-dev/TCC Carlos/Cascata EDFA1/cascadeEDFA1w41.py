@@ -301,4 +301,4 @@ plt.xlabel('Wavelenght')
 plt.grid(True)
 plt.legend()
 
-plt.savefig('results/CascadeEDFA1With40Pins.pdf', dpi = 200)
+plt.savefig('results/CascadeEDFA1With41Pins.pdf', dpi = 200)

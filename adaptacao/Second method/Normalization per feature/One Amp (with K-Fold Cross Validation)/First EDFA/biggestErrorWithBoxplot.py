@@ -54,13 +54,13 @@ def unnormalizationicin(data, min_pinto, max_pinto, min_gain, max_gain, range_a,
 #Set the font sizes to the plots
 smaller_size = 12
 medium_size = 20
-bigger_size = 26
+bigger_size = 48
 plt.rc('font', size=bigger_size)             # controls default text sizes
-plt.rc('axes', titlesize=medium_size)        # fontsize of the axes title
-plt.rc('axes', labelsize=medium_size)        # fontsize of the x and y labels
-plt.rc('xtick', labelsize=smaller_size)      # fontsize of the tick labels
-plt.rc('ytick', labelsize=smaller_size)      # fontsize of the tick labels
-plt.rc('legend', fontsize=smaller_size)       # legend fontsize
+plt.rc('axes', titlesize=bigger_size)        # fontsize of the axes title
+plt.rc('axes', labelsize=bigger_size)        # fontsize of the x and y labels
+plt.rc('xtick', labelsize=bigger_size)      # fontsize of the tick labels
+plt.rc('ytick', labelsize=bigger_size)      # fontsize of the tick labels
+plt.rc('legend', fontsize=bigger_size)       # legend fontsize
 plt.rc('figure', titlesize=bigger_size)      # fontsize of the figure title
 
 #### Getting the folds
@@ -719,6 +719,7 @@ for i in range(0 , len(pred_yio)):
                 biggest_current = diff
 
         diff_current.append(biggest_current)
+        
     diffs_io.append(diff_current)
     diffs_nf2.append(diff_current2)
 
@@ -728,7 +729,7 @@ if DEBUG:
 
 ########## Boxplot #######################
 
-plt.figure(figsize=(10,8))
+plt.figure(figsize=(15,12))
 
 
 plt.boxplot([
@@ -738,8 +739,9 @@ plt.boxplot([
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
             ])        
 
-plt.xticks([1, 2, 3, 4], ['PerChannel', 'PerChannel-Tilt', 'Spectrum', 'Spectrum-Tilt'])
-plt.ylabel('MSE (dB)')
+plt.xticks([1, 2, 3, 4], ['PerChannel', 'PerChannel-Tilt', 'Spectrum', 'Spectrum-Tilt'], rotation=45)
+plt.ylabel('Maximum Error (dB)')
+plt.tight_layout()
 
 plt.savefig('plots/BiggestErrorNNsBoxPlot.pdf', dpi = 200)
 

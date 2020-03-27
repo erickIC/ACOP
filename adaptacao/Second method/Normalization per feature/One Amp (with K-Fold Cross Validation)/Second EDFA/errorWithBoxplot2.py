@@ -83,11 +83,11 @@ plt.rc('legend', fontsize=bigger_size)       # legend fontsize
 plt.rc('figure', titlesize=bigger_size)      # fontsize of the figure title
 
 #### Getting the folds
-input_folder1 = "masks/mask-edfa1-padtec-new-models-fold-1v2.txt"
-input_folder2 = "masks/mask-edfa1-padtec-new-models-fold-2v2.txt"
-input_folder3 = "masks/mask-edfa1-padtec-new-models-fold-3v2.txt"
-input_folder4 = "masks/mask-edfa1-padtec-new-models-fold-4v2.txt"
-input_folder5 = "masks/mask-edfa1-padtec-new-models-fold-5v2.txt"
+input_folder1 = "masks/mask-edfa2-padtec-new-models-fold-1.txt"
+input_folder2 = "masks/mask-edfa2-padtec-new-models-fold-2.txt"
+input_folder3 = "masks/mask-edfa2-padtec-new-models-fold-3.txt"
+input_folder4 = "masks/mask-edfa2-padtec-new-models-fold-4.txt"
+input_folder5 = "masks/mask-edfa2-padtec-new-models-fold-5.txt"
 
 DEBUG = False
 wavelength = [1560.713, 1559.794, 1559.04, 1558.187, 1557.433, 1556.613, 
@@ -336,11 +336,11 @@ fold42_y = [fold42_y1, fold42_y2, fold42_y3, fold42_y4, fold42_y5]
 #################################### ICTON 17 with tilt ##################################################
 
 
-input_folder1 = "masks/mask-edfa1-padtec-icton17-fold-1v2.txt"
-input_folder2 = "masks/mask-edfa1-padtec-icton17-fold-2v2.txt"
-input_folder3 = "masks/mask-edfa1-padtec-icton17-fold-3v2.txt"
-input_folder4 = "masks/mask-edfa1-padtec-icton17-fold-4v2.txt"
-input_folder5 = "masks/mask-edfa1-padtec-icton17-fold-5v2.txt"
+input_folder1 = "masks/mask-edfa2-padtec-icton17-fold-1.txt"
+input_folder2 = "masks/mask-edfa2-padtec-icton17-fold-2.txt"
+input_folder3 = "masks/mask-edfa2-padtec-icton17-fold-3.txt"
+input_folder4 = "masks/mask-edfa2-padtec-icton17-fold-4.txt"
+input_folder5 = "masks/mask-edfa2-padtec-icton17-fold-5.txt"
 
 with open(input_folder1, 'r') as f_in:
 	data1 = []
@@ -505,24 +505,21 @@ modelsictono = []
 
 
 for i in range(0, k):
-    model_name = 'models/nn-icon17v2' + str(i + 1) + '.h5'
+    model_name = 'models/nn-icon17' + str(i + 1) + '.h5'
     model_current = load_model(model_name)
     modelsicton.append(model_current)
 
-    model_name = 'models/nn-icon17-ov2' + str(i + 1) + '.h5'
+    model_name = 'models/nn-icon17-o' + str(i + 1) + '.h5'
     model_current = load_model(model_name)
     modelsictono.append(model_current)
 
-    model_name = 'models/nn-41to40v2' + str(i + 1) + '.h5'
+    model_name = 'models/nn-41to40' + str(i + 1) + '.h5'
     model_current = load_model(model_name)
     models41to40.append(model_current)
 
-    model_name = 'models/nn-42to40v2' + str(i + 1) + '.h5'
+    model_name = 'models/nn-42to40' + str(i + 1) + '.h5'
     model_current = load_model(model_name)
     models42to40.append(model_current)
-
-   
-
 
 
 
@@ -552,7 +549,7 @@ if DEBUG:
 
 ########### Take the infos to unnormalize the data #####################
 
-info_file = "masks/mask-edfa1-padtec-icton17-infov2.txt"
+info_file = "masks/mask-edfa2-padtec-icton17-info.txt"
 
 file = open( info_file, 'r')
 
@@ -577,7 +574,7 @@ if DEBUG:
     print(max_gch, max_nf, min_gch, min_gch, range_a, range_b)
 
 
-info_file = 'masks/mask-edfa1-padtec-new-models-infov2.txt'
+info_file = 'masks/mask-edfa2-padtec-new-models-info.txt'
 
 file = open( info_file, 'r')
 
@@ -793,7 +790,7 @@ plt.xticks([1, 2, 3, 4], ['PerChannel', 'PerChannel-Tilt', 'Spectrum', 'Spectrum
 plt.ylabel('Mean Error (dB)')
 plt.tight_layout()
 
-plt.savefig('plots/AverageErrorNNsBoxPlot.pdf', dpi = 200)
+plt.savefig('plots/AverageErrorNNsBoxPlotEDFA2.pdf', dpi = 200)
 
 plt.figure(figsize=(10,8))
 # plt.subplot(212)
@@ -807,7 +804,7 @@ plt.xticks([1, 2], ['Spectrum', 'Spectrum-Tilt'])
 plt.ylabel('MSE (dB)')
 
 
-plt.savefig('plots/AverageErrorNNsBoxPlotZoom.pdf', dpi = 200)
+plt.savefig('plots/AverageErrorNNsBoxPlotZoomEDFA2.pdf', dpi = 200)
 
 plt.figure(figsize=(8,6))
 
@@ -818,7 +815,7 @@ n4240 = np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diff
 
 errors = [io, ic, n4140, n4240]
 
-pickle_out = open("errors/edfa1-average-error.obj","wb")
+pickle_out = open("errors/edfa2-average-error.obj","wb")
 pickle.dump(errors, pickle_out)
 pickle_out.close()
 
@@ -844,5 +841,5 @@ plt.tick_params(axis='y', which='both', right=False, left=False, labelleft=False
 for pos in ['right','top','bottom','left']:
     plt.gca().spines[pos].set_visible(False)
 
-plt.savefig('plots/AverageErrorTableNNsBoxPlot.pdf', dpi = 200)
+plt.savefig('plots/AverageErrorTableNNsBoxPlotEDFA2.pdf', dpi = 200)
 

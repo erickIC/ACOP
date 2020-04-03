@@ -88,8 +88,13 @@ class TrainNeuralNetwork(object):
 
             aux3 = [line[self.__gset_init]] + aux1 + aux2
 
-            if not '' in aux3:
-                self.__x_input.append(aux3)
+            if '' in aux3:
+                for i in range(0, len(aux3)):
+                    if aux3[i] == '':
+                        aux3[i] = '0'
+                        
+            self.__x_input.append(aux3)    
+
 
         print(len(self.__x_input))
         for i in range(0, len(self.__x_input)):

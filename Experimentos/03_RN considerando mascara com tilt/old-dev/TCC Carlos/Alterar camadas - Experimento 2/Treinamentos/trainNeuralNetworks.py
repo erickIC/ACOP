@@ -219,7 +219,8 @@ def train_neural_network_with_n_layers(number_of_hidden_layers = 2):
     tests_x = [test_x1, test_x2, test_x3, test_x4, test_x5]
     tests_y = [test_y1, test_y2, test_y3, test_y4, test_y5]
 
-    numbers_of_neurons_hidden = [32, 64, 128, 256, 512]
+    #numbers_of_neurons_hidden = [32, 64, 128, 256, 512]
+    numbers_of_neurons_hidden = [128, 256, 512]
     #numbers_of_neurons_hidden = [1024]
     
 

@@ -18,6 +18,8 @@ def unnormalization(data, min, max, range_a, range_b):
 		values = []
 		for j in range(0, data.shape[1]):
 			values.append(((float(data[i][j]) - float(range_a)) * (float(max)-float(min))) / (float(range_b) - float(range_a)) + float(min))
+			#print(((float(data[i][j]) - float(range_a)) * (float(max)-float(min))), (float(range_b) - float(range_a)), float(min))
+			#print(data[i][j], min, max, range_a, range_b, ((float(data[i][j]) - float(range_a)) * (float(max)-float(min))) / (float(range_b) - float(range_a)) + float(min))
 		unnormalized_data.append(values)
 	return np.array(unnormalized_data)
 
@@ -29,6 +31,7 @@ class TrainNeuralNetwork(object):
         self.__x_input = []
         self.__x_norm = []
         self.__y_norm = []
+        self.__y_pure = []
         self.range_a = 0.15
         self.range_b = 0.85
         self.__max_gset = 0
@@ -41,6 +44,7 @@ class TrainNeuralNetwork(object):
         self.__y_train = []
         self.__x_test = []
         self.__y_test = []
+        self.__y_test_pure = []
         self.history = []
         self.errors = []
 
@@ -141,17 +145,21 @@ class TrainNeuralNetwork(object):
         for i in range(0, len(self.__x_input)):
             pins = []
             pouts = []
+            pouts_pure = []
 
             for j in range(0, self.__channels):
                 pins.append(normalization(self.__x_input[i][1 + j], self.__min_pin, self.__max_pin, self.range_a, self.range_b))
                 pouts.append(normalization(self.__x_input[i][self.__channels + 1 + j], self.__min_pout, self.__max_pout, self.range_a, self.range_b))
+                pouts_pure.append(self.__x_input[i][self.__channels + 1 + j])
 
             self.__x_norm.append([normalization(self.__x_input[i][0], self.__min_gset, self.__max_gset, self.range_a, self.range_b)] + pins)
             self.__y_norm.append(pouts)
+            self.__y_pure.append(pouts_pure)
         
         print(len(self.__x_norm), len(self.__y_norm), len(self.__x_norm[0]), len(self.__y_norm[0]))
         self.__x_norm = np.array(self.__x_norm)
         self.__y_norm = np.array(self.__y_norm)
+        self.__y_pure = np.array(self.__y_pure)
 
     def split_train_and_test(self):
         caught = [False] * len(self.__x_norm)
@@ -167,8 +175,9 @@ class TrainNeuralNetwork(object):
 
         for i in range(0, len(caught)):
             if not caught[i]:
-                self.__x_test.append(self.__x_norm[current])
-                self.__y_test.append(self.__y_norm[current])
+                self.__x_test.append(self.__x_norm[i])
+                self.__y_test.append(self.__y_norm[i])
+                self.__y_test_pure.append(self.__y_pure[i])
                 caught[current] = True
 
         self.__x_train = np.array(self.__x_train)
@@ -202,11 +211,14 @@ class TrainNeuralNetwork(object):
         y_pred_norm = self.model.predict(self.__x_test)
         y_pred = unnormalization(y_pred_norm, self.__min_pout, self.__max_pout, self.range_a, self.range_b)
         y_test = unnormalization(self.__y_test, self.__min_pout, self.__max_pout, self.range_a, self.range_b)
+        
 
         for i in range(0, len(y_pred)):
             diff = (0)
             for j in range(0, len(y_pred[i])):
                 diff += abs(y_pred[i][j] - y_test[i][j])
+                
+            
             self.errors.append(diff/len(y_pred[i]))
         
         output_file = self.mask_name.split('.')[0] + '-info.txt'
@@ -232,8 +244,10 @@ class TrainNeuralNetwork(object):
 
             new_line = ''
 
+
             for i in range(0, len(self.errors)):
                 new_line += str(self.errors[i]) + '\t'
+
             
             f_out.write(new_line + '\n')
 

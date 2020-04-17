@@ -18,8 +18,6 @@ def unnormalization(data, min, max, range_a, range_b):
 		values = []
 		for j in range(0, data.shape[1]):
 			values.append(((float(data[i][j]) - float(range_a)) * (float(max)-float(min))) / (float(range_b) - float(range_a)) + float(min))
-			#print(((float(data[i][j]) - float(range_a)) * (float(max)-float(min))), (float(range_b) - float(range_a)), float(min))
-			#print(data[i][j], min, max, range_a, range_b, ((float(data[i][j]) - float(range_a)) * (float(max)-float(min))) / (float(range_b) - float(range_a)) + float(min))
 		unnormalized_data.append(values)
 	return np.array(unnormalized_data)
 
@@ -32,6 +30,9 @@ class TrainNeuralNetwork(object):
         self.__x_norm = []
         self.__y_norm = []
         self.__y_pure = []
+        self.__first_channel = 0.0
+        self.__last_channel = 0.0
+        self.__between_channels = 0.0
         self.range_a = 0.15
         self.range_b = 0.85
         self.__max_gset = 0
@@ -48,7 +49,6 @@ class TrainNeuralNetwork(object):
         self.history = []
         self.errors = []
 
-
     def take_the_input(self):
         f = open(self.mask_name, 'r+')
         entries = f.readlines()
@@ -57,10 +57,12 @@ class TrainNeuralNetwork(object):
         self.__pin_init = 0
         self.__pout_init = 0
         self.__gset_init = 0
+        self.__freq_init = 0
 
         got_pin_init = False
         got_pout_init = False
         got_gset_init = False
+        got_freq_init = False
 
         for i in range(0, len(header)):
             if header[i] == 'Ganho Total Set (dB)' and not got_gset_init:
@@ -77,9 +79,31 @@ class TrainNeuralNetwork(object):
 
             if header[i] == 'Pin Canal (dBm)':
                 self.__channels = self.__channels + 1
+            
+            if header[i] == 'Freq. Canal (Hz)' and not got_freq_init:
+                
+                self.__freq_init = i
+                got_freq_init = True
     
         print(self.__gset_init, self.__pin_init, self.__pout_init, self.__channels)
         print(header[self.__gset_init], header[self.__pin_init], header[self.__pout_init])
+
+        self.__first_channel = entries[1].split(';')[self.__freq_init]
+        
+        self.__first_channel = float(self.__first_channel.split(',')[0] + '.' + self.__first_channel.split(',')[1])
+
+
+        self.__last_channel = entries[1].split(';')[self.__freq_init + self.__channels - 1]
+        self.__last_channel = float(self.__last_channel.split(',')[0] + '.' + self.__last_channel.split(',')[1])
+
+        second_freq = entries[1].split(';')[self.__freq_init + 1]
+    
+        second_freq = float(second_freq.split(',')[0] + '.' + second_freq.split(',')[1])
+
+        self.__between_channels = abs(second_freq - self.__first_channel)
+
+        print(self.__first_channel, self.__last_channel, self.__between_channels, second_freq)
+        
 
         for l in range(1, len(entries)):
             line = entries[l].split(';')
@@ -248,9 +272,11 @@ class TrainNeuralNetwork(object):
             for i in range(0, len(self.errors)):
                 new_line += str(self.errors[i]) + '\t'
 
-            
             f_out.write(new_line + '\n')
 
+            new_line = str(self.__first_channel) + '\t' + str(self.__last_channel) + '\t' + str(self.__between_channels)
+
+            f_out.write(new_line + '\n')
 
 
 if __name__ == '__main__':

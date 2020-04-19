@@ -21,7 +21,6 @@ def unnormalization(data, min, max, range_a, range_b):
 		unnormalized_data.append(values)
 	return np.array(unnormalized_data)
 
-
 class TrainNeuralNetwork(object):
     def __init__(self, mask_name):
         self.mask_name = mask_name
@@ -277,7 +276,6 @@ class TrainNeuralNetwork(object):
             new_line = str(self.__first_channel) + '\t' + str(self.__last_channel) + '\t' + str(self.__between_channels)
 
             f_out.write(new_line + '\n')
-
 
 if __name__ == '__main__':
     string_path = "mascara.csv"   

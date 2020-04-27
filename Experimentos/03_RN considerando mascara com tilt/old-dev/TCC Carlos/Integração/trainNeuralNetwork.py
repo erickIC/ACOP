@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from numpy import median
 import keras
@@ -8,11 +9,27 @@ from keras import callbacks
 from keras.layers import Dropout
 from random import randint 
 
-def normalization(x, min, max, range_a, range_b):
+def normalization(x: float, min: float, max: float, range_a: float, range_b: float) -> float:
+    """
+		This function is used to normalize a number.
+
+		Input argument(s): a float value, with min and max of the respective parameter 
+		and the desired range (a: lower, b: higher) of the output.
+		
+		Returns: the normalized value as a float.
+	"""
 	z = ((float(range_b) - float(range_a)) * ((x - float(min))/(float(max) - float(min)))) + float(range_a)
 	return z
 
-def unnormalization(data, min, max, range_a, range_b):
+def unnormalization(data: np.array, min: float, max: float, range_a: float, range_b: float) -> np.array:
+    """
+		This function is used to unnormalize data.
+
+		Input argument(s): a numpy array (1-D or 2-D), with min and max of the respective parameter 
+		and the range (a: lower, b: higher) at which the data was normalized.
+		
+		Returns: the unnormalized values as a numpy array ( 1 output per line, 1 channel per column).
+	"""
 	unnormalized_data = []
 	for i in range(0, data.shape[0]):
 		values = []
@@ -22,7 +39,26 @@ def unnormalization(data, min, max, range_a, range_b):
 	return np.array(unnormalized_data)
 
 class TrainNeuralNetwork(object):
-    def __init__(self, mask_name):
+    """
+        Class used to train a Neural network with the proportional parameters previously researched for a 
+        amount of Input Power(s). 
+        
+        Using the method 'train_neural_network', it'll save a trained model (.h5) and a file with infos (.txt).
+        
+        The Info file name will be like 'the-Mask-file-name-info.txt', the lines are structured in this way:
+        1st: Normalization info: Highest values of [Gset, Power input (Pin), Power output (Pout)]
+        2nd: Normalization info: Lowest values of [Gset, Power input (Pin), Power output (Pout)]
+        3rd: Normalization info: Range values [lowest, highest] 
+        4th: Training info: Errors per Epoch
+        5th: Training info: Epochs
+        6th: Test info: Mean absolute error per instance, to make a boxplot.
+        7th Channels info: Respectively first frequency channel, last frequency channel and the step between channels.
+
+        Constructor argument(s): The path to the Mask file (.csv).
+
+        Returns: Null
+    """
+    def __init__(self, mask_name: str):
         self.mask_name = mask_name
         self.__channels = 0
         self.__x_input = []
@@ -49,6 +85,10 @@ class TrainNeuralNetwork(object):
         self.errors = []
 
     def take_the_input(self):
+        """
+            This method extract and treat the data from the csv.
+            The main infos are the amount of Input powers, First freq, Last freq, Step between frequencies and the inputs and outputs for normalization.  
+        """
         f = open(self.mask_name, 'r+')
         entries = f.readlines()
         header = entries[0].split(';')
@@ -133,6 +173,9 @@ class TrainNeuralNetwork(object):
                 self.__x_input[i][j] = float(self.__x_input[i][j])
 
     def normalizing_data(self):
+        """
+            This method normalizes the data.
+        """
         self.__max_gset = self.__x_input[0][0]
         self.__max_pin = self.__x_input[0][1]
         self.__max_pout = self.__x_input[0][self.__channels + 1]
@@ -185,6 +228,10 @@ class TrainNeuralNetwork(object):
         self.__y_pure = np.array(self.__y_pure)
 
     def split_train_and_test(self):
+        """
+            Method to split the data into training and test, with 80% for training and 20% for test. with the range: lowest 0.15 and highest 0.85.
+        """
+
         caught = [False] * len(self.__x_norm)
         eighty_percent = int(0.8 * len(self.__x_norm))
 
@@ -209,12 +256,24 @@ class TrainNeuralNetwork(object):
         self.__y_test = np.array(self.__y_test)
 
     def train_neural_network(self):
+        """
+            This is the main method of that Class.
+
+            It creates a Neural Networks that have 2 hidden layers with the 2/3 of the sum of the length of input and the length of the output.
+            Uses Droput of 0.1 and the EarlyStopping to do not overfit. The optimazer is the adam, the metrics is mean squared error for training and 
+            the maximum number of epochs is set at 5000.
+            The activation function is the sigmoid.
+
+            Also this method saves the model trained and the file of info. 
+
+        """
         self.take_the_input()
         self.normalizing_data()
         self.split_train_and_test()
 
         num_epochs = 5000
 
+        ## Creating the model
         self.model = Sequential()
         num_neurons_hidden = int((len(self.__x_train[0]) + len(self.__y_train[0])) * 2/3)
         self.model.add(Dense(num_neurons_hidden, input_dim=len(self.__x_train[0]), activation='sigmoid'))
@@ -227,10 +286,13 @@ class TrainNeuralNetwork(object):
 
         self.model.summary()
 
+        ## Training the model
         self.history = self.model.fit(self.__x_train, self.__y_train, validation_data=(self.__x_test, self.__y_test), epochs = num_epochs,callbacks=[cb])
 
+        ## Saving the model
         self.model.save(self.mask_name.split('.')[0] + '-model.h5')
 
+        ## Predicting for calcule the test error
         y_pred_norm = self.model.predict(self.__x_test)
         y_pred = unnormalization(y_pred_norm, self.__min_pout, self.__max_pout, self.range_a, self.range_b)
         y_test = unnormalization(self.__y_test, self.__min_pout, self.__max_pout, self.range_a, self.range_b)
@@ -241,9 +303,9 @@ class TrainNeuralNetwork(object):
             for j in range(0, len(y_pred[i])):
                 diff += abs(y_pred[i][j] - y_test[i][j])
                 
-            
             self.errors.append(diff/len(y_pred[i]))
         
+        ## Creating the info file
         output_file = self.mask_name.split('.')[0] + '-info.txt'
         with open(output_file, 'w') as f_out:
             new_line = str(self.__max_gset) + '\t' + str(self.__max_pin) + '\t' + str(self.__max_pout) + '\n'

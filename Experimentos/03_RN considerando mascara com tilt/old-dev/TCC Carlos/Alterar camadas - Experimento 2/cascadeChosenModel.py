@@ -1,14 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 import re
+import pandas as pd
 import keras
-from keras.models import Sequential
-from keras.layers import Dense
 from keras.models import load_model
-from random import randint 
-from keras import callbacks
-from keras.layers import Dropout
+
 
 
 def unnormalization(data, min, max, range_a, range_b):
@@ -47,7 +43,7 @@ plt.rc('figure', titlesize=medium_size)      # fontsize of the figure title
 
 ## Taking information to normalization.
 
-input_file = "models/mask-edfa1-padtec-new-models-info.txt"
+input_file = "masks/mask-edfa1-padtec-new-models-infov2.txt"
 
 with open(input_file, 'r') as f_in:
 
@@ -55,23 +51,26 @@ with open(input_file, 'r') as f_in:
     auxiliary = lines[0].split()
     max_gset = float(auxiliary[0])
     max_pin = float(auxiliary[1])
+    max_tilt = float(auxiliary[2])
     max_pout = float(auxiliary[3])
 
     auxiliary = lines[1].split()
     min_gset = float(auxiliary[0])
     min_pin = float(auxiliary[1])
+    min_tilt = float(auxiliary[2])
     min_pout = float(auxiliary[3])
 
     auxiliary = lines[2].split()
     range_a = auxiliary[0]
     range_b = auxiliary[1]
 
-    print(max_gset, min_gset, max_pout, min_pout, range_a, range_b)
+    print(max_gset, min_gset, max_pout, min_pout, range_a, range_b, max_tilt, min_tilt)
 
 
 ## Load the model
 
-model_name = 'models/nn-41to401.h5'
+model_name = 'models/nn-layers-2-neurons-256-fold-1.h5'
+
 
 model = load_model(model_name)
 
@@ -85,54 +84,61 @@ dataframe_1 = pd.read_excel(input_set_1, usecols=range(0, 12), skiprows=range(0,
 columns_1 = list(dataframe_1)
 
 
-
-
 gain_1 = 14
 loss_1 = gain_1
 
 signal_current = []
 gset_current = []
+tilt_current = []
 
 
 middle_signal = []
 middle_predict = []
 
+tilt_1 = dataframe_1[columns_1[1]][0] - dataframe_1[columns_1[1]][39]
 
 for i in range(0, len(dataframe_1[columns_1[1]])):
     signal_current.append(normalization(dataframe_1[columns_1[1]][i], min_pin, max_pin, range_a, range_b))
 gset_current.append(normalization(gain_1, min_gset, max_gset, range_a, range_b))
+tilt_current.append(normalization(tilt_1, min_tilt, max_tilt, range_a, range_b))
 
 gset_current = np.array([gset_current])
+tilt_current = np.array([tilt_current])
 signal_current = np.array([signal_current])
 diff_scenario1 = []
 
 for i in range(2, int(len(columns_1)/2)+1):
 	
-	x_current = np.concatenate((gset_current,signal_current),axis=1)
-	y_out = model.predict(x_current)
+    x_current = np.concatenate((gset_current,signal_current, tilt_current),axis=1)
+    y_out = model.predict(x_current)
 
-	y_out = unnormalization(y_out[0], min_pout, max_pout, range_a, range_b)
+    y_out = unnormalization(y_out[0], min_pout, max_pout, range_a, range_b)
 
 	
-	for j in range(0, y_out.shape[0]):
-		diff_current = []
-		for k in range(0, y_out.shape[1]):
-			diff_current.append(abs(float(y_out[j][k]) - dataframe_1[columns_1[i]][k]))
-		diff_scenario1.append(diff_current)
-	signal_current = []
-	gset_current = []
-	if i == len(columns_1)/4 + 1:
-		middle_predict = y_out[0]
-		middle_signal =  dataframe_1[columns_1[i]]
-		middle_id = int(len(columns_1)/4)
-	for j in range(0, len(y_out)):
-		signal_current.append(normalization((y_out[j] - loss_1), min_pin, max_pin, range_a, range_b))
-	gset_current.append(normalization(gain_1, min_gset, max_gset, range_a, range_b))
-	gset_current = np.array([gset_current])
-	signal_current = np.array(signal_current)
+    for j in range(0, y_out.shape[0]):
+    	diff_current = []
+    	for k in range(0, y_out.shape[1]):
+    		diff_current.append(abs(float(y_out[j][k]) - dataframe_1[columns_1[i]][k]))
+    	diff_scenario1.append(diff_current)
+
+    signal_current = []
+    gset_current = []
+    tilt_current = []
+
+    if i == len(columns_1)/4 + 1:
+    	middle_predict = y_out[0]
+    	middle_signal =  dataframe_1[columns_1[i]]
+    	middle_id = int(len(columns_1)/4)
 	
-
-
+    for j in range(0, len(y_out)):
+    	signal_current.append(normalization((y_out[j] - loss_1), min_pin, max_pin, range_a, range_b))
+    gset_current.append(normalization(gain_1, min_gset, max_gset, range_a, range_b))
+  
+    tilt_current.append(normalization(((y_out[0][0] - loss_1) - (y_out[0][39] - loss_1)), min_tilt, max_tilt, range_a, range_b))
+	
+    gset_current = np.array([gset_current])
+    tilt_current = np.array([tilt_current])
+    signal_current = np.array(signal_current)
 
 plt.figure(figsize=(16,10))
 plt.subplot(231)
@@ -154,7 +160,6 @@ plt.legend()
 
 ### Second scenario
 
-
 ## Dataset 2 (G_set = 20dB)
 input_set_2 = "data/EDFA1STG_G=20dB@16dBm_Tilt=-1.09_Maior_Precisão.xlsx"
 dataframe_2 = pd.read_excel(input_set_2, usecols=range(0, 22), skiprows=range(0, 1))
@@ -165,41 +170,52 @@ columns_2 = list(dataframe_2)
 
 gain_2 = 20
 loss_2 = gain_2
+tilt_2 = dataframe_2[columns_2[1]][0] - dataframe_2[columns_2[1]][39]
 
 signal_current = []
 gset_current = []
+tilt_current = []
 
 for i in range(0, len(dataframe_2[columns_2[1]])):
     signal_current.append(normalization(dataframe_2[columns_2[1]][i], min_pin, max_pin, range_a, range_b))
 gset_current.append(normalization(gain_2, min_gset, max_gset, range_a, range_b))
+tilt_current.append(normalization(tilt_2, min_tilt, max_tilt, range_a, range_b))
 
 gset_current = np.array([gset_current])
 signal_current = np.array([signal_current])
+tilt_current = np.array([tilt_current])
+
 diff_scenario2 = []
+
 for i in range(2, len(columns_2)):
 	
-	x_current = np.concatenate((gset_current,signal_current),axis=1)
-	y_out = model.predict(x_current)
+    x_current = np.concatenate((gset_current,signal_current, tilt_current),axis=1)
+    y_out = model.predict(x_current)
 
-	y_out = unnormalization(y_out[0], min_pout, max_pout, range_a, range_b)
+    y_out = unnormalization(y_out[0], min_pout, max_pout, range_a, range_b)
 
 
-	for j in range(0, y_out.shape[0]):
-		diff_current = []
-		for k in range(0, y_out.shape[1]):
-			diff_current.append(abs(float(y_out[j][k]) - dataframe_2[columns_2[i]][k]))
-		diff_scenario2.append(diff_current)
-	if i == len(columns_1)/2:
-		middle_predict = y_out[0]
-		middle_signal =  dataframe_2[columns_2[i]]
-		middle_id = int(len(columns_2)/2 - 1)
-	signal_current = []
-	gset_current = []
-	for j in range(0, len(y_out)):
-		signal_current.append(normalization((y_out[j] - loss_2), min_pin, max_pin, range_a, range_b))
-	gset_current.append(normalization(gain_2, min_gset, max_gset, range_a, range_b))
-	gset_current = np.array([gset_current])
-	signal_current = np.array(signal_current)
+    for j in range(0, y_out.shape[0]):
+    	diff_current = []
+    	for k in range(0, y_out.shape[1]):
+    		diff_current.append(abs(float(y_out[j][k]) - dataframe_2[columns_2[i]][k]))
+    	diff_scenario2.append(diff_current)
+    if i == len(columns_1)/2:
+    	middle_predict = y_out[0]
+    	middle_signal =  dataframe_2[columns_2[i]]
+    	middle_id = int(len(columns_2)/2 - 1)
+    signal_current = []
+    gset_current = []
+    tilt_current = []
+    for j in range(0, len(y_out)):
+    	signal_current.append(normalization((y_out[j] - loss_2), min_pin, max_pin, range_a, range_b))
+    gset_current.append(normalization(gain_2, min_gset, max_gset, range_a, range_b))
+    tilt_current.append(normalization(((y_out[0][0] - loss_2) - (y_out[0][39] - loss_2)), min_tilt, max_tilt, range_a, range_b))
+	
+    gset_current = np.array([gset_current])
+    tilt_current = np.array([tilt_current])
+    signal_current = np.array(signal_current)
+
 
 plt.subplot(232)
 plt.boxplot(diff_scenario2)
@@ -220,7 +236,6 @@ plt.legend()
 
 ### Third scenario
 
-
 ## Dataset 3 (variable G_set)
 input_set_3 = "data/EDFA1STG_diferentes_Ganhos_G=14,24,...,14,24....xlsx"
 dataframe_3 = pd.read_excel(input_set_3, usecols=range(0, 22), skiprows=range(0, 1))
@@ -228,8 +243,8 @@ dataframe_3 = pd.read_excel(input_set_3, usecols=range(0, 22), skiprows=range(0,
 
 columns_3 = list(dataframe_3)
 
-
 # Getting gains and losses for each amplifier in the cascade
+
 i = 0
 gains_3 = [i] * (len(columns_3)-1)
 losses_3 = [i] * (len(columns_3)-1)
@@ -241,49 +256,58 @@ for amplifier in columns_3[3:]:
 	loss_3, gain_3 = re.findall('\d+', amplifier[:-1])
 	losses_3[i], gains_3[i] = int(loss_3), int(gain_3)
 
-
 gset_current = []
 gset_current.append(normalization(gains_3[0], min_gset, max_gset, range_a, range_b))
 
+tilt_3 = dataframe_3[columns_3[1]][0] - dataframe_3[columns_3[1]][39]
+tilt_current = []
+tilt_current.append(normalization(tilt_3, min_tilt, max_tilt, range_a, range_b))
+
 signal_current = []
+
 for i in range(0, len(dataframe_3[columns_3[1]])):
     signal_current.append(normalization(dataframe_3[columns_3[1]][i], min_pin, max_pin, range_a, range_b))
 
 gset_current = np.array([gset_current])
+tilt_current = np.array([tilt_current])
 signal_current = np.array([signal_current])
 
 diff_scenario3 = []
 
 # Cascade
 for i in range(2, len(columns_3)):
-	# Building input
-	x_current = np.concatenate((gset_current, signal_current), axis=1)
+    # Building input
+  
+    x_current = np.concatenate((gset_current, signal_current, tilt_current), axis=1)
 
-	# Predicting P_out
-	y_out = model.predict(x_current)
+    # Predicting P_out
+    y_out = model.predict(x_current)
 
-	# De-normalizing data
-	y_out = unnormalization(y_out[0], min_pout, max_pout, range_a, range_b)
+    # De-normalizing data
+    y_out = unnormalization(y_out[0], min_pout, max_pout, range_a, range_b)
 
-	# Calculating error at current amplifier
-	diff_current = []
-	for j in range(0, y_out.shape[1]):
-		diff_current.append(abs(float(y_out[0][j]) - dataframe_3[columns_3[i]][j]))
-	diff_scenario3.append(diff_current)
-	# Normalizing next input in cascade
-	gset_current = []
-	gset_current.append(normalization(gains_3[i-1], min_gset, max_gset, range_a, range_b))
-	gset_current = np.array([gset_current])
+    # Calculating error at current amplifier
+    diff_current = []
+    for j in range(0, y_out.shape[1]):
+    	diff_current.append(abs(float(y_out[0][j]) - dataframe_3[columns_3[i]][j]))
+    diff_scenario3.append(diff_current)
 
-	signal_current = []
-	if i == len(columns_1)/2:
-		middle_predict = y_out[0]
-		middle_signal =  dataframe_3[columns_3[i]]
-		middle_id = int(len(columns_3)/2 - 1)
+    # Normalizing next input in cascade
+    gset_current = []
+    gset_current.append(normalization(gains_3[i-1], min_gset, max_gset, range_a, range_b))
+    gset_current = np.array([gset_current])
+    tilt_current = []
+    signal_current = []
+    if i == len(columns_1)/2:
+    	middle_predict = y_out[0]
+    	middle_signal =  dataframe_3[columns_3[i]]
+    	middle_id = int(len(columns_3)/2 - 1)
 
-	for j in range(0, len(y_out)):
-		signal_current.append(normalization((y_out[j] - losses_3[i-1]), min_pin, max_pin, range_a, range_b))
-	signal_current = np.array(signal_current)
+    for j in range(0, len(y_out)):
+    	signal_current.append(normalization((y_out[j] - losses_3[i-1]), min_pin, max_pin, range_a, range_b))
+    signal_current = np.array(signal_current)
+    tilt_current.append(normalization(((y_out[0][0] - losses_3[i-1]) - (y_out[0][39] - losses_3[i-1])), min_tilt, max_tilt, range_a, range_b))
+    tilt_current = np.array([tilt_current])
 
 plt.subplot(233)
 plt.boxplot(diff_scenario3)
@@ -302,4 +326,4 @@ plt.xlabel('Wavelenght')
 plt.grid(True)
 plt.legend()
 
-plt.savefig('results/CascadeEDFA1With41Pins.pdf', dpi = 200)
+plt.savefig('results/CascadeModel2Layers256Neurons.pdf', dpi = 200)

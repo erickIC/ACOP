@@ -1,0 +1,14 @@
+Tilt positivo:
+G_set: 27.0
+Pin_total: -27
+Pout_total: 0
+
+Tilt negativo:
+G_set: 19.0
+Pin_total: -20
+Pout_total: 0
+
+Tilt zero:
+G_set: 20.0
+Pin_total: -21
+Pout_total: 0

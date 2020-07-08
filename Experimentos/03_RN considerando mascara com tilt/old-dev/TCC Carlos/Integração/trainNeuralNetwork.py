@@ -1,0 +1,349 @@
+# -*- coding: utf-8 -*-
+import numpy as np
+from numpy import median
+import keras
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.models import load_model
+from keras import callbacks
+from keras.layers import Dropout
+from random import randint 
+
+def normalization(x: float, min: float, max: float, range_a: float, range_b: float) -> float:
+    """
+		This function is used to normalize a number.
+
+		Input argument(s): a float value, with min and max of the respective parameter 
+		and the desired range (a: lower, b: higher) of the output.
+		
+		Returns: the normalized value as a float.
+	"""
+	z = ((float(range_b) - float(range_a)) * ((x - float(min))/(float(max) - float(min)))) + float(range_a)
+	return z
+
+def unnormalization(data: np.array, min: float, max: float, range_a: float, range_b: float) -> np.array:
+    """
+		This function is used to unnormalize data.
+
+		Input argument(s): a numpy array (1-D or 2-D), with min and max of the respective parameter 
+		and the range (a: lower, b: higher) at which the data was normalized.
+		
+		Returns: the unnormalized values as a numpy array ( 1 output per line, 1 channel per column).
+	"""
+	unnormalized_data = []
+	for i in range(0, data.shape[0]):
+		values = []
+		for j in range(0, data.shape[1]):
+			values.append(((float(data[i][j]) - float(range_a)) * (float(max)-float(min))) / (float(range_b) - float(range_a)) + float(min))
+		unnormalized_data.append(values)
+	return np.array(unnormalized_data)
+
+class TrainNeuralNetwork(object):
+    """
+        Class used to train a Neural network with the proportional parameters previously researched for a 
+        amount of Input Power(s). 
+        
+        Using the method 'train_neural_network', it'll save a trained model (.h5) and a file with infos (.txt).
+        
+        The Info file name will be like 'the-Mask-file-name-info.txt', the lines are structured in this way:
+        1st: Normalization info: Highest values of [Gset, Power input (Pin), Power output (Pout)]
+        2nd: Normalization info: Lowest values of [Gset, Power input (Pin), Power output (Pout)]
+        3rd: Normalization info: Range values [lowest, highest] 
+        4th: Training info: Errors per Epoch
+        5th: Training info: Epochs
+        6th: Test info: Mean absolute error per instance, to make a boxplot.
+        7th Channels info: Respectively first frequency channel, last frequency channel and the step between channels.
+
+        Constructor argument(s): The path to the Mask file (.csv).
+
+        Returns: Null
+    """
+    def __init__(self, mask_name: str):
+        self.mask_name = mask_name
+        self.__channels = 0
+        self.__x_input = []
+        self.__x_norm = []
+        self.__y_norm = []
+        self.__y_pure = []
+        self.__first_channel = 0.0
+        self.__last_channel = 0.0
+        self.__between_channels = 0.0
+        self.range_a = 0.15
+        self.range_b = 0.85
+        self.__max_gset = 0
+        self.__max_pin = 0
+        self.__max_pout = 0
+        self.__min_gset = 0
+        self.__min_pin = 0
+        self.__min_pout = 0
+        self.__x_train = []
+        self.__y_train = []
+        self.__x_test = []
+        self.__y_test = []
+        self.__y_test_pure = []
+        self.history = []
+        self.errors = []
+
+    def take_the_input(self):
+        """
+            This method extract and treat the data from the csv.
+            The main infos are the amount of Input powers, First freq, Last freq, Step between frequencies and the inputs and outputs for normalization.  
+        """
+        f = open(self.mask_name, 'r+')
+        entries = f.readlines()
+        header = entries[0].split(';')
+
+        self.__pin_init = 0
+        self.__pout_init = 0
+        self.__gset_init = 0
+        self.__freq_init = 0
+
+        got_pin_init = False
+        got_pout_init = False
+        got_gset_init = False
+        got_freq_init = False
+
+        for i in range(0, len(header)):
+            if header[i] == 'Ganho Total Set (dB)' and not got_gset_init:
+                self.__gset_init = i
+                got_gset_init = True
+
+            if header[i] == 'Pin Canal (dBm)' and not got_pin_init:
+                self.__pin_init = i
+                got_pin_init = True
+
+            if header[i] == 'Pout Canal (dBm)' and not got_pout_init:
+                self.__pout_init = i
+                got_pout_init = True
+
+            if header[i] == 'Pin Canal (dBm)':
+                self.__channels = self.__channels + 1
+            
+            if header[i] == 'Freq. Canal (Hz)' and not got_freq_init:
+                
+                self.__freq_init = i
+                got_freq_init = True
+    
+        print(self.__gset_init, self.__pin_init, self.__pout_init, self.__channels)
+        print(header[self.__gset_init], header[self.__pin_init], header[self.__pout_init])
+
+        self.__first_channel = entries[1].split(';')[self.__freq_init]
+        
+        self.__first_channel = float(self.__first_channel.split(',')[0] + '.' + self.__first_channel.split(',')[1])
+
+
+        self.__last_channel = entries[1].split(';')[self.__freq_init + self.__channels - 1]
+        self.__last_channel = float(self.__last_channel.split(',')[0] + '.' + self.__last_channel.split(',')[1])
+
+        second_freq = entries[1].split(';')[self.__freq_init + 1]
+    
+        second_freq = float(second_freq.split(',')[0] + '.' + second_freq.split(',')[1])
+
+        self.__between_channels = abs(second_freq - self.__first_channel)
+
+        print(self.__first_channel, self.__last_channel, self.__between_channels, second_freq)
+        
+
+        for l in range(1, len(entries)):
+            line = entries[l].split(';')
+            aux1 = []
+            aux2 = []
+            aux3 = []
+            for i in range(0, self.__channels):
+                aux1.append(line[self.__pin_init + i])
+                aux2.append(line[self.__pout_init + i])
+
+            aux3 = [line[self.__gset_init]] + aux1 + aux2
+
+            if '' in aux3:
+                for i in range(0, len(aux3)):
+                    if aux3[i] == '':
+                        aux3[i] = '0'
+                        
+            self.__x_input.append(aux3)    
+
+
+        print(len(self.__x_input))
+        for i in range(0, len(self.__x_input)):
+            for j in range(0, len(self.__x_input[i])):
+                if ',' in self.__x_input[i][j]:
+                    u = self.__x_input[i][j].split(',')
+                    self.__x_input[i][j] = u[0] + '.' + u[1]    
+
+                self.__x_input[i][j] = float(self.__x_input[i][j])
+
+    def normalizing_data(self):
+        """
+            This method normalizes the data.
+        """
+        self.__max_gset = self.__x_input[0][0]
+        self.__max_pin = self.__x_input[0][1]
+        self.__max_pout = self.__x_input[0][self.__channels + 1]
+
+        self.__min_gset = self.__x_input[0][0]
+        self.__min_pin = self.__x_input[0][1]
+        self.__min_pout = self.__x_input[0][self.__channels + 1]
+
+        for i in range(1, len(self.__x_input)):
+            if self.__x_input[i][0] > self.__max_gset:
+                self.__max_gset = self.__x_input[i][0]
+            
+            if self.__x_input[i][0] < self.__min_gset:
+                self.__min_gset = self.__x_input[i][0]
+        
+        for i in range(0, len(self.__x_input)):
+            for j in range(0, self.__channels):
+                if self.__x_input[i][1 + j] > self.__max_pin:
+                    self.__max_pin = self.__x_input[i][1 + j]
+                
+                if self.__x_input[i][1 + j] < self.__min_pin:
+                    self.__min_pin = self.__x_input[i][1 + j]
+                
+                if self.__x_input[i][self.__channels + 1 + j] > self.__max_pout:
+                    self.__max_pout = self.__x_input[i][self.__channels + 1 + j]
+                
+                if self.__x_input[i][self.__channels + 1 + j] < self.__min_pout:
+                    self.__min_pout = self.__x_input[i][self.__channels + 1 + j]
+        
+        print(self.__max_gset, self.__max_pin, self.__max_pout)
+        print(self.__min_gset, self.__min_pin, self.__min_pout)
+
+        for i in range(0, len(self.__x_input)):
+            pins = []
+            pouts = []
+            pouts_pure = []
+
+            for j in range(0, self.__channels):
+                pins.append(normalization(self.__x_input[i][1 + j], self.__min_pin, self.__max_pin, self.range_a, self.range_b))
+                pouts.append(normalization(self.__x_input[i][self.__channels + 1 + j], self.__min_pout, self.__max_pout, self.range_a, self.range_b))
+                pouts_pure.append(self.__x_input[i][self.__channels + 1 + j])
+
+            self.__x_norm.append([normalization(self.__x_input[i][0], self.__min_gset, self.__max_gset, self.range_a, self.range_b)] + pins)
+            self.__y_norm.append(pouts)
+            self.__y_pure.append(pouts_pure)
+        
+        print(len(self.__x_norm), len(self.__y_norm), len(self.__x_norm[0]), len(self.__y_norm[0]))
+        self.__x_norm = np.array(self.__x_norm)
+        self.__y_norm = np.array(self.__y_norm)
+        self.__y_pure = np.array(self.__y_pure)
+
+    def split_train_and_test(self):
+        """
+            Method to split the data into training and test, with 80% for training and 20% for test. with the range: lowest 0.15 and highest 0.85.
+        """
+
+        caught = [False] * len(self.__x_norm)
+        eighty_percent = int(0.8 * len(self.__x_norm))
+
+        while len(self.__x_train) != eighty_percent:
+            current = randint(0, len(caught) - 1)
+            
+            if not caught[current]:
+                self.__x_train.append(self.__x_norm[current])
+                self.__y_train.append(self.__y_norm[current])
+                caught[current] = True
+
+        for i in range(0, len(caught)):
+            if not caught[i]:
+                self.__x_test.append(self.__x_norm[i])
+                self.__y_test.append(self.__y_norm[i])
+                self.__y_test_pure.append(self.__y_pure[i])
+                caught[current] = True
+
+        self.__x_train = np.array(self.__x_train)
+        self.__y_train = np.array(self.__y_train)
+        self.__x_test = np.array(self.__x_test)
+        self.__y_test = np.array(self.__y_test)
+
+    def train_neural_network(self):
+        """
+            This is the main method of that Class.
+
+            It creates a Neural Networks that have 2 hidden layers with the 2/3 of the sum of the length of input and the length of the output.
+            Uses Droput of 0.1 and the EarlyStopping to do not overfit. The optimazer is the adam, the metrics is mean squared error for training and 
+            the maximum number of epochs is set at 5000.
+            The activation function is the sigmoid.
+
+            Also this method saves the model trained and the file of info. 
+
+        """
+        self.take_the_input()
+        self.normalizing_data()
+        self.split_train_and_test()
+
+        num_epochs = 5000
+
+        ## Creating the model
+        self.model = Sequential()
+        num_neurons_hidden = int((len(self.__x_train[0]) + len(self.__y_train[0])) * 2/3)
+        self.model.add(Dense(num_neurons_hidden, input_dim=len(self.__x_train[0]), activation='sigmoid'))
+        self.model.add(Dropout(0.1))
+        self.model.add(Dense(num_neurons_hidden, activation='sigmoid'))
+        self.model.add(Dense(len(self.__y_train[0]), activation='sigmoid'))
+        
+        self.model.compile(optimizer = 'adam', loss = 'mse', metrics = ['acc'])
+        cb = callbacks.EarlyStopping(monitor = 'val_loss', min_delta = 0, patience = 120, verbose = 0, mode='auto')
+
+        self.model.summary()
+
+        ## Training the model
+        self.history = self.model.fit(self.__x_train, self.__y_train, validation_data=(self.__x_test, self.__y_test), epochs = num_epochs,callbacks=[cb])
+
+        ## Saving the model
+        self.model.save(self.mask_name.split('.')[0] + '-model.h5')
+
+        ## Predicting for calcule the test error
+        y_pred_norm = self.model.predict(self.__x_test)
+        y_pred = unnormalization(y_pred_norm, self.__min_pout, self.__max_pout, self.range_a, self.range_b)
+        y_test = unnormalization(self.__y_test, self.__min_pout, self.__max_pout, self.range_a, self.range_b)
+        
+
+        for i in range(0, len(y_pred)):
+            diff = (0)
+            for j in range(0, len(y_pred[i])):
+                diff += abs(y_pred[i][j] - y_test[i][j])
+                
+            self.errors.append(diff/len(y_pred[i]))
+        
+        ## Creating the info file
+        output_file = self.mask_name.split('.')[0] + '-info.txt'
+        with open(output_file, 'w') as f_out:
+            new_line = str(self.__max_gset) + '\t' + str(self.__max_pin) + '\t' + str(self.__max_pout) + '\n'
+            new_line += str(self.__min_gset) + '\t' + str(self.__min_pin) + '\t' + str(self.__min_pout) + '\n'
+            new_line += str(self.range_a) + '\t' + str(self.range_b)
+            f_out.write(new_line + '\n')
+
+            new_line = ''
+            new_line2 = ''
+            
+            loss = self.history.history['val_loss']
+            epoch = self.history.epoch
+            
+            for i in range(0, len(loss)):
+                new_line += str(loss[i]) + '\t'
+                new_line2 += str(epoch[i]) + '\t'
+            
+            new_line += '\n' + new_line2
+
+            f_out.write(new_line + '\n')
+
+            new_line = ''
+
+
+            for i in range(0, len(self.errors)):
+                new_line += str(self.errors[i]) + '\t'
+
+            f_out.write(new_line + '\n')
+
+            new_line = str(self.__first_channel) + '\t' + str(self.__last_channel) + '\t' + str(self.__between_channels)
+
+            f_out.write(new_line + '\n')
+
+if __name__ == '__main__':
+    string_path = "mascara.csv"   
+    nn = TrainNeuralNetwork(string_path)
+    nn.train_neural_network()
+    
+
+
+

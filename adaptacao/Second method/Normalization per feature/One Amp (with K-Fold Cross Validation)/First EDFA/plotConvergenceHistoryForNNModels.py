@@ -35,4 +35,5 @@ plt.xlabel('Epochs')
 
 plt.legend()
 plt.tight_layout()
+plt.grid(True)
 plt.savefig('plots/ResultNNConvergenceHistoryPerStep.pdf', dpi=200)

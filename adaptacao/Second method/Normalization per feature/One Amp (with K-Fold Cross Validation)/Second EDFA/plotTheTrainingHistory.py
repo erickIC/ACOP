@@ -58,6 +58,7 @@ plt.xlabel('EPOCHS')
 
 plt.legend()
 plt.tight_layout()
+plt.grid(True)
 plt.savefig('Treinamento41to40.pdf', dpi = 200)
 
 
@@ -76,6 +77,7 @@ plt.xlabel('EPOCHS')
 
 plt.legend()
 plt.tight_layout()
+plt.grid(True)
 plt.savefig('Treinamento42to40.pdf', dpi = 200)
 
 plt.figure()
@@ -93,6 +95,7 @@ plt.xlabel('EPOCHS')
 
 plt.legend()
 plt.tight_layout()
+plt.grid(True)
 plt.savefig('TreinamentoICTON.pdf', dpi = 200)
 
 plt.figure()
@@ -110,4 +113,5 @@ plt.xlabel('EPOCHS')
 
 plt.legend()
 plt.tight_layout()
+plt.grid(True)
 plt.savefig('TreinamentoICTON-O.pdf', dpi = 200)

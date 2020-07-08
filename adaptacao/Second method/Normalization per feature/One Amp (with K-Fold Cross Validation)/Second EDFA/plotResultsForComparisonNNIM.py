@@ -40,17 +40,24 @@ nn_max_error = np.amax(nn_data, axis=1)
 # Plotting results per fold (only used for 1dB step)
 fold_size = int(len(im_mean_error) / 5)
 
+boxprops = dict(linestyle='-', linewidth=6, color='black')
+medianprops = dict(linestyle='-', linewidth=6)
+whiskerprops = dict(linestyle='-', linewidth=6)
+capprops = dict(linestyle='-', linewidth=6)
+flierprops = dict(marker='o', markersize=6, linestyle='none')
+
 plt.figure(num=1, figsize=(15,12))
 
 plt.boxplot([im_mean_error[0:fold_size],
 			 im_mean_error[fold_size:fold_size*2],
 			 im_mean_error[fold_size*2:fold_size*3],
 			 im_mean_error[fold_size*3:fold_size*4],
-			 im_mean_error[fold_size*4:]])
-plt.title("Mean error per signal for Interpolation Method (7 masks)")
+			 im_mean_error[fold_size*4:]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Mean error per signal for Interpolation Method (7 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
 bottom_mean_group_1, top_mean_group_1 = plt.ylim()
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMeanErrorPerFold-IM-group-1.pdf", dpi=200)
 
 plt.clf()
@@ -59,11 +66,12 @@ plt.boxplot([im_max_error[0:fold_size],
 			 im_max_error[fold_size:fold_size*2],
 			 im_max_error[fold_size*2:fold_size*3],
 			 im_max_error[fold_size*3:fold_size*4],
-			 im_max_error[fold_size*4:]])
-plt.title("Maximum error per signal for Interpolation Method (7 masks)")
+			 im_max_error[fold_size*4:]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Maximum error per signal for Interpolation Method (7 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
 bottom_max_group_1, top_max_group_1 = plt.ylim()
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMaxErrorPerFold-IM-group-1.pdf", dpi=200)
 
 plt.clf()
@@ -72,10 +80,11 @@ plt.boxplot([nn_mean_error[0:fold_size],
 			 nn_mean_error[fold_size:fold_size*2],
 			 nn_mean_error[fold_size*2:fold_size*3],
 			 nn_mean_error[fold_size*3:fold_size*4],
-			 nn_mean_error[fold_size*4:]])
-plt.title("Mean error per signal for Neural Network (7 masks)")
+			 nn_mean_error[fold_size*4:]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Mean error per signal for Neural Network (7 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMeanErrorPerFold-NN-group-1.pdf", dpi=200)
 
 plt.clf()
@@ -84,10 +93,11 @@ plt.boxplot([nn_max_error[0:fold_size],
 			 nn_max_error[fold_size:fold_size*2],
 			 nn_max_error[fold_size*2:fold_size*3],
 			 nn_max_error[fold_size*3:fold_size*4],
-			 nn_max_error[fold_size*4:]])
-plt.title("Maximum error per signal for Neural Network (7 masks)")
+			 nn_max_error[fold_size*4:]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Maximum error per signal for Neural Network (7 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMaxErrorPerFold-NN-group-1.pdf", dpi=200)
 
 plt.clf()
@@ -97,11 +107,12 @@ plt.boxplot([nn_mean_error[0:fold_size],
 			 nn_mean_error[fold_size:fold_size*2],
 			 nn_mean_error[fold_size*2:fold_size*3],
 			 nn_mean_error[fold_size*3:fold_size*4],
-			 nn_mean_error[fold_size*4:]])
-plt.title("Mean error per signal for Neural Network (7 masks)")
+			 nn_mean_error[fold_size*4:]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Mean error per signal for Neural Network (7 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
 plt.ylim(bottom_mean_group_1, top_mean_group_1)
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMeanErrorPerFold-NN-group-1-without-zoom.pdf", dpi=200)
 
 plt.clf()
@@ -110,11 +121,12 @@ plt.boxplot([nn_max_error[0:fold_size],
 			 nn_max_error[fold_size:fold_size*2],
 			 nn_max_error[fold_size*2:fold_size*3],
 			 nn_max_error[fold_size*3:fold_size*4],
-			 nn_max_error[fold_size*4:]])
-plt.title("Maximum error per signal for Neural Network (7 masks)")
+			 nn_max_error[fold_size*4:]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Maximum error per signal for Neural Network (7 masks)")
 plt.xticks(np.arange(1, 6), ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"])
 plt.ylabel("Error (dB)")
 plt.ylim(bottom_max_group_1, top_max_group_1)
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMaxErrorPerFold-NN-group-1-without-zoom.pdf", dpi=200)
 
 plt.clf()
@@ -166,61 +178,67 @@ for im_group_error, nn_group_error in zip(im_general_error, nn_general_error):
 	nn_max_error.append(np.amax(nn_group_error, axis=1))
 
 # Plotting results
-plt.boxplot([im_mean_error[0], im_mean_error[1], im_mean_error[2]])
-plt.title("Mean error for Interpolation Method")
+plt.boxplot([im_mean_error[0], im_mean_error[1], im_mean_error[2]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Mean error for Interpolation Method")
 plt.xticks(np.arange(1, 4), ["7", "5", "3"])
 plt.xlabel("Number of masks")
 plt.ylabel("Mean error (dB)")
 bottom_mean_other_groups, top_mean_other_groups = plt.ylim()
 plt.tight_layout()
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMeanErrorPerGroup-IM.pdf", dpi=200)
 
 plt.clf()
 
-plt.boxplot([im_max_error[0], im_max_error[1], im_max_error[2]])
-plt.title("Maximum error for Interpolation Method")
+plt.boxplot([im_max_error[0], im_max_error[1], im_max_error[2]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+##plt.title("Maximum error for Interpolation Method")
 plt.xticks(np.arange(1, 4), ["7", "5", "3"])
 plt.xlabel("Number of masks")
 plt.ylabel("Maximum error (dB)")
 bottom_max_other_groups, top_max_other_groups = plt.ylim()
 plt.tight_layout()
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMaxErrorPerGroup-IM.pdf", dpi=200)
 
 plt.clf()
 
-plt.boxplot([nn_mean_error[0], nn_mean_error[1], nn_mean_error[2]])
-plt.title("Mean error for Spectrum-Tilt")
+plt.boxplot([nn_mean_error[0], nn_mean_error[1], nn_mean_error[2]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Mean error for Spectrum-Tilt")
 plt.xticks(np.arange(1, 4), ["7", "5", "3"])
 plt.xlabel("Number of masks")
 plt.ylabel("Mean error (dB)")
 plt.tight_layout()
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMeanErrorPerGroup-NN.pdf", dpi=200)
 
 plt.clf()
 
-plt.boxplot([nn_max_error[0], nn_max_error[1], nn_max_error[2]])
-plt.title("Maximum error for Spectrum-Tilt")
+plt.boxplot([nn_max_error[0], nn_max_error[1], nn_max_error[2]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Maximum error for Spectrum-Tilt")
 plt.xticks(np.arange(1, 4), ["7", "5", "3"])
 plt.xlabel("Number of masks")
 plt.ylabel("Maximum error (dB)")
 plt.tight_layout()
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMaxErrorPerGroup-NN.pdf", dpi=200)
 
 plt.clf()
 
 # Plotting NN results without 'zoom'
-plt.boxplot([nn_mean_error[0], nn_mean_error[1], nn_mean_error[2]])
-plt.title("Mean error for Spectrum-Tilt")
+plt.boxplot([nn_mean_error[0], nn_mean_error[1], nn_mean_error[2]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Mean error for Spectrum-Tilt")
 plt.xticks(np.arange(1, 4), ["7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
+plt.grid(True, axis = 'y')
 plt.ylim(bottom_mean_other_groups, top_mean_other_groups)
 plt.savefig("plots/ResultMeanErrorPerGroup-NN-without-zoom.pdf", dpi=200)
 
 plt.clf()
 
-plt.boxplot([nn_max_error[0], nn_max_error[1], nn_max_error[2]])
-plt.title("Maximum error for Spectrum-Tilt")
+plt.boxplot([nn_max_error[0], nn_max_error[1], nn_max_error[2]],flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)
+#plt.title("Maximum error for Spectrum-Tilt")
 plt.xticks(np.arange(1, 4), ["7 masks", "5 masks", "3 masks"])
 plt.ylabel("Error (dB)")
 plt.ylim(bottom_max_other_groups, top_max_other_groups)
+plt.grid(True, axis = 'y')
 plt.savefig("plots/ResultMaxErrorPerGroup-NN-without-zoom.pdf", dpi=200)

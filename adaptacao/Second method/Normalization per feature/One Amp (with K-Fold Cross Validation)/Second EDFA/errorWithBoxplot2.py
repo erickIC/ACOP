@@ -777,6 +777,11 @@ if DEBUG:
 ########## Boxplot #######################
 
 plt.figure(figsize=(15,12))
+boxprops = dict(linestyle='-', linewidth=6, color='black')
+medianprops = dict(linestyle='-', linewidth=6)
+whiskerprops = dict(linestyle='-', linewidth=6)
+capprops = dict(linestyle='-', linewidth=6)
+flierprops = dict(marker='o', markersize=6, linestyle='none')
 
 # plt.subplot(211)
 plt.boxplot([
@@ -784,11 +789,12 @@ plt.boxplot([
             np.concatenate((diffs_ic[0], diffs_ic[1], diffs_ic[2], diffs_ic[3], diffs_ic[4]), axis = 0),         #icton17 with tilt 
             np.concatenate((diffs_41[0], diffs_41[1], diffs_41[2], diffs_41[3], diffs_41[4]), axis = 0),         #41to40 
             np.concatenate((diffs_42[0], diffs_42[1], diffs_42[2], diffs_42[3], diffs_42[4]), axis = 0),         #42to40 with tilt
-            ])        
+            ], flierprops=flierprops, boxprops = boxprops, medianprops = medianprops, whiskerprops = whiskerprops, capprops = capprops)        
 # plt.title('Absolute difference Pout')
 plt.xticks([1, 2, 3, 4], ['PerChannel', 'PerChannel-Tilt', 'Spectrum', 'Spectrum-Tilt'], rotation=45)
 plt.ylabel('Mean Error (dB)')
 plt.tight_layout()
+plt.grid(True, axis = 'y')
 
 plt.savefig('plots/AverageErrorNNsBoxPlotEDFA2.pdf', dpi = 200)
 
